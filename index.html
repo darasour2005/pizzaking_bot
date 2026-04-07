@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V23</title>
+    <title>Pizz King Sovereign V24</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -17,7 +17,7 @@
         .cat-icon { width: 40px; height: 40px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 4px; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
         .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
-        .cat-item span { font-size: 0.65rem; font-weight: 700; display: block; }
+        .cat-item span { font-size: 0.65rem; font-weight: 700; display: block; white-space: nowrap; }
 
         .container { padding: 10px; padding-bottom: 220px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -27,19 +27,16 @@
         .title { font-size: 0.8rem; font-weight: 700; height: 35px; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
         
-        /* QTY Control */
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 6px; padding: 2px; margin-bottom: 8px; }
         .qty-btn { width: 25px; height: 25px; border: none; background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .qty-num { font-size: 0.85rem; font-weight: 700; }
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* Delivery Form */
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
-        /* Footer Cart Manager */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid var(--pizz-border); padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -50,16 +47,16 @@
         .cart-del-btn { color: var(--pizz-red); background: none; border: none; font-size: 20px; cursor: pointer; }
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
 
-        /* Payment Overlay Card (High-End) */
+        /* Payment Card Design */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .bank-pill { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-        .qr-invoice { background: white; border-radius: 20px; width: 100%; max-width: 300px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; position: relative; }
-        .qr-header { background: var(--pizz-red); padding: 15px; color: white; text-align: center; }
-        .qr-body { padding: 20px; text-align: center; }
-        .qr-img { width: 100%; height: auto; margin-bottom: 10px; }
-        .qr-footer { border-top: 1px dashed #ddd; padding: 15px; text-align: center; }
-        .qr-name { font-weight: 700; font-size: 1rem; color: #333; margin-bottom: 5px; }
-        .qr-riel { font-weight: 700; font-size: 1.3rem; color: var(--pizz-red); }
+        .qr-invoice { background: white; border-radius: 20px; width: 100%; max-width: 300px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; }
+        .qr-header { background: #e74c3c; padding: 15px; color: white; font-weight: 700; letter-spacing: 2px; }
+        .qr-body { padding: 20px; }
+        .qr-img { width: 100%; height: auto; margin-bottom: 10px; border-radius: 8px; }
+        .qr-footer { border-top: 1px dashed #ddd; padding: 15px; }
+        .qr-name { font-weight: 700; font-size: 1.1rem; color: #333; margin-bottom: 5px; }
+        .qr-riel { font-weight: 700; font-size: 1.4rem; color: #e74c3c; }
         
         #loader { text-align: center; padding: 40px; color: #95a5a6; font-weight: 700; }
     </style>
@@ -67,23 +64,21 @@
 <body>
 
 <div id="payment-screen" class="pay-overlay">
-    <div style="font-weight:700; margin-bottom:10px;">⏳ ផុតកំណត់ក្នុង: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
+    <div style="font-weight:700; margin-bottom:10px;">⏳ ផុតកំណត់ក្នុង: <span id="pay-timer">15:00</span></div>
     
     <button class="bank-pill" onclick="triggerBankPay()">
         <img src="https://www.ababank.com/favicon.ico" style="width:14px;"> Open ABA APP
     </button>
 
     <div class="qr-invoice">
-        <div class="qr-header">
-            <div style="font-weight:700; letter-spacing: 2px;">KHQR</div>
-        </div>
+        <div class="qr-header">KHQR</div>
         <div class="qr-body">
             <div class="qr-name">SOUR DARA</div>
             <img src="" id="dynamic-khqr" class="qr-img">
-            <button onclick="saveQR()" style="background:none; border:none; color:#007bff; font-size:0.8rem; text-decoration:underline;">📥 ចុចទីនេះដើម្បីរក្សាទុក QR</button>
+            <button onclick="saveQR()" style="background:none; border:none; color:#007bff; font-size:0.85rem; text-decoration:underline; cursor:pointer;">📥 ចុចដើម្បីរក្សាទុក QR</button>
         </div>
         <div class="qr-footer">
-            <div class="qr-riel"><span id="pay-amt-label">0</span>៛</div>
+            <div class="qr-riel"><span id="pay-amt-label">0</span> ៛</div>
         </div>
     </div>
     
@@ -96,7 +91,7 @@
 </div>
 
 <div class="container">
-    <div id="loader">📦 កំពុងទាញយកទំនិញ...</div>
+    <div id="loader">📦 កំពុងទាញយក...</div>
     <div id="product-grid" class="grid"></div>
     <div class="order-form">
         <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
@@ -125,7 +120,7 @@
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {};
 
-    // --- 🏦 SOVEREIGN KHQR ENGINE ---
+    // --- 🏦 CRC16 ENGINE ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -135,15 +130,16 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    function generateInvoiceKHQR(amt) {
+    function generateUniversalKHQR(amt) {
         const amtStr = amt.toFixed(1);
         const amtPart = `54${amtStr.length.toString().padStart(2, '0')}${amtStr}`;
-        // Base string with Static initiation '11' for maximum ACLEDA compatibility
-        const base = `00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116${amtPart}5802KH5909SOUR DARA6010Phnom Penh6304`;
+        // FOUNDATION: Using ACLEDA/Bakong Tag 2938... for Universal Compatibility
+        // Initiation Method 11 (Static) + MCC 52042000 as per working ACLEDA sample
+        const base = `00020101021129380009khqr@aclb0111855164043920206ACLEDA391300042CCY01014520420005303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH621302090872828276304`;
         return base + crc16(base);
     }
 
-    // --- 🛒 CART ENGINE (IMMUTABLE) ---
+    // --- 🛒 CART ENGINE (ZERO OMISSION) ---
     function addToCart(id) {
         const p = allProducts.find(x => x.id === id);
         const q = cardQtys[id] || 1;
@@ -178,20 +174,19 @@
             </div>`).join('');
     }
 
-    // --- 💳 PAYMENT & SYSTEM ---
+    // --- 🏦 PAYMENT & SYSTEM ---
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        const finalQR = generateInvoiceKHQR(total);
+        const finalQR = generateUniversalKHQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(finalQR)}`;
         startTimer(900);
     }
     function triggerBankPay() { tg.openLink(ABA_LINK); }
-    function saveQR() { 
-        // Open the QR image full screen so the user can long-press to save
-        tg.openLink(document.getElementById('dynamic-khqr').src); 
-    }
+    function saveQR() { tg.openLink(document.getElementById('dynamic-khqr').src); }
+    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
+    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
 
     async function submitFinalOrder() {
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total: cart.reduce((s, i) => s + (i.price * i.qty), 0) };
@@ -202,7 +197,7 @@
         } catch (e) { document.getElementById('confirm-btn').innerText = "🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
-    // --- 🚀 INITIALIZATION & FORM ---
+    // --- INIT & CATEGORY ---
     async function init() {
         if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
         document.getElementById('user-phone').value = localStorage.getItem('pizz_phone') || "";
@@ -228,14 +223,12 @@
         document.getElementById('loader').style.display = 'none';
         document.getElementById('product-grid').innerHTML = items.map(p => {
             const pid = p.id; cardQtys[pid] = 1;
-            return `<div class="card"><img src="${p.images[0]?.src || ''}"><div class="card-body"><div class="title">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div><div class="qty-control"><button class="qty-btn" onclick="cardQtys[${pid}]=Math.max(1,cardQtys[${pid}]-1);document.getElementById('q-${pid}').innerText=cardQtys[${pid}]">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="cardQtys[${pid}]++;document.getElementById('q-${pid}').innerText=cardQtys[${pid}]">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">🛒 បន្ថែម</button></div></div>`;
+            return `<div class="card"><img src="${p.images[0]?.src || ''}"><div class="card-body"><div class="title">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">🛒 បន្ថែម</button></div></div>`;
         }).join('');
     }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function filterCatLocal(id) { renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
     function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
-    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     init();
 </script>
 </body>
