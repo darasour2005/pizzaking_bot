@@ -1,10 +1,9 @@
 import os
 import asyncio
 import logging
-import json
 from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import WebAppInfo
 from aiohttp import web
 from woocommerce import API
 
@@ -13,7 +12,6 @@ API_TOKEN = '8581539352:AAGByoBXhKj26xq2WPZkMdtsIUeYfpaDg6A'
 WC_URL = "https://1.phsar.me"
 WC_KEY = "ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03"
 WC_SECRET = "cs_63c256e1b4eba0a65723f054159e55d2148c3c57"
-MY_PHONE = "+85587282827"
 MINI_APP_URL = "https://darasour2005.github.io/pizzaking_bot/"
 
 bot = Bot(token=API_TOKEN)
@@ -24,12 +22,16 @@ wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version=
 # --- BOT ---
 @router.message(Command("start"))
 async def start_handler(message: types.Message):
-    markup = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=MINI_APP_URL))]], resize_keyboard=True)
+    markup = types.ReplyKeyboardMarkup(keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=MINI_APP_URL))]], resize_keyboard=True)
     await message.answer("🇰🇭 **ស្វាគមន៍មកកាន់ Pizz King!**", reply_markup=markup, parse_mode="Markdown")
 
 # --- ORDER API ---
 async def create_order_endpoint(request):
-    headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+    }
     if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
     try:
         data = await request.json()
@@ -40,20 +42,20 @@ async def create_order_endpoint(request):
         wcapi.post("orders", {
             "billing": {"first_name": name, "address_1": loc, "phone": phone},
             "line_items": line_items,
-            "customer_note": f"TG ID: {tid} | Name: {name}"
+            "customer_note": f"TG ID: {tid}"
         })
 
-        # Send Receipt from @pizzaking_bot
+        # Send Receipt
         if tid:
-            receipt = f"✅ **ការកម្ម៉ង់ជោគជ័យ!**\n\n👤 ឈ្មោះ: {name}\n📞 លេខទូរស័ព្ទ: {phone}\n📍 ទីតាំង: {loc}\n\n📦 **ទំនិញ:**\n"
-            for i in items: receipt += f"• {i['name']} x{i['qty']} = {int(i['price']*i['qty']).toLocaleString()}៛\n"
-            receipt += f"\n💰 **សរុប: {int(total).toLocaleString()}៛**\n\n🙏 បន្ទាប់ពីបង់ប្រាក់ សូមផ្ញើ Screenshot មកកាន់ពួកយើង!"
+            receipt = f"✅ **ការកម្ម៉ង់ជោគជ័យ!**\n\n👤 ឈ្មោះ: {name}\n📍 ទីតាំង: {loc}\n\n📦 **ទំនិញ:**\n"
+            for i in items: receipt += f"• {i['name']} x{i['qty']}\n"
+            receipt += f"\n💰 **សរុប: {int(total).toLocaleString() if hasattr(total, 'toLocaleString') else int(total)}៛**"
             await bot.send_message(tid, receipt, parse_mode="Markdown")
 
         return web.json_response({"status": "success"}, headers=headers)
-    except Exception as e: return web.json_response({"status": "error", "message": str(e)}, status=500, headers=headers)
+    except Exception as e:
+        return web.json_response({"status": "error", "message": str(e)}, status=500, headers=headers)
 
-# --- IGNITION ---
 async def main():
     dp.include_router(router)
     app = web.Application()
