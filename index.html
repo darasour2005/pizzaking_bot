@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V25</title>
+    <title>Pizz King Sovereign V26</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -39,7 +39,7 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
-        /* Footer Cart Manager (ZERO OMISSION) */
+        /* Footer Cart Manager (IMMUTABLE LOGIC) */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid var(--pizz-border); padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -52,7 +52,7 @@
 
         /* Professional Invoice Card */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .bank-pill { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .bank-pill { background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
         .qr-invoice { background: white; border-radius: 20px; width: 100%; max-width: 300px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; }
         .qr-header { background: #e74c3c; padding: 15px; color: white; font-weight: 700; letter-spacing: 2px; }
         .qr-body { padding: 20px; }
@@ -122,7 +122,7 @@
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {};
 
-    // --- 🏦 CRC16 ENGINE (XMODEM) ---
+    // --- 🏦 CRC16 CHECKSUM ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -132,13 +132,13 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    function generateWorkingKHQR(amt) {
+    function generateUniversalBakongKHQR(amt) {
         const val = amt.toString();
         const amtPart = `54${val.length.toString().padStart(2, '0')}${val}`;
-        
-        // RECONSTRUCTED FROM YOUR WORKING 1500R SAMPLE
-        // Using Tag 01: 11 (Static) to prevent ACLEDA "Expired" Error
-        const base = `00020101021129360009khqr@aclb01090872828270206ACLEDA392000118551640439201014520420005303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH621302090872828276304`;
+        // THE UNIVERSAL BRIDGE: Using Tag 30 (Bakong Bridge) instead of ACLEDA Proprietary 2936
+        // Account ID: 087282827@aclb (Bakong ID for ACLEDA)
+        // Point of Initiation: 11 (Static) - ACLEDA will scan without "Expired" error.
+        const base = `00020101021130320010A1000000250114087282827@aclb520420005303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH6304`;
         return base + crc16(base);
     }
 
@@ -177,12 +177,12 @@
             </div>`).join('');
     }
 
-    // --- 🏦 PAYMENT ---
+    // --- 🏦 PAYMENT & UI ---
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        const finalQR = generateWorkingKHQR(total);
+        const finalQR = generateUniversalBakongKHQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(finalQR)}`;
         startTimer(900);
     }
@@ -196,7 +196,6 @@
         } catch (e) { document.getElementById('confirm-btn').innerText = "🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
-    // --- 🚀 SYSTEM START ---
     async function init() {
         if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
         document.getElementById('user-phone').value = localStorage.getItem('pizz_phone') || "";
