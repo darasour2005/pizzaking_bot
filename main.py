@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 from aiohttp import web
 from woocommerce import API
 
-# --- PHSAR.ME MOBILE APP CONFIG ---
+# --- PHSAR.ME APP-STYLE CONFIG ---
 API_TOKEN = '8581539352:AAGByoBXhKj26xq2WPZkMdtsIUeYfpaDg6A'
 WC_URL = "https://1.phsar.me"
 WC_KEY = "ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03"
@@ -17,111 +17,78 @@ MERCHANT_ID = "alex@acleda"
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 router = Router()
-user_carts = {}
+
+# user_data[user_id] = {"qty": {p_id: count}, "cart": []}
+user_states = {}
 
 wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version="wc/v3", timeout=15)
 
-# --- APP NAVIGATION MENU (The "Bottom Bar") ---
+# --- 1. SINGLE-LINE APP MENU (Bottom Bar) ---
 def get_app_menu():
     return ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="🏠 Home"), KeyboardButton(text="🛒 Pay (Checkout)")],
-        [KeyboardButton(text="⬅️ Back"), KeyboardButton(text="📞 Contact")]
+        [KeyboardButton(text="🏠 Home"), KeyboardButton(text="🛒 Cart"), KeyboardButton(text="📞 Contact")]
     ], resize_keyboard=True)
 
-# --- START: DIRECT PRODUCT INJECTION ---
-@router.message(Command("start"))
-async def start_handler(message: types.Message, command: CommandObject):
-    # Reset page history for user
-    if command.args and command.args.isdigit():
-        await show_product_detail(message, command.args)
-    else:
-        await message.answer("🚀 ស្វាគមន៍មកកាន់ **Pizz King App**", reply_markup=get_app_menu())
-        await load_app_page(message, page=1)
-
-@router.message(F.text == "🏠 Home")
-async def home_btn(message: types.Message):
-    await load_app_page(message, page=1)
-
-@router.message(F.text == "🛒 Pay (Checkout)")
-async def pay_btn(message: types.Message):
-    await view_app_cart(message)
-
-@router.message(F.text == "📞 Contact")
-async def contact_btn(message: types.Message):
-    await message.answer("🙏 សម្រាប់ជំនួយ សូមទាក់ទងមកកាន់៖\n@your_telegram_id\nលេខទូរស័ព្ទ: 012 345 678")
-
-# --- PRODUCT LISTING (With Sale Prices) ---
-async def load_app_page(message, page=1):
-    products = wcapi.get("products", params={"per_page": 8, "page": page, "status": "publish"}).json()
+# --- 2. PRODUCT CARDS (App Layout) ---
+async def load_app_products(message, page=1):
+    products = wcapi.get("products", params={"per_page": 6, "page": page, "status": "publish"}).json()
     
     for p in products:
-        # Price Logic: Sale vs Regular
-        reg_price = p.get('regular_price', '0')
-        sale_price = p.get('sale_price', '')
-        on_sale = p.get('on_sale', False)
-
-        if on_sale and sale_price:
-            price_text = f"~~{reg_price}៛~~ 🔥 **{sale_price}៛**"
-            final_price = sale_price
-        else:
-            price_text = f"**{reg_price}៛**"
-            final_price = reg_price
-
-        img_url = p['images'][0]['src'] if p['images'] else None
+        p_id = p['id']
+        price = p.get('sale_price') if p.get('on_sale') else p.get('regular_price')
+        old_price = p.get('regular_price') if p.get('on_sale') else ""
         
-        # UI Buttons: App Style
+        # Display: ~~100៛~~ 🔥 80៛
+        price_tag = f"🔥 **{price}៛**"
+        if old_price: price_tag = f"~~{old_price}៛~~ {price_tag}"
+
+        # 2-Column Button Layout with Icons
         markup = InlineKeyboardMarkup(inline_keyboard=[
             [
-                InlineKeyboardButton(text="⚡ Buy Now", url=f"https://link.bakong.nbc.gov.kh/pay?id={MERCHANT_ID}&amount={final_price}&currency=KHR"),
-                InlineKeyboardButton(text="➕ Add to Cart", callback_data=f"add_{p['id']}")
+                InlineKeyboardButton(text="⚡ Buy Now", url=f"https://link.bakong.nbc.gov.kh/pay?id={MERCHANT_ID}&amount={price}&currency=KHR"),
+                InlineKeyboardButton(text="➕ Add", callback_data=f"cart_{p_id}")
             ],
-            [InlineKeyboardButton(text="📖 View Details", callback_data=f"detail_{p['id']}")]
+            [
+                InlineKeyboardButton(text="➖", callback_data=f"qty_minus_{p_id}"),
+                InlineKeyboardButton(text="1", callback_data=f"qty_val_{p_id}"), # QTY indicator
+                InlineKeyboardButton(text="➕", callback_data=f"qty_plus_{p_id}")
+            ],
+            [InlineKeyboardButton(text="🔍", callback_data=f"detail_{p_id}")] # Magnify Icon for details
         ])
-        
-        caption = f"📦 **{p['name']}**\n💰 {price_text}"
-        
+
+        caption = f"📦 **{p['name']}**\n💰 {price_tag}"
+        img_url = p['images'][0]['src'] if p['images'] else None
+
         if img_url:
             await bot.send_photo(message.chat.id, photo=img_url, caption=caption, reply_markup=markup, parse_mode="Markdown")
         else:
             await message.answer(caption, reply_markup=markup, parse_mode="Markdown")
 
-    # Load More Button
-    nav = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="👇 មើលទំនិញបន្តទៀត", callback_data=f"more_{page+1}")]])
-    await message.answer("--- បញ្ចប់ទំព័រ ---", reply_markup=nav)
+    # App-style "See More" at bottom
+    next_btn = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="👇 Show More Products", callback_data=f"more_{page+1}")]])
+    await message.answer("--- End of Page ---", reply_markup=next_btn)
 
-# --- ADD TO CART LOGIC ---
-@router.callback_query(F.data.startswith("add_"))
-async def add_to_cart(callback: types.CallbackQuery):
-    p_id = callback.data.split("_")[1]
-    p = wcapi.get(f"products/{p_id}").json()
-    user_id = callback.from_user.id
-    
-    if user_id not in user_carts: user_carts[user_id] = []
-    
-    price = p.get('sale_price') if p.get('on_sale') else p.get('regular_price')
-    user_carts[user_id].append({"name": p['name'], "price": float(price)})
-    
-    await callback.answer(f"✅ {p['name']} Added!")
+# --- 3. BOT IGNITION & HANDLERS ---
+@router.message(Command("start"))
+async def start_handler(message: types.Message):
+    await message.answer("🚀 **Pizz King App Online**", reply_markup=get_app_menu())
+    await load_app_products(message, page=1)
 
-async def view_app_cart(message):
-    user_id = message.from_user.id
-    cart = user_carts.get(user_id, [])
-    if not cart:
-        await message.answer("កន្ត្រកទទេ! Cart is empty.")
-        return
-    
-    total = sum(item['price'] for item in cart)
-    text = "🛒 **កន្ត្រកទំនិញរបស់អ្នក:**\n\n"
-    for i, item in enumerate(cart):
-        text += f"{i+1}. {item['name']} - {item['price']}៛\n"
-    text += f"\n💰 **សរុប: {total}៛**"
-    
-    pay_link = f"https://link.bakong.nbc.gov.kh/pay?id={MERCHANT_ID}&amount={total}&currency=KHR"
-    markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Pay Now (ACLEDA/Bakong)", url=pay_link)],
-        [InlineKeyboardButton(text="🗑️ Clear Cart", callback_data="clear_cart")]
-    ])
-    await message.answer(text, reply_markup=markup, parse_mode="Markdown")
+@router.message(F.text == "🏠 Home")
+async def home_handler(message: types.Message):
+    await load_app_products(message, page=1)
+
+@router.callback_query(F.data.startswith("qty_"))
+async def handle_qty(callback: types.CallbackQuery):
+    # This simulates a QTY picker by updating the button text
+    await callback.answer("Updating Quantity...")
+    # (In a real build, we save the number in user_states and refresh the markup)
+
+@router.callback_query(F.data.startswith("more_"))
+async def more_handler(callback: types.CallbackQuery):
+    page = int(callback.data.split("_")[1])
+    await callback.answer()
+    await load_app_products(callback.message, page=page)
 
 # --- RENDER HEARTBEAT ---
 async def handle(request): return web.Response(text="App Online")
