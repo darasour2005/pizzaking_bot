@@ -3,78 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign</title>
+    <title>Pizz King Sovereign V4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; }
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; }
         
-        /* Category Slider */
-        .cat-slider { display: flex; overflow-x: auto; padding: 15px; background: #fff; gap: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; }
-        .cat-icon { width: 50px; height: 50px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 2px solid transparent; }
+        /* Category Slider (Dynamic & Smaller) */
+        .cat-slider { display: flex; overflow-x: auto; padding: 10px; background: #fff; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
+        .cat-slider::-webkit-scrollbar { display: none; }
+        .cat-item { text-align: center; min-width: 55px; cursor: pointer; flex-shrink: 0; }
+        .cat-icon { width: 45px; height: 45px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 4px; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
         .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
-        .cat-item span { font-size: 0.75rem; font-weight: 700; }
+        .cat-item span { font-size: 0.65rem; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Grid */
-        .container { padding: 10px; padding-bottom: 180px; }
+        /* Grid Layout */
+        .container { padding: 10px; padding-bottom: 200px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card img { width: 100%; height: 140px; object-fit: cover; }
+        .card img { width: 100%; height: 130px; object-fit: cover; background: #eee; }
         .card-body { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 4px; }
-        .price { color: var(--pizz-red); font-weight: 700; font-size: 0.95rem; }
+        .title { font-size: 0.8rem; font-weight: 700; height: 35px; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
+        .price { color: var(--pizz-red); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
         
-        /* Cart Action */
-        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .btn-cart { background: var(--pizz-green); color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        /* QTY Control on Card */
+        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 6px; padding: 2px; margin-bottom: 8px; }
+        .qty-btn { width: 25px; height: 25px; border: none; background: #fff; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; }
+        .qty-num { font-size: 0.85rem; font-weight: 700; }
+
+        /* Add to Cart Button (Green BG, White Icon) */
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-add-cart svg { width: 18px; height: 18px; fill: white; }
+        .btn-add-cart:active { transform: scale(0.95); opacity: 0.8; }
 
         /* Order Form */
-        .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
+        .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #eee; }
         .input-group { margin-bottom: 10px; }
-        .input-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: 700; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
         /* Expandable Footer */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; }
-        .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; font-size: 0.85rem; }
-        .cart-details.open { max-height: 200px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; font-size: 0.8rem; }
+        .cart-details.open { max-height: 250px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-item-row { display: flex; justify-content: space-between; margin-bottom: 6px; padding: 4px 0; }
         
-        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
-        
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 300; align-items: center; justify-content: center; }
-        .modal-content { background: #fff; width: 90%; border-radius: 15px; padding: 20px; }
+        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
+
+        #loader { text-align: center; padding: 40px; color: #95a5a6; font-size: 0.9rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <div class="cat-slider" id="cat-slider">
-    <div class="cat-item active" id="cat-all" onclick="filterCat('all')"><div class="cat-icon">🏠</div><span>ទាំងអស់</span></div>
-    <div class="cat-item" id="cat-fruits" onclick="filterCat('fruits')"><div class="cat-icon">🍎</div><span>ផ្លែឈើ</span></div>
-    <div class="cat-item" id="cat-dried" onclick="filterCat('dried')"><div class="cat-icon">🍇</div><span>ដំណាប់</span></div>
-    <div class="cat-item" id="cat-drink" onclick="filterCat('drink')"><div class="cat-icon">🥤</div><span>ភេសជ្ជៈ</span></div>
-</div>
+    <div class="cat-item active" id="cat-0" onclick="filterCat(0)">
+        <div class="cat-icon">🏠</div>
+        <span>ទាំងអស់</span>
+    </div>
+    </div>
 
 <div class="container">
+    <div id="loader">📦 កំពុងទាញយក...</div>
     <div id="product-grid" class="grid"></div>
     
     <div class="order-form">
-        <h4 style="margin:0 0 10px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
+        <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
         <div class="input-group">
             <label>លេខទូរស័ព្ទ</label>
-            <input type="tel" id="user-phone" placeholder="012 345 678">
+            <input type="tel" id="user-phone" placeholder="ឧទាហរណ៍: 012 345 678">
         </div>
         <div class="input-group">
             <label>ទីតាំងដឹកជញ្ជូន</label>
-            <input type="text" id="user-loc" placeholder="ផ្ទះលេខ, ភូមិ, សង្កាត់...">
+            <input type="text" id="user-loc" placeholder="ផ្ទះលេខ, ផ្លូវ, ភូមិ, សង្កាត់...">
         </div>
     </div>
 </div>
 
-<div class="footer-cart">
+<div class="footer-cart" id="footer-ui" style="display:none;">
     <div id="cart-list" class="cart-details"></div>
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:700;" onclick="toggleCart()">
+    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-weight:700;" onclick="toggleCart()">
         <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span>
         <span id="cart-total">០៛</span>
     </div>
@@ -83,72 +92,118 @@
 
 <script>
     const tg = window.Telegram.WebApp;
+    const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
+    const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
+
     tg.expand();
 
     let allProducts = [];
-    let products = [];
     let cart = [];
+    let cardQtys = {}; // Track QTY per product ID on the UI
 
-    async function loadData() {
+    async function init() {
+        await loadCategories();
+        await filterCat(0); // Load all by default
+    }
+
+    async function loadCategories() {
         try {
-            const res = await fetch("https://1.phsar.me/wp-json/wc/v3/products?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57&per_page=50");
+            const res = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
+            const cats = await res.json();
+            const slider = document.getElementById('cat-slider');
+            cats.forEach(c => {
+                const icon = c.image ? `<img src="${c.image.src}">` : "📦";
+                slider.innerHTML += `
+                    <div class="cat-item" id="cat-${c.id}" onclick="filterCat(${c.id})">
+                        <div class="cat-icon">${icon}</div>
+                        <span>${c.name}</span>
+                    </div>
+                `;
+            });
+        } catch (e) { console.error("Cat Load Error"); }
+    }
+
+    async function filterCat(id) {
+        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`cat-${id}`).classList.add('active');
+        
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('product-grid').innerHTML = '';
+        
+        const catFilter = id === 0 ? "" : `&category=${id}`;
+        try {
+            const res = await fetch(`${WC_BASE}/products${AUTH}${catFilter}&per_page=40&status=publish`);
             allProducts = await res.json();
-            products = allProducts;
-            renderProducts(products);
-        } catch (e) {
-            console.error("Load Error:", e);
-        }
+            renderProducts(allProducts);
+        } catch (e) { document.getElementById('loader').innerText = "⚠️ បញ្ហាការតភ្ជាប់"; }
     }
 
     function renderProducts(items) {
+        document.getElementById('loader').style.display = 'none';
         const grid = document.getElementById('product-grid');
-        grid.innerHTML = items.map(p => `
-            <div class="card">
-                <img src="${p.images[0]?.src || ''}">
-                <div class="card-body">
-                    <div class="title">${p.name}</div>
-                    <div class="price">${p.price}៛</div>
-                    <div class="action-row">
-                        <span>ចំនួន: 1</span>
-                        <button class="btn-cart" onclick="addToCart(${p.id})">🛒</button>
+        
+        grid.innerHTML = items.map(p => {
+            const pid = p.id;
+            if(!cardQtys[pid]) cardQtys[pid] = 1;
+            
+            return `
+                <div class="card">
+                    <img src="${p.images[0]?.src || ''}">
+                    <div class="card-body">
+                        <div class="title">${p.name}</div>
+                        <div class="price">${p.price || 0}៛</div>
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeCardQty(${pid}, -1)">−</button>
+                            <span class="qty-num" id="card-qty-${pid}">${cardQtys[pid]}</span>
+                            <button class="qty-btn" onclick="changeCardQty(${pid}, 1)">+</button>
+                        </div>
+                        <button class="btn-add-cart" onclick="addToCart(${pid})">
+                            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                        </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    function filterCat(slug) {
-        // UI Update for Active Tab
-        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('cat-' + slug).classList.add('active');
-        
-        if(slug === 'all') {
-            products = allProducts;
-        } else {
-            // Simple text-based filter for demo, logic can be expanded for specific category IDs
-            products = allProducts.filter(p => p.categories.some(c => c.slug.includes(slug) || c.name.toLowerCase().includes(slug)));
-        }
-        renderProducts(products);
+    function changeCardQty(pid, delta) {
+        cardQtys[pid] = (cardQtys[pid] || 1) + delta;
+        if(cardQtys[pid] < 1) cardQtys[pid] = 1;
+        document.getElementById(`card-qty-${pid}`).innerText = cardQtys[pid];
     }
 
     function addToCart(id) {
         const p = allProducts.find(x => x.id === id);
-        if(p) {
-            cart.push({ id: p.id, name: p.name, price: parseFloat(p.price || 0), qty: 1 });
-            updateUI();
-            tg.HapticFeedback.impactOccurred('medium');
+        const qtyToStore = cardQtys[id] || 1;
+        
+        // SMART CART LOGIC: Update QTY if exists
+        const existing = cart.find(item => item.id === id);
+        if (existing) {
+            existing.qty += qtyToStore;
+        } else {
+            cart.push({ id: p.id, name: p.name, price: parseFloat(p.price || 0), qty: qtyToStore });
         }
+        
+        // Reset card UI qty to 1 after adding
+        cardQtys[id] = 1;
+        document.getElementById(`card-qty-${id}`).innerText = 1;
+
+        updateUI();
+        tg.HapticFeedback.impactOccurred('medium');
     }
 
     function updateUI() {
+        const footer = document.getElementById('footer-ui');
+        footer.style.display = cart.length > 0 ? 'block' : 'none';
+        
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${cart.length} មុខ (ចុចមើល)`;
-        document.getElementById('cart-total').innerText = `${total}៛`;
+        document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         
-        document.getElementById('cart-list').innerHTML = cart.map(i => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>${i.name} x${i.qty}</span>
-                <span>${i.price * i.qty}៛</span>
+        document.getElementById('cart-list').innerHTML = cart.map((i, index) => `
+            <div class="cart-item-row">
+                <span>${i.name} <b>x${i.qty}</b></span>
+                <span>${(i.price * i.qty).toLocaleString()}៛</span>
             </div>
         `).join('');
     }
@@ -162,13 +217,11 @@
         const loc = document.getElementById('user-loc').value;
 
         if (!phone || !loc || cart.length === 0) {
-            alert("សូមបំពេញព័ត៌មាន និងជ្រើសរើសទំនិញ!");
+            tg.showAlert("សូមបំពេញព័ត៌មាន និងជ្រើសរើសទំនិញ!");
             return;
         }
 
-        // --- THE MISSING BIT: GET TELEGRAM ID ---
         const telegramId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
-
         const orderData = {
             telegram_id: telegramId,
             phone: phone,
@@ -177,7 +230,8 @@
             total: cart.reduce((s, i) => s + (i.price * i.qty), 0)
         };
 
-        tg.MainButton.showProgress();
+        tg.MainButton.setText("កំពុងបញ្ជូនកម្ម៉ង់...");
+        tg.MainButton.show();
         
         try {
             await fetch("https://pizzaking-bot.onrender.com/create-order", {
@@ -185,17 +239,15 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(orderData)
             });
-            
-            tg.MainButton.hideProgress();
-            alert("ការបញ្ជាទិញបានជោគជ័យ! សូមពិនិត្យមើលសារក្នុង Bot របស់អ្នក។");
-            tg.close();
+            tg.MainButton.hide();
+            tg.showConfirm("ការបញ្ជាទិញបានជោគជ័យ! យើងនឹងទាក់ទងទៅលោកអ្នក។", () => tg.close());
         } catch (e) {
-            tg.MainButton.hideProgress();
-            alert("មានបញ្ហាបច្ចេកទេស! សូមព្យាយាមម្តងទៀត។");
+            tg.MainButton.hide();
+            tg.showAlert("មានបញ្ហាបច្ចេកទេស!");
         }
     }
 
-    loadData();
+    init();
 </script>
 </body>
 </html>
