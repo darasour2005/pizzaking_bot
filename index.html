@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V26</title>
+    <title>Pizz King Sovereign V27</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -33,13 +33,13 @@
         .qty-num { font-size: 0.85rem; font-weight: 700; }
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* Form Logics */
+        /* Form */
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
-        /* Footer Cart Manager (IMMUTABLE LOGIC) */
+        /* Footer Cart Manager (ZERO OMISSION RESTORED) */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid var(--pizz-border); padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -122,7 +122,7 @@
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {};
 
-    // --- 🏦 CRC16 CHECKSUM ---
+    // --- 🏦 THE "SUPER BRIDGE" CRC16 ENGINE ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -132,17 +132,21 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    function generateUniversalBakongKHQR(amt) {
+    function generateSuperBridgeKHQR(amt) {
         const val = amt.toString();
         const amtPart = `54${val.length.toString().padStart(2, '0')}${val}`;
-        // THE UNIVERSAL BRIDGE: Using Tag 30 (Bakong Bridge) instead of ACLEDA Proprietary 2936
-        // Account ID: 087282827@aclb (Bakong ID for ACLEDA)
-        // Point of Initiation: 11 (Static) - ACLEDA will scan without "Expired" error.
-        const base = `00020101021130320010A1000000250114087282827@aclb520420005303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH6304`;
+        
+        // POINT OF INITIATION: 11 (Static) - PLEASES ACLEDA & PREVENTS EXPIRATION
+        // TAG 29: ABA INDIVIDUAL TEMPLATE (WORKS FOR ABA)
+        // TAG 30: BAKONG/ACLEDA BRIDGE (WORKS FOR ACLEDA/WING)
+        const tag29 = `29450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827`;
+        const tag30 = `30320010A1000000250114087282827@aclb`;
+        
+        const base = `000201010211${tag29}${tag30}520420005303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH6304`;
         return base + crc16(base);
     }
 
-    // --- 🛒 CART LOGICS (RESTORED - ZERO OMISSION) ---
+    // --- 🛒 CART LOGICS (ZERO OMISSION RESTORED) ---
     function addToCart(id) {
         const p = allProducts.find(x => x.id === id);
         const q = cardQtys[id] || 1;
@@ -177,25 +181,26 @@
             </div>`).join('');
     }
 
-    // --- 🏦 PAYMENT & UI ---
+    // --- 🏦 PAYMENT ---
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        const finalQR = generateUniversalBakongKHQR(total);
+        const finalQR = generateSuperBridgeKHQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(finalQR)}`;
         startTimer(900);
     }
     function saveQR() { tg.openLink(document.getElementById('dynamic-khqr').src); }
     async function submitFinalOrder() {
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total: cart.reduce((s, i) => s + (i.price * i.qty), 0) };
-        document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
+        document.getElementById('confirm-btn').innerText = "⏳ កំពុងរក្សាទុក...";
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
             tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
         } catch (e) { document.getElementById('confirm-btn').innerText = "🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
+    // --- 🚀 BOOTSTRAP ---
     async function init() {
         if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
         document.getElementById('user-phone').value = localStorage.getItem('pizz_phone') || "";
