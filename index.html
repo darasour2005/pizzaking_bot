@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V14</title>
+    <title>Pizz King Sovereign V15</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
+        /* Category Slider */
         .cat-slider { display: flex; overflow-x: auto; padding: 10px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
         .cat-item { text-align: center; min-width: 55px; cursor: pointer; flex-shrink: 0; }
@@ -42,14 +43,13 @@
         .cart-header.open { display: flex; }
         .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .cart-details.open { max-height: 250px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid var(--pizz-border); padding-bottom: 10px; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .cart-item-actions { display: flex; align-items: center; gap: 8px; }
-        .cart-del-btn { color: var(--pizz-red); background: none; border: none; font-size: 20px; cursor: pointer; }
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
 
-        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
-        .bank-btn { background: #007bff; color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
-        .bank-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .bank-btn { background: #007bff; color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-bottom: 15px; }
+        .qr-frame { border: 4px solid var(--pizz-green); border-radius: 12px; padding: 10px; margin-bottom: 15px; width: 100%; max-width: 300px; text-align: center; }
+        .qr-image { width: 100%; height: auto; border-radius: 8px; }
+        
         #loader { text-align: center; padding: 40px; color: #95a5a6; font-weight: 700; }
     </style>
 </head>
@@ -57,15 +57,20 @@
 
 <div id="payment-screen" class="pay-overlay">
     <h3 style="margin-top:0;">💳 ជំហានទូទាត់ប្រាក់</h3>
-    <div style="color: var(--pizz-red); font-weight: 700; font-size: 1.4rem; margin-bottom: 20px;" id="pay-timer">15:00</div>
+    <div style="color: var(--pizz-red); font-weight: 700; font-size: 1.4rem; margin-bottom: 15px;" id="pay-timer">15:00</div>
     
-    <button class="bank-btn" id="aba-trigger" onclick="triggerBankPay()">📱 បើកកម្មវិធី ABA / ACLEDA</button>
-    <div style="border:4px solid var(--pizz-green); border-radius:12px; padding:10px; margin-bottom:20px;">
-        <img src="https://1.phsar.me/2922.jpg" style="width:200px; height:auto;">
+    <button class="bank-btn" onclick="triggerBankPay()">📱 បើកកម្មវិធី ABA / ACLEDA</button>
+
+    <div class="qr-frame">
+        <img src="https://1.phsar.me/2922.jpg" class="qr-image">
     </div>
     
-    <p style="text-align:center;">សរុប: <b id="pay-amt">0</b>៛<br>សូមបង់ប្រាក់ រួចចុចប៊ូតុងបៃតងខាងក្រោម។</p>
-    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">ត្រឡប់ក្រោយ</button>
+    <div style="text-align:center; margin-bottom: 15px;">
+        <span style="font-size: 1.2rem; font-weight: 700;">សរុប: <span id="pay-amt">0</span>៛</span>
+    </div>
+
+    <button class="checkout-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
+    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">បោះបង់</button>
 </div>
 
 <div class="cat-slider" id="cat-slider">
@@ -76,11 +81,11 @@
     <div id="loader">📦 កំពុងទាញយក...</div>
     <div id="product-grid" class="grid"></div>
     
-    <div class="order-form" id="main-order-form">
+    <div class="order-form">
         <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
-        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="validateInputs()"></div>
-        <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="validateInputs()"></div>
-        <div class="input-group"><label>ទីតាំង</label><input type="text" id="user-loc" oninput="validateInputs()"></div>
+        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="checkForm()"></div>
+        <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="checkForm()"></div>
+        <div class="input-group"><label>ទីតាំង</label><input type="text" id="user-loc" oninput="checkForm()"></div>
     </div>
 </div>
 
@@ -98,7 +103,9 @@
     const RENDER_URL = "https://pizzaking-bot.onrender.com"; 
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
-    const ABA_LINK = "https://pay.ababank.com/oRF8/fj3kp697";
+    
+    // NEW DYNAMIC MERCHANT ID (Uses the one from your QR string)
+    const MERCHANT_ID = "087282827@acleda"; 
 
     tg.expand();
     tg.ready();
@@ -109,44 +116,35 @@
         if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name;
         document.getElementById('user-phone').value = localStorage.getItem('pizz_phone') || "";
         document.getElementById('user-loc').value = localStorage.getItem('pizz_loc') || "";
-        validateInputs();
+        checkForm();
         await loadCategories();
         await loadAllProducts();
     }
 
-    function validateInputs() {
-        const name = document.getElementById('user-name').value;
-        const phone = document.getElementById('user-phone').value;
-        const loc = document.getElementById('user-loc').value;
+    function checkForm() {
+        const n = document.getElementById('user-name').value;
+        const p = document.getElementById('user-phone').value;
+        const l = document.getElementById('user-loc').value;
         const btn = document.getElementById('pre-pay-btn');
-        
-        if(name.length > 1 && phone.length > 8 && loc.length > 5) {
-            btn.disabled = false;
-            btn.style.background = "#2ecc71";
-            btn.innerText = "💳 បន្តទៅការបង់ប្រាក់";
+        if(n.length > 1 && p.length > 8 && l.length > 5) {
+            btn.disabled = false; btn.style.background = "#2ecc71"; btn.innerText = "💳 បន្តទៅការបង់ប្រាក់";
         } else {
-            btn.disabled = true;
-            btn.style.background = "#bdc3c7";
-            btn.innerText = "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
+            btn.disabled = true; btn.style.background = "#bdc3c7"; btn.innerText = "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
         }
     }
 
     async function loadCategories() {
-        try {
-            const res = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
-            const cats = await res.json();
-            cats.forEach(c => {
-                document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
-            });
-        } catch(e) {}
+        const res = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
+        const cats = await res.json();
+        cats.forEach(c => {
+            document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
+        });
     }
 
     async function loadAllProducts() {
-        try {
-            const res = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
-            allProducts = await res.json();
-            renderProducts(allProducts);
-        } catch(e) { document.getElementById('loader').innerText = "⚠️ បញ្ហាការតភ្ជាប់"; }
+        const res = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
+        allProducts = await res.json();
+        renderProducts(allProducts);
     }
 
     function renderProducts(items) {
@@ -176,7 +174,7 @@
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${cart.length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = cart.map(i => `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions"><button class="qty-btn" onclick="updateCartItemQty(${i.id},-1)">−</button><span>${i.qty}</span><button class="qty-btn" onclick="updateCartItemQty(${i.id},1)">+</button><button class="cart-del-btn" onclick="removeFromCart(${i.id})">🗑️</button></div></div>`).join('');
+        document.getElementById('cart-list').innerHTML = cart.map(i => `<div class="cart-item-row"><span>${i.name} x${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}៛</span></div>`).join('');
     }
 
     function openPayment() {
@@ -184,59 +182,44 @@
         document.getElementById('pay-amt').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
         startTimer(900);
-        
-        tg.MainButton.setText("✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់ (បញ្ជូនកម្ម៉ង់)").show();
-        tg.MainButton.onClick(submitFinalOrder);
     }
 
     function triggerBankPay() {
-        // Trigger the exact ABA link you provided
-        tg.openLink(ABA_LINK);
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        // This link uses the official NBC (Bakong) protocol to PASS THE AMOUNT
+        const payUrl = `https://link.bakong.nbc.gov.kh/pay?id=${MERCHANT_ID}&amount=${total}&currency=KHR&name=PizzKing`;
+        tg.openLink(payUrl);
     }
 
     async function submitFinalOrder() {
-        tg.MainButton.showProgress();
         const name = document.getElementById('user-name').value;
         const phone = document.getElementById('user-phone').value;
         const loc = document.getElementById('user-loc').value;
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         
         localStorage.setItem('pizz_phone', phone);
         localStorage.setItem('pizz_loc', loc);
 
-        const orderData = { 
-            telegram_id: tg.initDataUnsafe.user?.id, 
-            name, phone, location: loc, 
-            items: cart, total: cart.reduce((s, i) => s + (i.price * i.qty), 0)
-        };
-
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name, phone, location: loc, items: cart, total };
+        
         try {
-            const res = await fetch(`${RENDER_URL}/create-order`, { 
-                method: "POST", 
-                headers: { "Content-Type": "application/json" }, 
-                body: JSON.stringify(orderData) 
-            });
-            if (res.ok) {
-                tg.MainButton.hideProgress();
-                tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
-            } else { throw new Error("API Status " + res.status); }
-        } catch (e) {
-            tg.MainButton.hideProgress();
-            tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់: " + e.message);
-        }
+            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
+            tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
+        } catch (e) { tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
     function startTimer(d) {
         let t = d, m, s;
-        const display = document.getElementById('pay-timer');
-        const itv = setInterval(() => {
+        const disp = document.getElementById('pay-timer');
+        setInterval(() => {
             m = parseInt(t / 60, 10); s = parseInt(t % 60, 10);
-            display.textContent = (m < 10 ? "0" + m : m) + ":" + (sec = s < 10 ? "0" + s : s);
-            if (--t < 0) { clearInterval(itv); t = 0; }
+            disp.textContent = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+            if (--t < 0) t = 0;
         }, 1000);
     }
 
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { document.getElementById('payment-screen').style.display = 'none'; tg.MainButton.hide(); }
+    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     function filterCatLocal(id) { renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
 
     init();
