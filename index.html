@@ -3,160 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Ultra App</title>
+    <title>Pizz King Sovereign</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; }
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); user-select: none; }
-        .header { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid var(--pizz-green); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); }
         
-        /* 2-Column Grid */
-        .container { padding: 10px; margin-bottom: 120px; }
+        /* Category Slider */
+        .cat-slider { display: flex; overflow-x: auto; padding: 15px; background: #fff; gap: 20px; border-bottom: 1px solid #eee; sticky; top: 0; z-index: 100; }
+        .cat-item { text-align: center; min-width: 60px; cursor: pointer; }
+        .cat-icon { width: 50px; height: 50px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 2px solid transparent; }
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
+        .cat-item span { font-size: 0.75rem; font-weight: 700; }
+
+        /* Grid */
+        .container { padding: 10px; padding-bottom: 180px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        /* Product Card */
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
+        .card img { width: 100%; height: 140px; object-fit: cover; }
         .card-body { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
-        .price { color: var(--pizz-red); font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; }
+        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 4px; }
+        .price { color: var(--pizz-red); font-weight: 700; font-size: 0.95rem; }
         
-        /* QTY Controls */
-        .qty-row { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; border-radius: 6px; padding: 2px; margin-bottom: 8px; }
-        .qty-btn { width: 28px; height: 28px; border: none; background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .qty-val { font-weight: 700; font-size: 0.9rem; }
+        /* Cart Action */
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .btn-cart { background: var(--pizz-green); color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+        /* Order Form */
+        .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; font-weight: 700; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        /* Expandable Footer */
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; }
+        .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; font-size: 0.85rem; }
+        .cart-details.open { max-height: 200px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        .add-btn { background: var(--pizz-green); color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer; width: 100%; }
-        .add-btn:active { opacity: 0.7; }
-
-        /* Floating Cart Summary */
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 15px; box-sizing: border-box; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 200; }
-        .cart-info { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 700; font-size: 0.9rem; }
-        .checkout-btn { background: var(--pizz-dark); color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; }
-
-        #loader { text-align: center; padding: 40px; font-weight: 700; color: #95a5a6; }
+        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
+        
+        /* Variations Modal placeholder */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 300; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; width: 90%; border-radius: 15px; padding: 20px; }
     </style>
 </head>
 <body>
 
-<div class="header"><h3 style="margin:0;">🇰🇭 Pizz King Store</h3></div>
-
-<div class="container">
-    <div id="loader">📦 កំពុងទាញយកទំនិញ...</div>
-    <div id="product-grid" class="grid"></div>
+<div class="cat-slider" id="cat-slider">
+    <div class="cat-item active" onclick="filterCat('all')"><div class="cat-icon">🏠</div><span>ទាំងអស់</span></div>
+    <div class="cat-item" onclick="filterCat('fruits')"><div class="cat-icon">🍎</div><span>ផ្លែឈើ</span></div>
+    <div class="cat-item" onclick="filterCat('dried')"><div class="cat-icon">🍇</div><span>ដំណាប់</span></div>
+    <div class="cat-item" onclick="filterCat('drink')"><div class="cat-icon">🥤</div><span>ភេសជ្ជៈ</span></div>
 </div>
 
-<div class="footer-cart" id="footer-cart" style="display:none;">
-    <div class="cart-info">
-        <span id="cart-count">🛒 កន្ត្រក: ០ មុខ</span>
-        <span id="cart-total">សរុប: ០៛</span>
+<div class="container">
+    <div id="product-grid" class="grid"></div>
+    
+    <div class="order-form">
+        <h4 style="margin:0 0 10px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
+        <div class="input-group">
+            <label>លេខទូរស័ព្ទ</label>
+            <input type="tel" id="user-phone" placeholder="012 345 678">
+        </div>
+        <div class="input-group">
+            <label>ទីតាំងដឹកជញ្ជូន</label>
+            <input type="text" id="user-loc" placeholder="ផ្ទះលេខ, ភូមិ, សង្កាត់...">
+        </div>
     </div>
-    <button class="checkout-btn" onclick="openBakong()">💳 បង់ប្រាក់តាម ACLEDA / Bakong</button>
+</div>
+
+<div class="footer-cart">
+    <div id="cart-list" class="cart-details"></div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:700;" onclick="toggleCart()">
+        <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span>
+        <span id="cart-total">០៛</span>
+    </div>
+    <button class="checkout-btn" onclick="submitOrder()">💳 បញ្ជាទិញឥឡូវនេះ</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    tg.ready();
 
     let products = [];
     let cart = [];
-    let userQtys = {};
 
-    // --- PREMIUM CACHING LOGIC ---
-    async function initApp() {
-        const cachedData = localStorage.getItem('pizz_cache');
-        const cacheTime = localStorage.getItem('pizz_cache_time');
-        const now = new Date().getTime();
-
-        // If cache exists and is less than 1 hour old, load instantly
-        if (cachedData && (now - cacheTime < 3600000)) {
-            products = JSON.parse(cachedData);
-            renderProducts();
-        } else {
-            await fetchFromWooCommerce();
-        }
+    async function loadData() {
+        // Fetch products from your WooCommerce
+        const res = await fetch("https://1.phsar.me/wp-json/wc/v3/products?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57&per_page=50");
+        products = await res.json();
+        renderProducts(products);
     }
 
-    async function fetchFromWooCommerce() {
-        const url = "https://1.phsar.me/wp-json/wc/v3/products?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57&per_page=40";
-        try {
-            const res = await fetch(url);
-            products = await res.json();
-            localStorage.setItem('pizz_cache', JSON.stringify(products));
-            localStorage.setItem('pizz_cache_time', new Date().getTime().toString());
-            renderProducts();
-        } catch (e) {
-            document.getElementById('loader').innerText = "⚠️ បញ្ហាការតភ្ជាប់";
-        }
-    }
-
-    function renderProducts() {
-        document.getElementById('loader').style.display = 'none';
+    function renderProducts(items) {
         const grid = document.getElementById('product-grid');
-        grid.innerHTML = '';
-
-        products.forEach(p => {
-            const id = p.id;
-            if (!userQtys[id]) userQtys[id] = 1;
-            const img = p.images.length ? p.images[0].src : '';
-            
-            grid.innerHTML += `
-                <div class="card">
-                    <img src="${img}">
-                    <div class="card-body">
-                        <div class="title">${p.name}</div>
-                        <div class="price">${p.price}៛</div>
-                        <div class="qty-row">
-                            <button class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
-                            <span class="qty-val" id="qty-${id}">1</span>
-                            <button class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
-                        </div>
-                        <button class="add-btn" onclick="addToCart(${id})">➕ បន្ថែម</button>
+        grid.innerHTML = items.map(p => `
+            <div class="card">
+                <img src="${p.images[0]?.src || ''}">
+                <div class="card-body">
+                    <div class="title">${p.name}</div>
+                    <div class="price">${p.price}៛</div>
+                    <div class="action-row">
+                        <span>Qty: 1</span>
+                        <button class="btn-cart" onclick="addToCart(${p.id})">🛒</button>
                     </div>
                 </div>
-            `;
-        });
-    }
-
-    function changeQty(id, delta) {
-        let current = userQtys[id] || 1;
-        current += delta;
-        if (current < 1) current = 1;
-        userQtys[id] = current;
-        document.getElementById(`qty-${id}`).innerText = current;
+            </div>
+        `).join('');
     }
 
     function addToCart(id) {
         const p = products.find(x => x.id === id);
-        const qty = userQtys[id];
-        
-        // Add to cart array
-        cart.push({ name: p.name, price: parseFloat(p.price), qty: qty });
-        updateCartUI();
-        tg.HapticFeedback.impactOccurred('medium'); // Vibrate phone
+        cart.push({ id: p.id, name: p.name, price: parseFloat(p.price), qty: 1 });
+        updateUI();
+        tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function updateCartUI() {
-        const footer = document.getElementById('footer-cart');
-        if (cart.length > 0) footer.style.display = 'block';
+    function updateUI() {
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${cart.length} មុខ (ចុចមើល)`;
+        document.getElementById('cart-total').innerText = `${total}៛`;
         
-        const count = cart.reduce((sum, item) => sum + item.qty, 0);
-        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${count} មុខ`;
-        document.getElementById('cart-total').innerText = `សរុប: ${total}៛`;
+        document.getElementById('cart-list').innerHTML = cart.map(i => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>${i.name} x${i.qty}</span>
+                <span>${i.price * i.qty}៛</span>
+            </div>
+        `).join('');
     }
 
-    function openBakong() {
-        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        const merchantId = "alex@acleda";
-        const payUrl = `https://link.bakong.nbc.gov.kh/pay?id=${merchantId}&amount=${total}&currency=KHR&name=PizzKing`;
-        tg.openLink(payUrl);
+    function toggleCart() {
+        document.getElementById('cart-list').classList.toggle('open');
     }
 
-    initApp();
+    async function submitOrder() {
+        const phone = document.getElementById('user-phone').value;
+        const loc = document.getElementById('user-loc').value;
+
+        if (!phone || !loc || cart.length === 0) {
+            alert("សូមបំពេញព័ត៌មាន និងជ្រើសរើសទំនិញ!");
+            return;
+        }
+
+        // SEND TO YOUR RENDER SERVER
+        const orderData = {
+            phone: phone,
+            location: loc,
+            items: cart,
+            total: cart.reduce((s, i) => s + (i.price * i.qty), 0)
+        };
+
+        tg.MainButton.showProgress();
+        
+        // This sends the order to main.py to save in WooCommerce
+        await fetch("https://pizzaking-bot.onrender.com/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData)
+        });
+
+        tg.MainButton.hideProgress();
+        alert("ការបញ្ជាទិញបានជោគជ័យ! យើងនឹងទាក់ទងទៅលោកអ្នក។");
+        tg.close();
+    }
+
+    loadData();
 </script>
 </body>
 </html>
