@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V7</title>
+    <title>Pizz King Sovereign V9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
         /* Category Slider */
         .cat-slider { display: flex; overflow-x: auto; padding: 10px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
@@ -27,44 +27,61 @@
         .title { font-size: 0.8rem; font-weight: 700; height: 35px; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
         
-        /* QTY Control */
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 6px; padding: 2px; margin-bottom: 8px; }
         .qty-btn { width: 25px; height: 25px; border: none; background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .qty-num { font-size: 0.85rem; font-weight: 700; }
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-add-cart svg { width: 18px; height: 18px; fill: white; }
 
-        /* Form */
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
-        /* Footer Cart */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid var(--pizz-border); padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
         .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid var(--pizz-border); padding-bottom: 10px; }
-        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+        
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cart-item-actions { display: flex; align-items: center; gap: 8px; }
+        .cart-del-btn { color: var(--pizz-red); background: none; border: none; font-size: 20px; cursor: pointer; }
 
-        /* Payment Overlay */
+        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 20px; border-radius: 12px; font-weight: 700; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4); }
+
+        /* Payment Overlay V9 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .qr-frame { border: 8px solid var(--pizz-green); border-radius: 20px; padding: 10px; margin-bottom: 20px; }
-        .timer { font-size: 1.5rem; font-weight: 700; color: var(--pizz-red); margin-bottom: 20px; }
+        .qr-image { width: 220px; height: 220px; margin-bottom: 20px; }
+        .bank-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+        .bank-btn { background: #f8f9fa; border: 2px solid #eee; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; cursor: pointer; }
+        .bank-btn.primary { background: var(--pizz-green); color: white; border-color: var(--pizz-green); }
+        
+        #loader { text-align: center; padding: 40px; color: #95a5a6; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <div id="payment-screen" class="pay-overlay">
-    <h3 style="margin-top:0;">💳 ជំហានចុងក្រោយ</h3>
-    <div class="timer" id="pay-timer">05:00</div>
-    <div class="qr-frame">
-        <img src="" id="qr-image" style="width:200px; height:200px;">
+    <h3 style="margin-top:0;">💳 ការបង់ប្រាក់តាម KHQR</h3>
+    <div style="color: var(--pizz-red); font-weight: 700; margin-bottom: 10px;" id="pay-timer">05:00</div>
+    
+    <img src="" id="qr-display" class="qr-image">
+    
+    <div style="text-align:center; margin-bottom: 20px;">
+        <span style="font-size: 1.2rem; font-weight: 700;">សរុប: <span id="pay-amt">0</span>៛</span>
     </div>
-    <p style="text-align:center; font-size:0.9rem;">សូមបង់ប្រាក់ចំនួន <b id="pay-amt">0</b>៛<br>តាមរយៈ **KHQR** (ACLEDA/ABA/Wing...)</p>
-    <button class="checkout-btn" id="confirm-pay-btn" onclick="finalOrder()">🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">បោះបង់ការបញ្ជាទិញ</button>
+
+    <div class="bank-grid">
+        <button class="bank-btn primary" onclick="triggerBankPay()">
+            📱 បើកកម្មវិធីធនាគារដើម្បីបង់ប្រាក់
+        </button>
+        <button class="bank-btn" onclick="finalOrder()">
+            ✅ ខ្ញុំបានបង់រួចរាល់ (រួចរាល់)
+        </button>
+    </div>
+    
+    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">ត្រឡប់ក្រោយ</button>
 </div>
 
 <div class="cat-slider" id="cat-slider">
@@ -84,7 +101,7 @@
 </div>
 
 <div class="footer-cart" id="footer-ui" style="display:none;">
-    <div class="cart-header" id="cart-header"><span>🛒 កន្ត្រក</span><button onclick="toggleCart()" style="background:none; border:none; font-size:24px;">×</button></div>
+    <div class="cart-header" id="cart-header"><span>🛒 ទំនិញដែលបានរើស</span><button onclick="toggleCart()" style="background:none; border:none; font-size:24px;">×</button></div>
     <div id="cart-list" class="cart-details"></div>
     <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-weight:700;" onclick="toggleCart()">
         <span id="cart-count">🛒 កន្ត្រក: ០ មុខ</span><span id="cart-total">០៛</span>
@@ -96,7 +113,7 @@
     const tg = window.Telegram.WebApp;
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
-    const MERCHANT_ID = "087282827@acleda"; // YOUR ACCOUNT FROM PHOTO
+    const MERCHANT_ID = "087282827@acleda"; // SOUR DARA ACLEDA
 
     tg.expand();
 
@@ -143,35 +160,33 @@
         updateUI(); tg.HapticFeedback.impactOccurred('medium');
     }
 
+    function updateCartItemQty(id, d) { const i = cart.find(x => x.id === id); if(i) { i.qty = Math.max(1, i.qty + d); updateUI(); } }
+    function removeFromCart(id) { cart = cart.filter(x => x.id !== id); if(!cart.length) toggleCart(); updateUI(); }
+
     function updateUI() {
         document.getElementById('footer-ui').style.display = cart.length > 0 ? 'block' : 'none';
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${cart.length} មុខ`;
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${cart.length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${i.name} x${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}៛</span></div>`).join('');
+        document.getElementById('cart-list').innerHTML = cart.map(i => `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions"><button class="qty-btn" onclick="updateCartItemQty(${i.id},-1)">−</button><span>${i.qty}</span><button class="qty-btn" onclick="updateCartItemQty(${i.id},1)">+</button><button class="cart-del-btn" onclick="removeFromCart(${i.id})">🗑️</button></div></div>`).join('');
     }
 
-    // --- PAYMENT FLOW ---
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
         
-        // Generate KHQR Image using free API (GoQR or similar)
-        const payUrl = `https://link.bakong.nbc.gov.kh/pay?id=${MERCHANT_ID}&amount=${total}&currency=KHR&name=PizzKing`;
-        document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payUrl)}`;
+        // Show the ACLEDA KHQR IMAGE directly from your photo source or generated properly
+        const khqrData = `https://link.bakong.nbc.gov.kh/pay?id=${MERCHANT_ID}&amount=${total}&currency=KHR&name=PizzKing`;
+        document.getElementById('qr-display').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(khqrData)}`;
         
-        startTimer(300); // 5 minutes
+        startTimer(300);
     }
 
-    function startTimer(duration) {
-        let timer = duration, min, sec;
-        const display = document.getElementById('pay-timer');
-        const interval = setInterval(() => {
-            min = parseInt(timer / 60, 10); sec = parseInt(timer % 60, 10);
-            display.textContent = (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
-            if (--timer < 0) clearInterval(interval);
-        }, 1000);
+    function triggerBankPay() {
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        const payUrl = `https://link.bakong.nbc.gov.kh/pay?id=${MERCHANT_ID}&amount=${total}&currency=KHR&name=PizzKing`;
+        tg.openLink(payUrl); // This triggers ACLEDA app on the phone
     }
 
     async function finalOrder() {
@@ -184,12 +199,18 @@
 
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone, location: loc, items: cart, total };
         
-        // Trigger Deep Link so they pay before app closes
-        const payUrl = `https://link.bakong.nbc.gov.kh/pay?id=${MERCHANT_ID}&amount=${total}&currency=KHR&name=PizzKing`;
-        tg.openLink(payUrl);
-
         await fetch("https://pizzaking-bot.onrender.com/create-order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
         tg.close();
+    }
+
+    function startTimer(duration) {
+        let timer = duration, min, sec;
+        const display = document.getElementById('pay-timer');
+        setInterval(() => {
+            min = parseInt(timer / 60, 10); sec = parseInt(timer % 60, 10);
+            display.textContent = (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
+            if (--timer < 0) timer = 0;
+        }, 1000);
     }
 
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
