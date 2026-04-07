@@ -11,7 +11,7 @@
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); }
         
         /* Category Slider */
-        .cat-slider { display: flex; overflow-x: auto; padding: 15px; background: #fff; gap: 20px; border-bottom: 1px solid #eee; sticky; top: 0; z-index: 100; }
+        .cat-slider { display: flex; overflow-x: auto; padding: 15px; background: #fff; gap: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
         .cat-item { text-align: center; min-width: 60px; cursor: pointer; }
         .cat-icon { width: 50px; height: 50px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 2px solid transparent; }
         .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
@@ -43,7 +43,6 @@
         
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
         
-        /* Variations Modal placeholder */
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 300; align-items: center; justify-content: center; }
         .modal-content { background: #fff; width: 90%; border-radius: 15px; padding: 20px; }
     </style>
@@ -51,10 +50,10 @@
 <body>
 
 <div class="cat-slider" id="cat-slider">
-    <div class="cat-item active" onclick="filterCat('all')"><div class="cat-icon">🏠</div><span>ទាំងអស់</span></div>
-    <div class="cat-item" onclick="filterCat('fruits')"><div class="cat-icon">🍎</div><span>ផ្លែឈើ</span></div>
-    <div class="cat-item" onclick="filterCat('dried')"><div class="cat-icon">🍇</div><span>ដំណាប់</span></div>
-    <div class="cat-item" onclick="filterCat('drink')"><div class="cat-icon">🥤</div><span>ភេសជ្ជៈ</span></div>
+    <div class="cat-item active" id="cat-all" onclick="filterCat('all')"><div class="cat-icon">🏠</div><span>ទាំងអស់</span></div>
+    <div class="cat-item" id="cat-fruits" onclick="filterCat('fruits')"><div class="cat-icon">🍎</div><span>ផ្លែឈើ</span></div>
+    <div class="cat-item" id="cat-dried" onclick="filterCat('dried')"><div class="cat-icon">🍇</div><span>ដំណាប់</span></div>
+    <div class="cat-item" id="cat-drink" onclick="filterCat('drink')"><div class="cat-icon">🥤</div><span>ភេសជ្ជៈ</span></div>
 </div>
 
 <div class="container">
@@ -86,14 +85,19 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    let allProducts = [];
     let products = [];
     let cart = [];
 
     async function loadData() {
-        // Fetch products from your WooCommerce
-        const res = await fetch("https://1.phsar.me/wp-json/wc/v3/products?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57&per_page=50");
-        products = await res.json();
-        renderProducts(products);
+        try {
+            const res = await fetch("https://1.phsar.me/wp-json/wc/v3/products?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57&per_page=50");
+            allProducts = await res.json();
+            products = allProducts;
+            renderProducts(products);
+        } catch (e) {
+            console.error("Load Error:", e);
+        }
     }
 
     function renderProducts(items) {
@@ -105,7 +109,7 @@
                     <div class="title">${p.name}</div>
                     <div class="price">${p.price}៛</div>
                     <div class="action-row">
-                        <span>Qty: 1</span>
+                        <span>ចំនួន: 1</span>
                         <button class="btn-cart" onclick="addToCart(${p.id})">🛒</button>
                     </div>
                 </div>
@@ -113,11 +117,27 @@
         `).join('');
     }
 
+    function filterCat(slug) {
+        // UI Update for Active Tab
+        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('cat-' + slug).classList.add('active');
+        
+        if(slug === 'all') {
+            products = allProducts;
+        } else {
+            // Simple text-based filter for demo, logic can be expanded for specific category IDs
+            products = allProducts.filter(p => p.categories.some(c => c.slug.includes(slug) || c.name.toLowerCase().includes(slug)));
+        }
+        renderProducts(products);
+    }
+
     function addToCart(id) {
-        const p = products.find(x => x.id === id);
-        cart.push({ id: p.id, name: p.name, price: parseFloat(p.price), qty: 1 });
-        updateUI();
-        tg.HapticFeedback.impactOccurred('medium');
+        const p = allProducts.find(x => x.id === id);
+        if(p) {
+            cart.push({ id: p.id, name: p.name, price: parseFloat(p.price || 0), qty: 1 });
+            updateUI();
+            tg.HapticFeedback.impactOccurred('medium');
+        }
     }
 
     function updateUI() {
@@ -146,8 +166,11 @@
             return;
         }
 
-        // SEND TO YOUR RENDER SERVER
+        // --- THE MISSING BIT: GET TELEGRAM ID ---
+        const telegramId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+
         const orderData = {
+            telegram_id: telegramId,
             phone: phone,
             location: loc,
             items: cart,
@@ -156,16 +179,20 @@
 
         tg.MainButton.showProgress();
         
-        // This sends the order to main.py to save in WooCommerce
-        await fetch("https://pizzaking-bot.onrender.com/create-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderData)
-        });
-
-        tg.MainButton.hideProgress();
-        alert("ការបញ្ជាទិញបានជោគជ័យ! យើងនឹងទាក់ទងទៅលោកអ្នក។");
-        tg.close();
+        try {
+            await fetch("https://pizzaking-bot.onrender.com/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData)
+            });
+            
+            tg.MainButton.hideProgress();
+            alert("ការបញ្ជាទិញបានជោគជ័យ! សូមពិនិត្យមើលសារក្នុង Bot របស់អ្នក។");
+            tg.close();
+        } catch (e) {
+            tg.MainButton.hideProgress();
+            alert("មានបញ្ហាបច្ចេកទេស! សូមព្យាយាមម្តងទៀត។");
+        }
     }
 
     loadData();
