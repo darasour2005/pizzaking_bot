@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Drama Special Pizza",
+    "price": 12.50,
+    "image": "https://your-image-url.com/pizza.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Pizz King Tea",
+    "price": 2.00,
+    "image": "https://your-image-url.com/tea.jpg"
+  }
+]
