@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V49</title>
+    <title>Pizz King Sovereign V50</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -50,7 +50,6 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* Footer Cart Manager */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -69,17 +68,14 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - V49 PROTOCOL */
+        /* Payment Screen Protocol V50 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        
         .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
         .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
         .qr-body { padding: 15px; background: #fff; }
-        
         .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .qr-name-small { font-size: 0.85rem; color: #7f8c8d; }
         .qr-amount-bold { font-size: 1.15rem; color: var(--pizz-red); }
-
         .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
         .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 12px; line-height: 1.3; }
 
@@ -90,6 +86,8 @@
         .pay-summary-list.open { max-height: 150px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
 
         .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+        
+        /* Save Instruction Overlay (Fallback) */
         .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
 
         .clear-close { position:absolute; top:10px; right:10px; background:#fff; border:1px solid #ddd; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--pizz-red); cursor:pointer; font-weight:bold; z-index:10; }
@@ -134,8 +132,17 @@
 </div>
 
 <div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
-    <p style="font-weight:700;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
-    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:20px;">
+    <p style="font-weight:700; margin-bottom:5px;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
+    <p style="font-size:0.75rem; opacity:0.6;">(Long press to save to Photos)</p>
+    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:15px; box-shadow:0 0 20px rgba(255,255,255,0.3);">
+    <button style="margin-top:20px; background:#fff; color:#000; border:none; padding:10px 30px; border-radius:20px; font-weight:700;">រួចរាល់ (Close)</button>
+</div>
+
+<div id="popup-screen" class="popup-overlay" onclick="closePopup()">
+    <div class="popup-card" onclick="event.stopPropagation()">
+        <button class="clear-close" onclick="closePopup()">×</button>
+        <div id="popup-content"></div>
+    </div>
 </div>
 
 <div class="cat-slider" id="cat-slider">
@@ -169,7 +176,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V49</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V50</p>
 </footer>
 
 <script>
@@ -238,7 +245,6 @@
         if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
     }
 
-    // --- SOVEREIGN HEXADECIMAL CRC16 ENGINE V49 ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -248,28 +254,17 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    // --- SOVEREIGN STRICT ABA DYNAMIC DNA ENGINE V49 ---
     function generateDynamicABAQR(amt) {
-        // TEMPLATE: Strictly based on successful manual sequence (Dynamic Mode 0212)
         const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
-        
-        // DYNAMIC AMOUNT: Tag 54 [digit][amount].0
         const amtVal = amt.toString() + ".0";
         const digitCount = (amt.toString().length + 2).toString().padStart(2, '0');
         const amtTag = `54${digitCount}${amtVal}`;
-        
         const midSuffix = "5802KH5909SOUR DARA6010Phnom Penh";
-        
-        // PROPRIETARY DATA: Tag 99 (Creation & Expiry Timestamps)
         const timestamp = Date.now().toString();
-        const expiry = (Date.now() + 31536000000).toString(); // 1 year
+        const expiry = (Date.now() + 31536000000).toString();
         const tag99 = `99340013${timestamp}0113${expiry}`;
-        
-        // PAYLOAD CONSTRUCTION (Tag 63 CRC Header)
         const payload = prefix + amtTag + midSuffix + tag99 + "6304";
-        const checksum = crc16(payload);
-        
-        return payload + checksum;
+        return payload + crc16(payload);
     }
 
     function filterCatLocal(id) {
@@ -356,18 +351,34 @@
 
     function togglePaySummary() { const list = document.getElementById('pay-summary-list'); const caret = document.getElementById('summary-caret'); list.classList.toggle('open'); caret.innerText = list.classList.contains('open') ? "▲" : "▼"; }
 
+    // --- SOVEREIGN NATIVE SAVE PROTOCOL V50 ---
     async function downloadQRImage() {
-        const target = document.getElementById('invoice-card'); const btn = document.querySelector('.btn-save-qr'); btn.innerHTML = "⏳ កំពុងរៀបចំ...";
+        const target = document.getElementById('invoice-card');
+        const btn = document.querySelector('.btn-save-qr');
+        btn.innerHTML = "⏳ កំពុងរៀបចំ...";
         try {
-            const canvas = await html2canvas(target, { scale: 3, useCORS: true });
+            const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
             const dataUrl = canvas.toDataURL("image/png");
-            if (window.innerWidth > 900 || !navigator.userAgent.match(/Android|iPhone|iPad/i)) {
-                const link = document.createElement("a"); link.download = `PizzKing_QR_${Date.now()}.png`; link.href = dataUrl; link.click();
+            
+            // 1. Convert to Blob for Sharing
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], "PizzKing_QR.png", { type: "image/png" });
+
+            // 2. Try Native Share API (Perfect for iPhone/Android Native Function)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'Pizz King QR Code',
+                    text: 'សូមរក្សាទុកដើម្បីបង់ប្រាក់'
+                });
+                btn.innerHTML = "✅ រក្សាទុកជោគជ័យ";
             } else {
-                document.getElementById('fallback-img').src = dataUrl; document.getElementById('save-fallback').style.display = 'flex';
+                // 3. FALLBACK: Full-screen Image for Long-press Save
+                document.getElementById('fallback-img').src = dataUrl;
+                document.getElementById('save-fallback').style.display = 'flex';
+                btn.innerHTML = "✅ រួចរាល់";
             }
-            btn.innerHTML = "✅ រួចរាល់";
-            setTimeout(() => { btn.innerHTML = `<svg style="width:14px; height:14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 2000);
+            setTimeout(() => { btn.innerHTML = `<svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 3000);
         } catch(e) { btn.innerHTML = "⚠️ កំហុស"; }
     }
 
@@ -376,11 +387,8 @@
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
         document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
-        
-        // NEW SOVEREIGN QR LOGIC V49
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        
         startTimer(900); document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
     }
 
