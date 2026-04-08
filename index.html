@@ -8,14 +8,13 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V2.0</title>
+    <title>Pizza King Store V2.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* 1. PC WORKSPACE SILHOUETTE */
         body { 
             font-family: 'Kantumruy Pro', sans-serif; background: #000; 
             margin: 0; padding: 0; display: flex; justify-content: center;
@@ -27,16 +26,16 @@
             position: relative; box-shadow: 0 0 80px rgba(0,0,0,1); display: flex; flex-direction: column;
         }
 
-        /* 2. FORCE INSTALL GATEWAY */
+        /* FORCE INSTALL GUARD */
         #install-guard {
             position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; 
             background: #fff; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center;
             padding: 40px; text-align: center; box-sizing: border-box;
         }
-        .guard-logo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(231,76,60,0.2); }
+        .guard-logo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 20px; }
         .btn-install-force { background: var(--pizz-green); color: white; border: none; padding: 18px 40px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; }
 
-        /* 3. SOVEREIGN HEADER */
+        /* HEADER */
         .master-header { display: flex; align-items: center; background: #fff; padding: 8px 12px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 8px; }
         .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .brand-logo-btn.active { border-color: var(--pizz-green); }
@@ -47,7 +46,7 @@
         .movie-btn-pro span:first-child { font-size: 1.5rem; color: #fff; line-height: 1; }
         .movie-btn-pro span:last-child { font-size: 0.55rem; color: #fff; font-weight: 700; margin-top: 2px; }
 
-        /* 4. V51 COMPONENTS */
+        /* UI DNA */
         .cat-item { text-align: center; min-width: 55px; cursor: pointer; flex-shrink: 0; }
         .cat-icon { width: 40px; height: 40px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
@@ -65,24 +64,22 @@
         .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin: 0 10px 8px 10px; }
         .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
-        .var-selector { width: calc(100% - 20px); margin: 0 10px 10px 10px; padding: 6px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 0.75rem; outline: none; }
 
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin: 0 10px 10px 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 10px 10px 10px; gap: 5px; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 10px 10px 10px; }
 
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
 
-        /* 5. OVERLAY CENTER-LOCK */
+        /* CENTER-LOCK MODALS */
         .pay-overlay, .modal-overlay, .popup-screen { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; z-index: 600; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); box-sizing: border-box; padding: 15px; }
         .qr-card, .modal-card, .popup-card { background: white; border-radius: 20px; width: 92%; max-width: 380px; padding: 20px; box-sizing: border-box; box-shadow: 0 15px 50px rgba(0,0,0,0.3); position: relative; }
-
-        /* SCROLLABLE PRODUCT POPUP */
-        .popup-card { max-height: 85vh; overflow-y: auto; text-align: center; }
-        .close-popup-x { position: absolute; top: 12px; right: 12px; background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; font-weight: bold; color: var(--pizz-red); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        
+        .popup-card { max-height: 80vh; overflow-y: auto; text-align: center; }
+        .close-popup-x { position: absolute; top: 12px; right: 12px; background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; font-weight: bold; color: var(--pizz-red); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
         /* MINICART */
         .footer-cart { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
@@ -92,9 +89,12 @@
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
         .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pizz-red); }
-        
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; }
+
+        /* RECAP LIST */
+        #pay-summary-list { margin-bottom: 15px; border-bottom: 1px dashed #ddd; padding-bottom: 10px; text-align: left; }
+        .recap-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; font-weight: 700; }
 
         /* NOTE UI */
         .modal-card textarea { width: 100%; height: 160px; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box; outline: none; font-size: 0.9rem; }
@@ -152,15 +152,22 @@
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card">
             <div style="background:var(--pizz-red); color:white; padding:10px; font-weight:700; border-radius:10px 10px 0 0; margin: -20px -20px 15px -20px;">KHQR</div>
-            <div style="font-weight:700; margin-bottom:12px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
+            <div style="font-weight:700; margin-bottom:10px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
+            
+            <div id="pay-summary-list"></div>
+
             <div style="font-weight:800; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1.6rem;">
                 <span style="color:#7f8c8d; font-size:0.9rem;">SOUR DARA —</span>
                 <span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
             </div>
-            <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
-            <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:12px 30px; font-weight:700; margin:15px 0; cursor:pointer;">រក្សាទុក QR Code</button>
+            
+            <div id="qr-container" style="background:#fff; padding:10px; border-radius:10px; border:1px solid #eee; display:inline-block; margin-bottom:15px;">
+                <img src="" id="dynamic-khqr" style="width:220px; height:220px; display:block;" crossOrigin="anonymous">
+            </div>
+
+            <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:10px 25px; font-weight:700; margin-bottom:15px; cursor:pointer;">រក្សាទុក QR Code</button>
             <button class="checkout-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-            <button onclick="closePay()" style="background:none; border:none; margin-top:15px; color:#95a5a6; font-weight:700; cursor:pointer;">ត្រឡប់ក្រោយ</button>
+            <button onclick="closePay()" style="background:none; border:none; margin-top:15px; color:#95a5a6; font-weight:700; cursor:pointer; font-size:1rem;">ត្រឡប់ក្រោយ</button>
         </div>
     </div>
 
@@ -180,7 +187,7 @@
         </div>
     </div>
     
-    <footer><p>Dara Sour 087282827 @2026 Pizza King V2.0</p></footer>
+    <footer><p>Dara Sour 087282827 @2026 Pizza King V2.1</p></footer>
 </div>
 
 <script>
@@ -189,7 +196,7 @@
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
-    // SMART GUARD
+    // SMART GUARD DETECTION
     const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     const isTelegram = (tg.initData !== "");
     if (!isPWA && !isTelegram) { document.getElementById('install-guard').style.display = 'flex'; }
@@ -213,17 +220,38 @@
     }
 
     async function fetchData() {
-        setTimeout(() => { if(allProducts.length === 0) document.getElementById('loader').style.display='none'; }, 4500);
+        // HARDENED CACHING (24 HOUR LOCK)
+        const C_PROD = "pizz_cache_prod_v2", C_VAR = "pizz_cache_var_v2", C_CAT = "pizz_cache_cat_v2", C_TIME = "pizz_cache_time_v2";
+        const now = Date.now(), last = localStorage.getItem(C_TIME);
+        
+        if(last && (now - last < 86400000)) { 
+            allProducts = JSON.parse(localStorage.getItem(C_PROD));
+            productVariations = JSON.parse(localStorage.getItem(C_VAR));
+            renderCategories(JSON.parse(localStorage.getItem(C_CAT)));
+            renderProducts(allProducts);
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
+            return;
+        }
+
         try {
             const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
             const cats = await catRes.json();
             renderCategories(cats);
+            localStorage.setItem(C_CAT, JSON.stringify(cats));
+
             const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
             allProducts = await prodRes.json();
+            
             for (const vp of allProducts.filter(p => p.type === 'variable')) {
                 const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
                 productVariations[vp.id] = await vRes.json();
             }
+
+            localStorage.setItem(C_PROD, JSON.stringify(allProducts));
+            localStorage.setItem(C_VAR, JSON.stringify(productVariations));
+            localStorage.setItem(C_TIME, now);
+            
             document.getElementById('loader').style.display = 'none';
             restoreState();
         } catch(e) { document.getElementById('loader').style.display = 'none'; }
@@ -244,22 +272,16 @@
             const pid = p.id; cardQtys[pid] = 1;
             let variations = "";
             if (p.type === 'variable' && productVariations[pid]) {
-                if (productVariations[pid].length <= 2) {
-                    variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
-                } else {
-                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
-                }
+                variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
             }
             return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
         }).join('');
     }
 
-    // FIX: VARIATION SELECTION
     function selectVariation(pid, vid) {
         variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
         const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active');
     }
-    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
     
     function addToCart(pid) {
         const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
@@ -289,25 +311,29 @@
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:red;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`).join('');
         checkForm();
     }
 
-    // FIX: PAYMENT BUTTON UNLOCK LOGIC
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
-        const btn = document.getElementById('pre-pay-btn'); 
         const hasItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')).length > 0;
+        const btn = document.getElementById('pre-pay-btn'); 
         const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
-        btn.disabled = !isValid; 
-        btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
+        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
     }
 
     async function submitFinalOrder() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total: total, note: customerNote };
+        const orderData = { 
+            telegram_id: tg.initDataUnsafe.user?.id || 12345, 
+            name: document.getElementById('user-name').value, 
+            phone: document.getElementById('user-phone').value, 
+            location: document.getElementById('user-loc').value, 
+            items: cart, total: total, note: customerNote 
+        };
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
             localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => location.reload());
@@ -315,16 +341,31 @@
     }
 
     async function downloadQRImage() {
-        const target = document.getElementById('invoice-card');
-        const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
+        const target = document.getElementById('qr-container');
+        const canvas = await html2canvas(target, { scale: 3, useCORS: true });
         const dataUrl = canvas.toDataURL("image/png");
-        if (navigator.share) {
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "QR.png", { type: "image/png" });
-            await navigator.share({ files: [file], title: 'QR Code' });
-        } else {
-            const link = document.createElement('a'); link.download = 'QR.png'; link.href = dataUrl; link.click();
-        }
+        const link = document.createElement('a'); link.download = 'QR.png'; link.href = dataUrl; link.click();
+    }
+
+    function openPayment() {
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
+        
+        // POPULATE RECAP LIST
+        document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div class="recap-row"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('');
+        
+        document.getElementById('payment-screen').style.display = 'flex';
+        const dynamicQR = generateDynamicABAQR(total);
+        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
+        startTimer(900);
+    }
+
+    function crc16(d) { let c = 0xFFFF; for (let i = 0; i < d.length; i++) { let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF; x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF; } return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); }
+    function generateDynamicABAQR(amt) {
+        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
+        const amtVal = amt.toString() + ".0";
+        const payload = prefix + `54${(amtVal.length).toString().padStart(2, '0')}${amtVal}` + "5802KH5909SOUR DARA6010Phnom Penh" + "6304";
+        return payload + crc16(payload);
     }
 
     function openNote() { document.getElementById('note-modal').style.display = 'flex'; }
@@ -337,36 +378,18 @@
     function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
     function updateCartItemQty(cid, d) { const i = cart.find(x => x.cartId.toString() === cid.toString()); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + d); updateCartBasedOnDelivery(); } }
     function removeFromCart(cid) { cart = cart.filter(x => x.cartId.toString() !== cid.toString()); updateCartBasedOnDelivery(); }
-    
-    // FIX: POPUP SCROLLABLE UI
     function openDetail(pid) { 
         const p = allProducts.find(x => x.id === pid);
         document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%;border-radius:12px;margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`;
         document.getElementById('detail-popup').style.display = 'flex';
     }
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
-
-    function crc16(d) { let c = 0xFFFF; for (let i = 0; i < d.length; i++) { let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF; x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF; } return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); }
-    function generateDynamicABAQR(amt) {
-        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
-        const amtVal = amt.toString() + ".0";
-        const payload = prefix + `54${(amtVal.length).toString().padStart(2, '0')}${amtVal}` + "5802KH5909SOUR DARA6010Phnom Penh" + "6304";
-        return payload + crc16(payload);
-    }
-    function openPayment() {
-        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
-        document.getElementById('payment-screen').style.display = 'flex';
-        const dynamicQR = generateDynamicABAQR(total);
-        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        startTimer(900);
-    }
     function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
-    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('install-guard').style.display = 'none'; } } }
+    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); } }
 
     fetchData();
 </script>
