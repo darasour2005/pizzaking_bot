@@ -7,14 +7,15 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pizza King Store</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pizza King Store V2.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* 1. IMMUTABLE PC CENTERING (NO VOIDS) */
+        /* 1. PC WORKSPACE & SILHOUETTE */
         body { 
             font-family: 'Kantumruy Pro', sans-serif; background: #000; 
             margin: 0; padding: 0; display: flex; justify-content: center;
@@ -23,27 +24,35 @@
 
         #app-shell {
             width: 100%; max-width: 480px; background: #f0f2f5; min-height: 100dvh;
-            position: relative; box-shadow: 0 0 60px rgba(0,0,0,1); display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 0 80px rgba(0,0,0,1); display: flex; flex-direction: column;
         }
 
-        /* 2. SOVEREIGN HEADER V77 */
-        .master-header { display: flex; align-items: center; background: #fff; padding: 8px 12px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 8px; }
-        .brand-logo-btn { width: 46px; height: 46px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
-        .brand-logo-btn.active { border-color: var(--pizz-green); }
+        /* 2. FORCE INSTALL GATEWAY */
+        #install-guard {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; 
+            background: #fff; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; text-align: center; box-sizing: border-box;
+        }
+        .guard-logo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(231,76,60,0.2); }
+        .btn-install-force { background: var(--pizz-green); color: white; border: none; padding: 18px 40px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; }
 
+        /* 3. SOVEREIGN HEADER & MOVIE */
+        .master-header { display: flex; align-items: center; background: #fff; padding: 8px 12px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 8px; }
+        .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+        .brand-logo-btn.active { border-color: var(--pizz-green); }
         .cat-slider { display: flex; overflow-x: auto; padding: 5px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
         .cat-slider::-webkit-scrollbar { display: none; }
-
+        
         .movie-btn-pro { background: black; border-radius: 12px; padding: 6px 12px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-        .movie-btn-pro span:first-child { font-size: 1.6rem; color: #fff; line-height: 1; }
+        .movie-btn-pro span:first-child { font-size: 1.5rem; color: #fff; line-height: 1; }
         .movie-btn-pro span:last-child { font-size: 0.55rem; color: #fff; font-weight: 700; margin-top: 2px; }
 
-        /* 3. V51 UI DNA - RESTORED */
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
-        .cat-icon { width: 44px; height: 44px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
+        /* 4. V51 COMPONENTS - IMMUTABLE */
+        .cat-item { text-align: center; min-width: 55px; cursor: pointer; flex-shrink: 0; }
+        .cat-icon { width: 40px; height: 40px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
         .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
-        .cat-item span { font-size: 0.65rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 4px; }
+        .cat-item span { font-size: 0.6rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 3px; }
 
         .container { flex-grow: 1; overflow-y: auto; padding: 10px; padding-bottom: 280px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -53,33 +62,21 @@
         .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin: 10px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-left: 10px; margin-bottom: 10px; }
         
+        .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin: 0 10px 8px 10px; }
+        .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
+        .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
+        .var-selector { width: calc(100% - 20px); margin: 0 10px 10px 10px; padding: 6px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 0.75rem; outline: none; }
+
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin: 0 10px 10px 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; height: 42px; border-radius: 8px; cursor: pointer; font-weight: 700; margin: 0 10px 10px 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 10px 10px 10px; gap: 5px; }
 
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
 
-        /* 4. PERFECT CENTER-LOCK OVERLAYS (FIXES DRIFT) */
-        .pay-overlay, .modal-overlay, .popup-screen { 
-            position: fixed; top: 0; left: 50%; transform: translateX(-50%); 
-            width: 100%; max-width: 480px; height: 100%; 
-            z-index: 500; display: none; flex-direction: column; align-items: center; 
-            justify-content: center; background: rgba(0,0,0,0.7); box-sizing: border-box; padding: 15px; 
-        }
-
-        .qr-card, .modal-card, .popup-card { 
-            background: white; border-radius: 20px; width: 92%; max-width: 380px; 
-            padding: 20px; box-sizing: border-box; box-shadow: 0 15px 50px rgba(0,0,0,0.3); text-align: center; 
-        }
-
-        /* NOTE UI FIX (BOX LARGE, BUTTON SMALL) */
-        .modal-card textarea { width: 100%; height: 160px; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box; outline: none; font-size: 0.9rem; }
-        .btn-note-save { background: var(--pizz-green); color: #fff; border: none; padding: 12px 40px; border-radius: 30px; font-weight: 700; cursor: pointer; }
-
-        /* 5. MINICART - V51 RECOVERY */
+        /* 5. CENTER-LOCK MINICART & MODALS */
         .footer-cart { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -87,41 +84,41 @@
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
         .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pizz-red); }
+        
+        .pay-overlay, .modal-overlay, .popup-screen { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; z-index: 600; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); box-sizing: border-box; padding: 15px; }
+        .qr-card, .modal-card, .popup-card { background: white; border-radius: 20px; width: 92%; max-width: 380px; padding: 20px; box-sizing: border-box; box-shadow: 0 15px 50px rgba(0,0,0,0.3); text-align: center; }
+
+        /* NOTE UI FIX */
+        .modal-card textarea { width: 100%; height: 160px; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+        .btn-note-save { background: var(--pizz-green); color: #fff; border: none; padding: 12px 40px; border-radius: 30px; font-weight: 700; cursor: pointer; }
 
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; }
 
-        /* 6. QR CODE PRO - BIGGER VISIBILITY */
-        .qr-one-line { font-weight: 800; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1.6rem; }
-        .qr-img-main { width: 220px; height: 220px; border-radius: 8px; border: 1px solid #eee; margin: 0 auto; display: block; }
-
-        /* LOADER PRO */
+        /* LOADER */
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
-        .loader-img { width: 85px; height: 85px; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .loader-img { width: 90px; height: 90px; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-        .float-contact { position: fixed; bottom: 35px; right: calc(50% - 220px); width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 150; box-shadow: 0 4px 15px rgba(0,136,204,0.4); }
-        @media (max-width: 500px) { .float-contact { right: 20px; } }
-        .shift-up { transform: translateY(-110px); transition: 0.3s; }
 
         footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
     </style>
 </head>
 <body class="notranslate">
 
-<div id="loader">
-    <img src="logo.png" class="loader-img">
-    <div style="font-weight:700; color:var(--pizz-red); margin-top:15px;">🚀 កំពុងទាញយកទិន្នន័យ...</div>
+<div id="install-guard">
+    <img src="logo.png" class="guard-logo">
+    <div style="font-size:1.4rem; font-weight:700; color:var(--pizz-red); margin-bottom:10px;">Pizza King</div>
+    <div style="font-size:0.9rem; color:#7f8c8d; margin-bottom:30px;">សូមដំឡើងកម្មវិធី ដើម្បីបន្តការទិញទំនិញ!<br>(Please install the App)</div>
+    <button class="btn-install-force" onclick="installPWA()">📲 ដំឡើងកម្មវិធីឥឡូវនេះ</button>
 </div>
+
+<div id="loader"><img src="logo.png" class="loader-img"><div style="font-weight:700; color:var(--pizz-red); margin-top:15px;">🚀 កំពុងទាញយក...</div></div>
 
 <div id="app-shell">
     <div class="master-header">
         <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
-        <a href="movie.html" class="movie-btn-pro">
-            <span>🎬</span>
-            <span>មើលកុន</span>
-        </a>
+        <a href="movie.html" class="movie-btn-pro"><span>🎬</span><span>មើលកុន</span></a>
     </div>
 
     <div class="container">
@@ -151,7 +148,7 @@
         <div class="qr-card">
             <div style="background:var(--pizz-red); color:white; padding:10px; font-weight:700; border-radius:10px 10px 0 0; margin: -20px -20px 15px -20px;">KHQR</div>
             <div style="font-weight:700; margin-bottom:12px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
-            <div class="qr-one-line">
+            <div style="font-weight:800; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1.6rem;">
                 <span style="color:#7f8c8d; font-size:0.9rem;">SOUR DARA —</span>
                 <span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
             </div>
@@ -167,7 +164,7 @@
         <div class="modal-card">
             <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ</h4>
             <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..."></textarea>
-            <button class="btn-note-save" onclick="saveNote()">រក្សាទុក</button>
+            <button class="btn-note-save" onclick="saveNote()">រក្សាទុក (Save)</button>
             <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:15px; color:#95a5a6; cursor:pointer;">បោះបង់</button>
         </div>
     </div>
@@ -178,12 +175,8 @@
             <button onclick="closeDetail()" style="background:var(--pizz-red); color:white; border:none; padding:12px 30px; border-radius:10px; margin-top:15px; font-weight:700; cursor:pointer; width:100%;">បិទ</button>
         </div>
     </div>
-
-    <a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="float-contact-btn">
-        <svg viewBox="0 0 24 24" style="width:30px;height:30px;fill:white;"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
-    </a>
     
-    <footer><p>Dara Sour 087282827 @2026 Pizza King V77</p></footer>
+    <footer><p>Dara Sour 087282827 @2026 Pizza King V2.0</p></footer>
 </div>
 
 <script>
@@ -192,6 +185,11 @@
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
+    // 1. SMART GUARD DETECTION
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isTelegram = (tg.initData !== "");
+    if (!isPWA && !isTelegram) { document.getElementById('install-guard').style.display = 'flex'; }
+
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
@@ -211,8 +209,7 @@
     }
 
     async function fetchData() {
-        // Safety trigger
-        setTimeout(() => { if(allProducts.length === 0) document.getElementById('loader').style.display='none'; }, 4000);
+        setTimeout(() => { if(allProducts.length === 0) document.getElementById('loader').style.display='none'; }, 4500);
         try {
             const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
             const cats = await catRes.json();
@@ -246,15 +243,18 @@
                 if (productVariations[pid].length <= 2) {
                     variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
                 } else {
-                    variations = `<select onchange="selectVariationDropdown(${pid}, this)" style="width:calc(100% - 20px); margin:0 10px 10px 10px; padding:5px; border-radius:5px; font-family:inherit; font-size:0.7rem;"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
+                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
                 }
             }
             return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
         }).join('');
     }
 
-    // IMMUTABLE V51 LOGIC GATES - HARDENED
-    function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
+    // 2. FIX: VARIATION WORKING 100%
+    function selectVariation(pid, vid) {
+        variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
+        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active');
+    }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
     
     function addToCart(pid) {
@@ -268,6 +268,22 @@
         const existing = cart.find(i => i.cartId.toString() === cid.toString());
         if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
         saveCartToStorage(); updateCartBasedOnDelivery();
+    }
+
+    // 3. FIX: ORDER SAVING BUTTON WORKING
+    async function submitFinalOrder() {
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        const orderData = { 
+            telegram_id: tg.initDataUnsafe.user?.id || 12345, 
+            name: document.getElementById('user-name').value, 
+            phone: document.getElementById('user-phone').value, 
+            location: document.getElementById('user-loc').value, 
+            items: cart, total: total, note: customerNote 
+        };
+        try {
+            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
+            localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => location.reload());
+        } catch (e) { tg.showAlert("⚠️ Connection Error"); }
     }
 
     function updateCartBasedOnDelivery() {
@@ -285,7 +301,6 @@
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:red;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`).join('');
@@ -311,41 +326,6 @@
         }
     }
 
-    async function submitFinalOrder() {
-        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { 
-            telegram_id: tg.initDataUnsafe.user?.id || 12345, 
-            name: document.getElementById('user-name').value, 
-            phone: document.getElementById('user-phone').value, 
-            location: document.getElementById('user-loc').value, 
-            items: cart, 
-            total: total, 
-            note: customerNote 
-        };
-        try {
-            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-            localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => location.reload());
-        } catch (e) { tg.showAlert("⚠️ Connection Error"); }
-    }
-
-    function crc16(d) { let c = 0xFFFF; for (let i = 0; i < d.length; i++) { let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF; x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF; } return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); }
-    function generateDynamicABAQR(amt) {
-        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
-        const amtVal = amt.toString() + ".0";
-        const payload = prefix + `54${(amtVal.length).toString().padStart(2, '0')}${amtVal}` + "5802KH5909SOUR DARA6010Phnom Penh" + "6304";
-        return payload + crc16(payload);
-    }
-
-    function openPayment() {
-        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
-        document.getElementById('payment-screen').style.display = 'flex';
-        const dynamicQR = generateDynamicABAQR(total);
-        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        startTimer(900);
-    }
-
-    function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
     function openNote() { document.getElementById('note-modal').style.display = 'flex'; }
     function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
     function saveNote() { customerNote = document.getElementById('note-input').value; document.getElementById('note-btn').innerText = "✅ ចំណាំ"; closeNote(); }
@@ -363,6 +343,16 @@
         document.getElementById('detail-popup').style.display = 'flex';
     }
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
+
+    function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
+
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
+    async function installPWA() { 
+        if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('install-guard').style.display = 'none'; } }
+        else { alert("សូមចុចលើប៊ូតុង Share រួចរើសយក 'Add to Home Screen'"); }
+    }
 
     fetchData();
 </script>
