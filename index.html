@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V51</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e74c3c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Pizza King Sovereign V56</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -11,22 +14,30 @@
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
-        /* Category Slider */
-        .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
+        /* PWA Install Banner */
+        #pwa-install-banner { display: none; background: var(--pizz-dark); color: white; padding: 12px; position: fixed; top: 0; width: 100%; z-index: 1000; text-align: center; font-size: 0.8rem; font-weight: 700; align-items: center; justify-content: center; gap: 10px; }
+        #pwa-install-banner button { background: var(--pizz-green); border: none; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; cursor: pointer; }
+
+        /* Brand Header */
+        .brand-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--pizz-border); }
+        .brand-logo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pizz-red); }
+        .brand-name { font-size: 1.2rem; font-weight: 700; color: var(--pizz-red); }
+
+        .cat-slider { display: flex; overflow-x: auto; padding: 10px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
-        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-item { text-align: center; min-width: 65px; cursor: pointer; flex-shrink: 0; }
+        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
         .cat-item.active span { color: var(--pizz-green); font-weight: 700; }
         .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
 
         .container { padding: 10px; padding-bottom: 250px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
+        .card img { width: 100%; height: 130px; object-fit: cover; }
         .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
-        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
+        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; line-height: 1.2; margin-bottom: 5px; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
         
         .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -34,76 +45,54 @@
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
 
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .qty-num { font-size: 0.95rem; font-weight: 700; }
-        
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
-        .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; font-weight: 700; }
 
-        .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .float-contact svg { width: 30px; height: 30px; fill: white; }
-        .float-contact.shift-up { transform: translateY(-110px); }
-
-        .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
-
-        /* Footer Cart Manager */
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
-        .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .cart-header.open { display: flex; }
-        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
-        .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        
-        .summary-title { font-weight:700; display:flex; align-items:center; gap:10px; font-size:1.1rem; }
-        .summary-title svg { width:28px; height:28px; fill:black; }
-        
+        /* CART ROW - STRICT 3-COLUMN */
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
+        .cart-item-info { font-size: 0.8rem; font-weight: 700; }
         .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
-        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
-        
-        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
+        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pizz-red); font-weight: bold; }
 
-        /* Note Button Styling */
-        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .btn-add-note.has-note { background: #e8f5e9; color: var(--pizz-green); border-color: var(--pizz-green); }
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
+        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
+        .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; }
 
-        /* Payment Screen Protocol V51 */
+        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; }
+        .checkout-btn:disabled { background: #bdc3c7; }
+
+        /* Payment V56 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
-        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
-        .qr-body { padding: 15px; background: #fff; }
-        .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; overflow: hidden; text-align: center; margin-bottom: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; }
+        .qr-one-line { font-weight: 700; margin: 15px 0; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .qr-name-small { font-size: 0.85rem; color: #7f8c8d; }
         .qr-amount-bold { font-size: 1.15rem; color: var(--pizz-red); }
-        .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
-        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 12px; line-height: 1.3; }
+        .qr-img-main { width: 220px; height: 220px; margin: 0 auto; border-radius: 6px; border: 1px solid #f0f0f0; }
+        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 15px; padding-bottom: 15px; }
 
-        .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 8px 20px; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 8px 20px; font-weight: 700; font-size: 0.75rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; color:white; }
         
-        .pay-summary-toggle { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 310px; padding: 8px; font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #7f8c8d; }
-        .pay-summary-list { width: 100%; max-width: 310px; max-height: 0; overflow: hidden; transition: 0.3s; background: #fff; border-radius: 8px; }
-        .pay-summary-list.open { max-height: 150px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
-
-        .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+        .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; }
+        .float-contact svg { width: 30px; height: 30px; fill: white; }
         
-        /* Modal for Note V51 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; box-sizing: border-box; }
-        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box; margin-bottom: 15px; }
-
-        .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
-
-        .clear-close { position:absolute; top:10px; right:10px; background:#fff; border:1px solid #ddd; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--pizz-red); cursor:pointer; font-weight:bold; z-index:10; }
-        footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
-        #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
+        footer { text-align: center; padding: 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid #eee; margin-top: 20px; padding-bottom: 120px; }
+        #loader { text-align: center; padding: 60px; font-weight: 700; color: #95a5a6; }
     </style>
 </head>
 <body>
+
+<div id="pwa-install-banner">
+    <span>📲 តម្លើងកម្មវិធី Pizza King (Install App)</span>
+    <button onclick="installPWA()">តម្លើង</button>
+</div>
+
+<div class="brand-header">
+    <img src="logo.png" class="brand-logo" alt="Pizza King">
+    <span class="brand-name">Pizza King</span>
+</div>
 
 <a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="float-contact-btn">
     <svg viewBox="0 0 24 24"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
@@ -111,7 +100,6 @@
 
 <div id="payment-screen" class="pay-overlay">
     <div style="font-weight:700; margin-bottom:8px;">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
-
     <div class="qr-capture-area" id="invoice-card">
         <div class="qr-header">KHQR</div>
         <div class="qr-body">
@@ -123,29 +111,9 @@
             <div class="qr-scan-note">សូមស្កេនដើម្បីបង់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់</div>
         </div>
     </div>
-
-    <button onclick="downloadQRImage()" class="btn-save-qr">
-        <svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
-        រក្សាទុក QR Code
-    </button>
-
-    <button class="pay-summary-toggle" onclick="togglePaySummary()">
-        <span>📝 ពិនិត្យទំនិញឡើងវិញ</span>
-        <span id="summary-caret">▼</span>
-    </button>
-    <div id="pay-summary-list" class="pay-summary-list"></div>
-    
+    <button onclick="downloadQRImage()" class="btn-save-qr">រក្សាទុក QR Code</button>
     <button class="mini-paid-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
     <button onclick="closePay()" style="background:none; border:none; margin-top:10px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
-</div>
-
-<div id="note-modal" class="modal-overlay">
-    <div class="modal-card">
-        <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ (Add Note)</h4>
-        <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ, ដាក់នៅមុខផ្ទះ..."></textarea>
-        <button class="checkout-btn" onclick="saveNote()">រក្សាទុក</button>
-        <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6;">បោះបង់</button>
-    </div>
 </div>
 
 <div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
@@ -161,7 +129,7 @@
     <div id="loader">🚀 កំពុងទាញយកទិន្នន័យ...</div>
     <div id="product-grid" class="grid"></div>
     <div class="order-form">
-        <h4 style="margin:0 0 12px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
+        <h4 style="margin:0 0 10px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
         <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="saveFormData()"></div>
         <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
         <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
@@ -169,24 +137,14 @@
 </div>
 
 <div class="footer-cart" id="footer-ui" style="display:none;">
-    <div class="cart-header" id="cart-header">
-        <span class="summary-title">
-            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            ទំនិញដែលបានរើស
-        </span>
-        <button class="btn-add-note" id="note-btn" onclick="openNote()">➕ ចំណាំ</button>
-        <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
-    </div>
     <div id="cart-list" class="cart-details"></div>
     <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
-        <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
+        <span id="cart-count">🛒 កន្ត្រក: ០ មុខ</span><span id="cart-total">០៛</span>
     </div>
     <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
 </div>
 
-<footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V51</p>
-</footer>
+<footer><p>Dara Sour 087282827 @2026 Pizza King V56</p></footer>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -194,8 +152,13 @@
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
-    tg.expand(); tg.ready();
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
+    // PWA REGISTRATION
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwa-install-banner').style.display = 'flex'; });
+    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('pwa-install-banner').style.display = 'none'; } deferredPrompt = null; } }
+
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
 
     const DELIVERY_CONFIG = {
       "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"],
@@ -206,16 +169,16 @@
       "other_location_item_name_kh": "ថ្លៃសេវាដឹកជញ្ជូន (វីរៈប៊ុនថាំ - ផ្សេងទៀត)"
     };
 
-    function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
+    function saveCartToStorage() { localStorage.setItem('pizza_king_cart_v56', JSON.stringify(cart)); }
     function saveFormData() {
-        localStorage.setItem('pizz_king_tel', document.getElementById('user-phone').value);
-        localStorage.setItem('pizz_king_loc', document.getElementById('user-loc').value);
-        localStorage.setItem('pizz_king_name', document.getElementById('user-name').value);
+        localStorage.setItem('pizza_king_tel', document.getElementById('user-phone').value);
+        localStorage.setItem('pizza_king_loc', document.getElementById('user-loc').value);
+        localStorage.setItem('pizza_king_name', document.getElementById('user-name').value);
         checkForm();
     }
 
     async function fetchData() {
-        const C_PROD = "pizz_cache_products_v36", C_CAT = "pizz_cache_cats_v36", C_TIME = "pizz_cache_timestamp_v36", C_VAR = "pizz_cache_variations_v36";
+        const C_PROD = "pizza_cache_products_v56", C_CAT = "pizza_cache_cats_v56", C_TIME = "pizza_cache_timestamp_v56", C_VAR = "pizza_cache_variations_v56";
         const now = Date.now(), lastSync = localStorage.getItem(C_TIME);
         if (lastSync && (now - lastSync < 24 * 60 * 60 * 1000)) {
             allProducts = JSON.parse(localStorage.getItem(C_PROD));
@@ -230,8 +193,7 @@
             renderCategories(cats);
             const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
             allProducts = await prodRes.json();
-            const varProds = allProducts.filter(p => p.type === 'variable');
-            for (const vp of varProds) {
+            for (const vp of allProducts.filter(p => p.type === 'variable')) {
                 const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
                 productVariations[vp.id] = await vRes.json();
             }
@@ -243,14 +205,13 @@
     }
 
     function restoreState() {
-        document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
-        document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
-        document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
-        const savedCart = localStorage.getItem('pizz_king_cart_v36');
+        document.getElementById('user-phone').value = localStorage.getItem('pizza_king_tel') || "";
+        document.getElementById('user-loc').value = localStorage.getItem('pizza_king_loc') || "";
+        document.getElementById('user-name').value = localStorage.getItem('pizza_king_name') || "";
+        const savedCart = localStorage.getItem('pizza_king_cart_v56');
         if(savedCart) cart = JSON.parse(savedCart);
-        updateCartBasedOnDelivery();
-        checkForm();
-        const savedCat = localStorage.getItem('pizz_king_focus_cat');
+        updateCartBasedOnDelivery(); checkForm();
+        const savedCat = localStorage.getItem('pizza_king_focus_cat');
         if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
     }
 
@@ -276,61 +237,33 @@
         return payload + crc16(payload);
     }
 
-    function filterCatLocal(id) {
-        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-        const el = document.getElementById(`cat-${id}`); if(el) el.classList.add('active');
-        localStorage.setItem('pizz_king_focus_cat', id.toString());
-        renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
-    }
-
-    function renderCategories(cats) {
-        const container = document.getElementById('cat-slider');
-        cats.forEach(c => { container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; });
-    }
-
     function renderProducts(items) {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('product-grid').innerHTML = items.map(p => {
             const pid = p.id; cardQtys[pid] = 1;
             let variations = "";
             if (p.type === 'variable' && productVariations[pid]) {
-                if (productVariations[pid].length <= 2) {
-                    variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
-                } else {
-                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
-                }
+                variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
             }
-            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
+            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
         }).join('');
     }
-
-    function selectVariation(pid, vid) {
-        variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
-        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); tg.HapticFeedback.impactOccurred('light');
-    }
-    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; tg.HapticFeedback.impactOccurred('light'); }
 
     function addToCart(pid) {
         const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
         let name = p.name, price = parseFloat(p.price), cid = pid;
         if (p.type === 'variable') {
-            const vid = variationSelections[pid]; if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
+            const vid = variationSelections[pid]; if (!vid) return;
             const vData = productVariations[pid].find(v => v.id == vid);
             name = `${p.name} (${vData.attributes[0].option})`; price = parseFloat(vData.price); cid = `${pid}-${vid}`;
         }
         const existing = cart.find(i => i.cartId === cid);
         if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
-        cardQtys[pid] = 1; if(document.getElementById(`q-${pid}`)) document.getElementById(`q-${pid}`).innerText = 1;
-        saveCartToStorage(); updateCartBasedOnDelivery(); tg.HapticFeedback.impactOccurred('medium');
-    }
-
-    function updateCartItemQty(cid, delta) {
-        const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
-    }
-    function removeFromCart(cid) {
-        cart = cart.filter(x => x.cartId !== cid); if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
         saveCartToStorage(); updateCartBasedOnDelivery();
     }
+
+    function updateCartItemQty(cid, d) { const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + d); saveCartToStorage(); updateCartBasedOnDelivery(); } }
+    function removeFromCart(cid) { cart = cart.filter(x => x.cartId !== cid); saveCartToStorage(); updateCartBasedOnDelivery(); }
 
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
@@ -338,100 +271,69 @@
         const locRaw = document.getElementById('user-loc').value.toLowerCase(); cart = realItems;
         if(locRaw.length > 3) {
             const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
-            let fee = 0, nameKh = "", cartId = "";
-            if(isSR) { fee = subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel ? DELIVERY_CONFIG.siem_reap_charge_riel : 0; nameKh = DELIVERY_CONFIG.siem_reap_item_name_kh; cartId = "delivery_fee_sr"; }
-            else { fee = subtotal < DELIVERY_CONFIG.other_location_threshold_riel ? DELIVERY_CONFIG.other_location_charge_below_riel : DELIVERY_CONFIG.other_location_charge_over_or_equal_riel; nameKh = DELIVERY_CONFIG.other_location_item_name_kh; cartId = "delivery_fee_other"; }
-            if(fee > 0) cart.push({ cartId, id: cartId, name: nameKh, price: fee, qty: 1 });
+            let fee = isSR ? (subtotal < 40000 ? 3000 : 0) : (subtotal < 80000 ? 8000 : 11000);
+            if(fee > 0) cart.push({ cartId: "delivery", id: "delivery", name: "ថ្លៃសេវាដឹកជញ្ជូន", price: fee, qty: 1 });
         }
         updateUI(cart);
     }
 
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
-        const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
             const isD = i.cartId.toString().startsWith('delivery');
-            return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`;
+            return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">🗑️</button></div>`;
         }).join(''); checkForm();
     }
 
-    function togglePaySummary() { const list = document.getElementById('pay-summary-list'); const caret = document.getElementById('summary-caret'); list.classList.toggle('open'); caret.innerText = list.classList.contains('open') ? "▲" : "▼"; }
-
-    // --- NOTE LOGIC V51 ---
-    function openNote() { document.getElementById('note-modal').style.display = 'flex'; document.getElementById('note-input').value = customerNote; }
-    function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
-    function saveNote() { 
-        customerNote = document.getElementById('note-input').value; 
-        const btn = document.getElementById('note-btn');
-        if(customerNote.trim() !== "") { btn.classList.add('has-note'); btn.innerText = "✅ ចំណាំ"; }
-        else { btn.classList.remove('has-note'); btn.innerText = "➕ ចំណាំ"; }
-        closeNote(); 
-    }
-
     async function downloadQRImage() {
-        const target = document.getElementById('invoice-card'); const btn = document.querySelector('.btn-save-qr'); btn.innerHTML = "⏳ កំពុងរៀបចំ...";
+        const target = document.getElementById('invoice-card');
         try {
-            const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
+            const canvas = await html2canvas(target, { scale: 3, useCORS: true });
             const dataUrl = canvas.toDataURL("image/png");
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "PizzKing_QR.png", { type: "image/png" });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: 'Pizz King QR Code', text: 'សូមរក្សាទុកដើម្បីបង់ប្រាក់' });
-                btn.innerHTML = "✅ រក្សាទុកជោគជ័យ";
+            if (navigator.share) {
+                const blob = await (await fetch(dataUrl)).blob();
+                const file = new File([blob], "PizzaKing_QR.png", { type: "image/png" });
+                await navigator.share({ files: [file], title: 'QR Code' });
             } else {
                 document.getElementById('fallback-img').src = dataUrl; document.getElementById('save-fallback').style.display = 'flex';
-                btn.innerHTML = "✅ រួចរាល់";
             }
-            setTimeout(() => { btn.innerHTML = `<svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 3000);
-        } catch(e) { btn.innerHTML = "⚠️ កំហុស"; }
+        } catch(e) {}
     }
 
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        startTimer(900); document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
+        startTimer(900);
     }
 
     async function submitFinalOrder() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { 
-            telegram_id: tg.initDataUnsafe.user?.id, 
-            name: document.getElementById('user-name').value, 
-            phone: document.getElementById('user-phone').value, 
-            location: document.getElementById('user-loc').value, 
-            items: cart, 
-            total,
-            note: customerNote  // SENDING NOTE TO BACKEND
-        };
-        document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
+        const orderData = { telegram_id: tg.initDataUnsafe?.user?.id || 'PWA_USER', name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total };
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-            localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
-        } catch (e) { document.getElementById('confirm-btn').innerText = "✅ បង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
+            localStorage.removeItem('pizza_king_cart_v56'); alert("ការកម្ម៉ង់ជោគជ័យ!"); location.reload();
+        } catch (e) { alert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
-    function openDetail(pid) {
-        const p = allProducts.find(x => x.id === pid);
-        document.getElementById('popup-content').innerHTML = `<img src="${p.images[0]?.src || ''}" style="width:100%; border-radius:12px; margin-bottom:15px;"><h3>${p.name}</h3><div style="font-size:0.85rem; line-height:1.6; color:#7f8c8d;">${p.description || "គ្មានការពិពណ៌នា។"}</div>`;
-        document.getElementById('popup-screen').style.display = 'flex';
-    }
-    function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
-    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
         const btn = document.getElementById('pre-pay-btn'); const isValid = (n.length > 1 && p.length > 8 && l.length > 3);
-        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7"; btn.innerText = isValid ? "💳 បន្តទៅការបង់ប្រាក់" : "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
+        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
     }
-    function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
-    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
+
+    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
+    function filterCatLocal(id) { document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active')); document.getElementById(`cat-${id}`).classList.add('active'); localStorage.setItem('pizza_king_focus_cat', id.toString()); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
+    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
+    function openDetail(pid) { const p = allProducts.find(x => x.id === pid); alert(p.description || "គ្មានការពិពណ៌នា។"); }
+    function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60, 10), s = parseInt(t%60, 10); document.getElementById('pay-timer').textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
+    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); }
+    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     fetchData();
 </script>
 </body>
