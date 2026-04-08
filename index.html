@@ -6,72 +6,60 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>ភីហ្សា ឃីង - Shop & Drama</title>
+    <title>Pizza King - Shop & Drama</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* DESKTOP CENTERING - NO BLACK BARS */
+        /* RESTORED V51 GEOMETRY & PC CENTERING */
         body { 
             font-family: 'Kantumruy Pro', sans-serif; 
-            background: #e0e0e0; /* Light gray background for desktop */
-            margin: 0; padding: 0; 
-            display: flex; justify-content: center;
-            color: var(--pizz-dark); 
-            overflow-x: hidden; -webkit-font-smoothing: antialiased; 
-        }
-
-        #main-wrapper {
-            width: 100%;
+            background: #e0e0e0; /* Neutral gutter for PC */
+            margin: 0 auto; padding: 0; 
             max-width: 480px; /* Locked Width */
-            background: #f0f2f5;
-            min-height: 100dvh;
-            position: relative;
+            min-height: 100vh;
+            color: var(--pizz-dark); 
+            overflow-x: hidden; 
             box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            background-color: #f0f2f5; /* App background */
         }
 
-        /* SOVEREIGN HEADER V62 */
-        .master-header {
-            display: flex; align-items: center; background: #fff;
-            padding: 8px 12px; border-bottom: 1px solid var(--pizz-border);
-            position: sticky; top: 0; z-index: 200; gap: 10px;
-        }
+        /* Force Install Banner */
+        #pwa-install-banner { display: none; background: var(--pizz-red); color: white; padding: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; align-items: center; justify-content: center; gap: 10px; }
+        #pwa-install-banner button { background: white; border: none; color: var(--pizz-red); padding: 5px 15px; border-radius: 20px; font-weight: 700; cursor: pointer; }
 
+        /* SOVEREIGN HEADER V63 */
+        .master-header { display: flex; align-items: center; background: #fff; padding: 8px 12px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 8px; }
         .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .brand-logo-btn.active { border-color: var(--pizz-green); }
 
-        .cat-slider { display: flex; overflow-x: auto; padding: 10px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
+        .cat-slider { display: flex; overflow-x: auto; padding: 5px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
         .cat-slider::-webkit-scrollbar { display: none; }
         
         /* STANDOUT MOVIE BUTTON */
-        .movie-btn-pro {
-            background: #000; border-radius: 12px; padding: 6px 12px;
-            text-decoration: none; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .movie-btn-pro span:first-child { font-size: 1.5rem; color: #fff; line-height: 1; }
-        .movie-btn-pro span:last-child { font-size: 0.55rem; color: #fff; font-weight: 700; margin-top: 2px; }
+        .movie-btn-pro { background: black; border-radius: 12px; padding: 6px 12px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+        .movie-btn-pro span:first-child { font-size: 1.5rem; line-height: 1; }
+        .movie-btn-pro span:last-child { font-size: 0.55rem; color: white; font-weight: 700; margin-top: 2px; }
 
-        /* BANNER SLIDER */
+        /* DYNAMIC BANNER SLIDER */
         .banner-slider { width: 100%; height: 160px; overflow: hidden; background: #fff; position: relative; }
         .slider-track { display: flex; transition: 0.4s ease; height: 100%; }
         .slide { min-width: 100%; height: 100%; }
         .slide img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* V51 UI ELEMENTS RESTORED 100% */
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; }
-        .cat-icon { width: 42px; height: 42px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
+        /* V51 COMPONENTS RESTORED 100% */
+        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
+        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
-        .cat-item span { font-size: 0.65rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 4px; }
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
 
         .container { padding: 10px; padding-bottom: 250px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; }
+        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
         .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
         .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
@@ -82,46 +70,56 @@
 
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
         .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .qty-num { font-size: 0.95rem; font-weight: 700; }
+        
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
+        .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
 
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* MINICART V51 RESTORED */
+        /* MINICART V51 RESTORED 100% */
         .footer-cart { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
-        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
+        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pizz-red); }
-
+        .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
+        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
+        
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .checkout-btn:disabled { background: #bdc3c7 !important; }
+        .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .btn-add-note.has-note { background: #e8f5e9; color: var(--pizz-green); border-color: var(--pizz-green); }
 
-        /* PAYMENT & MODALS */
-        .pay-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; overflow: hidden; text-align: center; margin-bottom: 10px; }
-        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; }
+        /* PAYMENT V51 RESTORED */
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
+        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
+
+        .float-contact { position: fixed; bottom: 35px; right: calc(50% - 220px); width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @media (max-width: 500px) { .float-contact { right: 20px; } }
+        .shift-up { transform: translateY(-110px); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; box-sizing: border-box; }
-        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-
-        .float-contact { position: fixed; bottom: 35px; right: calc(50% - 220px); width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; }
-        @media (max-width: 500px) { .float-contact { right: 20px; } }
-        .shift-up { transform: translateY(-110px); }
+        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box; margin-bottom: 15px; outline: none; }
 
         footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
     </style>
 </head>
 <body>
+
+<div id="pwa-install-banner">
+    <span>📲 តម្លើងកម្មវិធី Pizza King សព្វថ្ងៃ</span>
+    <button onclick="installPWA()">តម្លើង</button>
+</div>
 
 <div id="main-wrapper">
     <div class="master-header">
@@ -135,8 +133,8 @@
 
     <div class="banner-slider">
         <div class="slider-track" id="slider-track">
-            <div class="slide"><img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&h=200&fit=cover"></div>
-            <div class="slide"><img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600&h=200&fit=cover"></div>
+            <div class="slide"><img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&h=180&fit=cover"></div>
+            <div class="slide"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&h=180&fit=cover"></div>
         </div>
     </div>
 
@@ -153,13 +151,16 @@
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
         <div class="cart-header" id="cart-header">
-            <span style="font-weight:700;">🛒 ទំនិញដែលបានរើស</span>
+            <span style="font-weight:700;display:flex;align-items:center;gap:10px;font-size:1.1rem;">
+                <svg viewBox="0 0 24 24" style="width:28px;height:28px;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                ទំនិញដែលបានរើស
+            </span>
             <button class="btn-add-note" id="note-btn" onclick="openNote()">➕ ចំណាំ</button>
             <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
         </div>
         <div id="cart-list" class="cart-details"></div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
-            <span id="cart-count">០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
+            <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
         </div>
         <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
     </div>
@@ -174,6 +175,7 @@
                     <span style="font-size:1.15rem; color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
                 </div>
                 <img src="" id="dynamic-khqr" style="width:210px; height:210px; margin:0 auto; display:block; border-radius:6px; border:1px solid #f0f0f0;" crossOrigin="anonymous">
+                <div style="font-size:0.7rem; color:#2c3e50; font-weight: 700; margin-top: 12px;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
             </div>
         </div>
         <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:8px 20px; font-weight:700; font-size:0.75rem; margin-bottom:12px; cursor:pointer;">រក្សាទុក QR Code</button>
@@ -185,7 +187,7 @@
         <svg viewBox="0 0 24 24" style="width:30px;height:30px;fill:white;"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
     </a>
     
-    <footer><p>Dara Sour 087282827 @2026 Pizza King V62</p></footer>
+    <footer><p>Dara Sour 087282827 @2026 Pizza King V63</p></footer>
 </div>
 
 <div id="note-modal" class="modal-overlay">
@@ -203,6 +205,12 @@
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
+    // PWA & INSTALL BANNER
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwa-install-banner').style.display = 'flex'; });
+    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('pwa-install-banner').style.display = 'none'; } deferredPrompt = null; } }
+
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
@@ -262,7 +270,7 @@
         }).join('');
     }
 
-    // --- LOGIC RE-SYNCED ---
+    // V51 LOGIC GATES
     function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
     function addToCart(pid) {
@@ -292,9 +300,9 @@
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
         const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
-        document.getElementById('cart-count').innerText = `${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ`;
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">🗑️</button></div>`).join('');
+        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:red;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`).join('');
         checkForm();
     }
 
@@ -310,7 +318,7 @@
         const dataUrl = canvas.toDataURL("image/png");
         if (navigator.share) {
             const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "PizzaKing_QR.png", { type: "image/png" });
+            const file = new File([blob], "QR.png", { type: "image/png" });
             await navigator.share({ files: [file], title: 'QR Code' });
         } else {
             const link = document.createElement('a'); link.download = 'QR.png'; link.href = dataUrl; link.click();
@@ -319,7 +327,7 @@
 
     async function submitFinalOrder() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 'WEB', name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total, note: customerNote };
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 'PWA', name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total, note: customerNote };
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
             localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => location.reload());
@@ -330,7 +338,8 @@
     function generateDynamicABAQR(amt) {
         const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
         const amtVal = amt.toString() + ".0";
-        const amtTag = `54${(amtVal.length).toString().padStart(2, '0')}${amtVal}`;
+        const digitCount = (amt.toString().length + 2).toString().padStart(2, '0');
+        const amtTag = `54${digitCount}${amtVal}`;
         const midSuffix = "5802KH5909SOUR DARA6010Phnom Penh";
         const payload = prefix + amtTag + midSuffix + "6304";
         return payload + crc16(payload);
@@ -351,11 +360,11 @@
     function saveNote() { customerNote = document.getElementById('note-input').value; document.getElementById('note-btn').innerText = "✅ ចំណាំ"; closeNote(); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
+    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
     function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
     function updateCartItemQty(cid, d) { const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + d); updateCartBasedOnDelivery(); } }
     function removeFromCart(cid) { cart = cart.filter(x => x.cartId !== cid); updateCartBasedOnDelivery(); }
-    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function openDetail(pid) { const p = allProducts.find(x => x.id === pid); tg.showAlert(p.description || "គ្មានការពិពណ៌នា។"); }
 
     fetchData();
