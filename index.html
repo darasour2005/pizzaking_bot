@@ -7,49 +7,49 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>ភីហ្សា ឃីង - Shop & Drama</title>
+    <title>Pizza King Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* 1. IMMUTABLE PC CENTERING & BLACK BACKGROUND */
+        /* 1. FLUID CENTERING PROTOCOL */
         body { 
-            font-family: 'Kantumruy Pro', sans-serif; background: #000; 
-            margin: 0; padding: 0; display: flex; justify-content: center;
-            color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased;
+            font-family: 'Kantumruy Pro', sans-serif; 
+            background: #000; /* PC Wallpaper */
+            margin: 0 auto; padding: 0; 
+            max-width: 480px; /* Lock Mobile Width on PC */
+            min-height: 100vh;
+            color: var(--pizz-dark); 
+            background-color: #f0f2f5; /* App Body Color */
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column;
         }
 
-        .app-shell {
-            width: 100%; max-width: 480px; background: #f0f2f5; min-height: 100dvh;
-            position: relative; box-shadow: 0 0 60px rgba(0,0,0,1); display: flex; flex-direction: column;
-        }
-
-        /* 2. SOVEREIGN HEADER V71 (LOGO & MOVIE) */
+        /* 2. SOVEREIGN HEADER V72 */
         .master-header { display: flex; align-items: center; background: #fff; padding: 8px 12px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 8px; }
         .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .brand-logo-btn.active { border-color: var(--pizz-green); }
-
         .cat-slider { display: flex; overflow-x: auto; padding: 5px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
         .cat-slider::-webkit-scrollbar { display: none; }
         
         .movie-btn-pro { background: black; border-radius: 12px; padding: 6px 12px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-        .movie-btn-pro span:first-child { font-size: 1.6rem; color: #fff; line-height: 1; }
+        .movie-btn-pro span:first-child { font-size: 1.5rem; color: #fff; line-height: 1; }
         .movie-btn-pro span:last-child { font-size: 0.55rem; color: #fff; font-weight: 700; margin-top: 2px; }
 
         /* 3. V51 COMPONENTS RESTORED 100% */
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
-        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; }
+        .cat-icon { width: 42px; height: 42px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
-        .cat-item.active span { color: var(--pizz-green); font-weight: 700; }
-        .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
+        .cat-item span { font-size: 0.65rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 4px; }
 
-        .container { padding: 10px; padding-bottom: 250px; }
+        .container { padding: 10px; padding-bottom: 250px; flex-grow: 1; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
+        .card img { width: 100%; height: 130px; object-fit: cover; }
         .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
         .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
@@ -59,7 +59,7 @@
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
 
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .qty-num { font-size: 0.95rem; font-weight: 700; }
         
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
@@ -70,42 +70,36 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
 
-        /* 4. CENTER-LOCK OVERLAY PROTOCOL (The Fix for "Outside the Box") */
-        .footer-cart, .pay-overlay, .modal-overlay { 
-            left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; max-width: 480px !important; 
-        }
-
-        .footer-cart { position: fixed; bottom: 0; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
+        /* 4. V51 MINICART MANAGER (FLUID BOTTOM) */
+        .footer-cart { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
         .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        
-        .summary-title { font-weight:700; display:flex; align-items:center; gap:10px; font-size:1.1rem; }
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
-        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
+        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pizz-red); font-weight: bold; }
         
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
-
+        .checkout-btn:disabled { background: #bdc3c7 !important; }
         .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 
-        /* PAYMENT & QR V51 RESTORED */
-        .pay-overlay { position: fixed; top: 0; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
-        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
-        .qr-body { padding: 15px; background: #fff; }
-        .qr-one-line { font-weight: 800; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1.4rem; }
-        .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
+        /* 5. PERFECT CENTER OVERLAYS (FIXES THE NOTE BUG) */
+        .pay-overlay, .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            z-index: 500; display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.6); 
+        }
+        .qr-capture-area, .modal-card { 
+            background: white; border-radius: 18px; width: 90%; max-width: 350px; 
+            padding: 20px; box-sizing: border-box; text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
 
-        /* MODAL V51 RESTORED */
-        .modal-overlay { position: fixed; top: 0; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; box-sizing: border-box; position: relative; }
-        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        .qr-one-line { font-weight: 800; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 1.4rem; }
+        .qr-img-main { width: 220px; height: 220px; border-radius: 8px; border: 1px solid #eee; margin: 0 auto; display: block; }
 
-        .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 150; box-shadow: 0 4px 15px rgba(0,136,204,0.4); }
+        .float-contact { position: fixed; bottom: 35px; right: calc(50% - 220px); width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 150; box-shadow: 0 4px 15px rgba(0,136,204,0.4); }
+        @media (max-width: 500px) { .float-contact { right: 20px; } }
         .shift-up { transform: translateY(-110px); }
 
         footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
@@ -114,7 +108,6 @@
 </head>
 <body class="notranslate">
 
-<div class="app-shell">
     <div class="master-header">
         <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
@@ -137,10 +130,7 @@
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
         <div class="cart-header" id="cart-header">
-            <span class="summary-title">
-                <svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:black;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                ទំនិញដែលបានរើស
-            </span>
+            <span style="font-weight:700; display:flex; align-items:center; gap:8px; font-size:1.1rem;">🛒 ទំនិញដែលបានរើស</span>
             <button class="btn-add-note" id="note-btn" onclick="openNote()">➕ ចំណាំ</button>
             <button onclick="toggleCart()" style="background:none; border:none; font-size:32px; color:#ccc; cursor:pointer;">×</button>
         </div>
@@ -152,43 +142,37 @@
     </div>
 
     <div id="payment-screen" class="pay-overlay">
-        <div style="font-weight:700; margin-bottom:8px;">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
         <div class="qr-capture-area" id="invoice-card">
-            <div class="qr-header">KHQR</div>
-            <div class="qr-body" style="padding:15px; background:#fff;">
+            <div style="font-weight:700; margin-bottom:10px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
+            <div style="background:var(--pizz-red); color:white; padding:8px; font-weight:700; border-radius:8px 8px 0 0;">KHQR</div>
+            <div style="padding:15px;">
                 <div class="qr-one-line">
-                    <span style="font-size:0.85rem; color:#7f8c8d;">SOUR DARA —</span>
-                    <span style="font-size:1.4rem; color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
+                    <span style="color:#7f8c8d; font-size:0.85rem;">SOUR DARA —</span>
+                    <span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
                 </div>
                 <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
-                <div style="font-size:0.75rem; color:#2c3e50; font-weight: 700; margin-top: 15px;">សូមស្កេនដើម្បីបង់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់</div>
+                <div style="font-size:0.75rem; color:#2c3e50; font-weight: 700; margin-top: 15px;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
             </div>
+            <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:10px 25px; font-weight:700; margin-bottom:15px; cursor:pointer;">រក្សាទុក QR Code</button>
+            <button class="checkout-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
+            <button onclick="closePay()" style="background:none; border:none; margin-top:15px; color:#95a5a6; font-weight:700; cursor:pointer;">ត្រឡប់ក្រោយ</button>
         </div>
-        <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:12px 30px; font-weight:700; font-size:0.85rem; margin-bottom:12px; cursor:pointer;">រក្សាទុក QR Code</button>
-        <button class="checkout-btn" id="confirm-btn" onclick="submitFinalOrder()" style="width:90%;">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-        <button onclick="closePay()" style="background:none; border:none; margin-top:15px; color:#95a5a6; font-size:1rem; cursor:pointer; font-weight:700;">ត្រឡប់ក្រោយ</button>
+    </div>
+
+    <div id="note-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ</h4>
+            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..."></textarea>
+            <button class="checkout-btn" onclick="saveNote()" style="width:100%;">រក្សាទុក</button>
+            <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6; cursor:pointer;">បោះបង់</button>
+        </div>
     </div>
 
     <a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="float-contact-btn">
         <svg viewBox="0 0 24 24" style="width:30px;height:30px;fill:white;"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
     </a>
     
-    <footer><p>Dara Sour 087282827 @2026 Pizza King V71</p></footer>
-</div>
-
-<div id="note-modal" class="modal-overlay">
-    <div class="modal-card">
-        <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ</h4>
-        <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..."></textarea>
-        <button class="checkout-btn" onclick="saveNote()" style="width:100%;">រក្សាទុក</button>
-        <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6;">បោះបង់</button>
-    </div>
-</div>
-
-<div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
-    <p style="font-weight:700;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
-    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:20px;">
-</div>
+    <footer><p>Dara Sour 087282827 @2026 Pizza King V72</p></footer>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -227,13 +211,13 @@
             }
             document.getElementById('loader').style.display = 'none';
             restoreState();
-        } catch(e) { document.getElementById('loader').style.display = 'none'; }
+        } catch(e) { document.getElementById('loader').innerText = "⚠️ Connection Error"; }
     }
 
     function restoreState() {
         document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
         document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
-        document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
+        document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || "";
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
         updateCartBasedOnDelivery(); checkForm();
@@ -255,7 +239,7 @@
         }).join('');
     }
 
-    // IMMUTABLE V51 LOGIC GATES
+    // IMMUTABLE V51 LOGIC RE-SYNCED
     function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
     
@@ -290,7 +274,7 @@
         const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:red;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`).join('');
+        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">🗑️</button></div>`).join('');
         checkForm();
     }
 
@@ -302,7 +286,7 @@
 
     async function downloadQRImage() {
         const target = document.getElementById('invoice-card');
-        const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
+        const canvas = await html2canvas(target, { scale: 3, useCORS: true });
         const dataUrl = canvas.toDataURL("image/png");
         if (navigator.share) {
             const blob = await (await fetch(dataUrl)).blob();
