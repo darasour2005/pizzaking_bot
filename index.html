@@ -3,105 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V35</title>
+    <title>Pizz King Sovereign V36</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
-        /* Category Slider V35Focus */
+        /* Category Slider Focus */
         .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
         .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
-        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 4px; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
         .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Active Category High Contrast Glow V35 */
         .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
         .cat-item.active span { color: var(--pizz-green); font-weight: 700; }
-        .cat-item span { font-size: 0.7rem; font-weight: 400; display: block; white-space: nowrap; color: #7f8c8d; }
+        .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
 
         .container { padding: 10px; padding-bottom: 250px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; position: relative; }
-        .card img { width: 100%; height: 130px; object-fit: cover; background: #eee; cursor: pointer; }
+        .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
         .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
         .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
         .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
         
-        /* Variation choice Chips V35 (20% smaller labels professional logic) */
+        /* Variation Chips (20% Smaller) */
         .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
-        .var-chip { padding: 4px 10px; background: #f8f9fa; color: #2c3e50; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.65rem; font-weight: 700; cursor: pointer; transition: 0.1s; white-space: nowrap; }
+        .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.65rem; font-weight: 700; cursor: pointer; }
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
-        
-        /* Dynamic Variation Dropdown V35 */
-        .var-selector { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #e0e0e0; font-family: inherit; font-size: 0.7rem; margin-bottom: 8px; background: #fff; }
+        .var-selector { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #e0e0e0; font-family: inherit; font-size: 0.7rem; margin-bottom: 8px; }
 
         /* QTY Control */
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1.1rem; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .qty-num { font-size: 0.95rem; font-weight: 700; }
         
-        /* Big White Cart Icon Add Button V35 */
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; transition: 0.2s; }
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
         .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
 
-        /* Floating Contact Button V35 (Logo, moved up 30px) */
-        .float-contact { position: fixed; bottom: 105px; right: 20px; width: 50px; height: 50px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: 0.3s; }
-        .float-contact svg { width: 25px; height: 25px; fill: white; }
-        .float-contact:hover { transform: scale(1.1); }
+        /* Smart Floating Contact Button (Moved up 30px more + Dynamic Shift) */
+        .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .float-contact svg { width: 30px; height: 30px; fill: white; }
+        /* Automatic Shift logic when cart appears */
+        .float-contact.shift-up { transform: translateY(-110px); }
 
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* Footer Cart V35focus (黑加大 Consistency) */
+        /* Footer Cart summary icon 黑加大 Consistency */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
         .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
+        .summary-title { font-weight:700; display:flex; align-items:center; gap:8px; font-size:1.1rem; }
+        .summary-title svg { width:26px; height:26px; fill:black; }
+        
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-item-info { flex-grow: 1; font-size: 0.85rem; font-weight: 700; }
-        .cart-item-actions { display: flex; align-items: center; gap: 12px; }
-        .cart-del-btn { color: var(--pizz-red); background: none; border: none; font-size: 18px; cursor: pointer; padding: 5px; }
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
 
-        /* V35黑加大 Summary Icon */
-        .summary-title { font-weight:700; display:flex; align-items:center; gap:8px; font-size:1.1rem; }
-        .summary-title svg { width:24px; height:24px; fill:black; }
+        /* V35 Popups */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .popup-card { background: #fff; border-radius: 16px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; padding: 25px; box-sizing: border-box; position: relative; }
+        .clear-close { position:absolute; top:10px; right:10px; background:#fff; border:1px solid #ddd; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--pizz-red); cursor:pointer; font-weight:bold; z-index:10; }
 
-        /* V35 Static Invoice Card (No amount CRC-Static Bridge) */
+        footer { text-align: center; padding: 30px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
+        #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
+        
+        /* Payment Overlay */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; text-align: center; margin-bottom: 20px; }
         .qr-header { background: var(--pizz-red); padding: 18px; color: white; font-weight: 700; letter-spacing: 3px; }
         .qr-body { padding: 30px 20px; }
         .qr-img { width: 220px; height: 220px; border-radius: 12px; margin-bottom: 10px; }
-        .qr-footer { border-top: 1px dashed #ccc; padding: 20px; background: #fafafa; }
         .qr-riel { font-weight: 700; font-size: 1.8rem; color: var(--pizz-red); }
 
-        /* V35 Hardened Popups (Clear close, Magnify zone) */
-        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .popup-card { background: #fff; border-radius: 16px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; padding: 25px; box-sizing: border-box; position: relative; }
-        .popup-img-container { position:relative; width:100%; margin-bottom:15px; border-radius:12px; overflow:hidden; }
-        .magnify-link { position:absolute; bottom:10px; right:10px; background:rgba(255,255,255,0.7); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-        .magnify-link svg { width:20px; height:20px; fill:var(--pizz-dark); }
-        .clear-close { position:absolute; top:15px; right:15px; background:#fff; border:1px solid #ccc; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:24px; color:#95a5a6; cursor:pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index:10; }
-
-        footer { text-align: center; padding: 30px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; line-height: 1.6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
-        #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
-        
         @media screen and (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } .container { max-width: 900px; margin: 0 auto; } }
     </style>
 </head>
 <body>
 
-<a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="tg-contact">
-    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.49 1.02-.73 4-.17 6.67-2.83 8.01-8.01.31-.12.65-.18.99-.18.33 0 .66.06.96.18.3.12.57.3.79.52.22.22.39.49.5.79.11.3.16.63.15.96z"/></svg>
+<a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="float-contact-btn">
+    <svg viewBox="0 0 24 24"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
 </a>
 
 <div id="payment-screen" class="pay-overlay">
@@ -111,7 +99,7 @@
         <div class="qr-body">
             <div style="font-weight:700; margin-bottom:10px; font-size:1.1rem;">SOUR DARA</div>
             <img src="" id="dynamic-khqr" class="qr-img">
-            <div style="margin-top:10px;"><button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" style="background:none; border:none; color:#007bff; font-size:0.85rem; text-decoration:underline; cursor:pointer;">📥 រក្សាទុក QR ក្នុងទូរស័ព្ទ</button></div>
+            <div style="margin-top:10px;"><button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" style="background:none; border:none; color:#007bff; font-size:0.85rem; text-decoration:underline; cursor:pointer;">📥 រក្សាទុក QR</button></div>
         </div>
         <div class="qr-footer">
             <div style="font-size: 0.8rem; color:#95a5a6; margin-bottom: 5px;">សូមវាយបញ្ចូលចំនួនទឹកប្រាក់ខាងក្រោម៖</div>
@@ -136,12 +124,11 @@
 <div class="container">
     <div id="loader">🚀 កំពុងទាញយកទិន្នន័យ...</div>
     <div id="product-grid" class="grid"></div>
-    
     <div class="order-form">
-        <h4 style="margin:0 0 12px 0; color:var(--pizz-dark);">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
-        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="checkForm()"></div>
-        <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="checkForm(); updateCartBasedOnDelivery();"></div>
-        <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="checkForm(); updateCartBasedOnDelivery();"></div>
+        <h4 style="margin:0 0 12px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
+        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="saveFormData()"></div>
+        <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
+        <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
     </div>
 </div>
 
@@ -161,7 +148,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V35</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V36</p>
 </footer>
 
 <script>
@@ -173,13 +160,6 @@
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
 
-    // --- SOVEREIGN CACHE ENGINE (24H Vault Protocol) ---
-    const CACHE_PRODUCTS = "pizz_cache_products_v35";
-    const CACHE_CATS = "pizz_cache_cats_v35";
-    const CACHE_TIME = "pizz_cache_timestamp_v35";
-    const CACHE_VAR = "pizz_cache_variations_v35";
-
-    // --- EDITABLE FLEXIBLE DELIVERY JSON V35 ---
     const DELIVERY_CONFIG = {
       "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"],
       "siem_reap_free_over_riel": 40000,
@@ -191,48 +171,57 @@
       "other_location_item_name_kh": "ថ្លៃសេវាដឹកជញ្ជូន (វីរៈប៊ុនថាំ - ផ្សេងទៀត)"
     };
 
+    // --- SOVEREIGN PERSISTENCE ENGINE V36 ---
+    function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
+    function saveFormData() {
+        localStorage.setItem('pizz_king_tel', document.getElementById('user-phone').value);
+        localStorage.setItem('pizz_king_loc', document.getElementById('user-loc').value);
+        localStorage.setItem('pizz_king_name', document.getElementById('user-name').value);
+        checkForm();
+    }
+
     async function fetchData() {
-        const now = Date.now();
-        const lastSync = localStorage.getItem(CACHE_TIME);
+        const CACHE_PRODUCTS = "pizz_cache_products_v36", CACHE_CATS = "pizz_cache_cats_v36", CACHE_TIME = "pizz_cache_timestamp_v36", CACHE_VAR = "pizz_cache_variations_v36";
+        const now = Date.now(), lastSync = localStorage.getItem(CACHE_TIME);
         
-        // Cache Protocol: check logic against freshness
         if (lastSync && (now - lastSync < 24 * 60 * 60 * 1000)) {
             allProducts = JSON.parse(localStorage.getItem(CACHE_PRODUCTS));
             productVariations = JSON.parse(localStorage.getItem(CACHE_VAR));
             renderCategories(JSON.parse(localStorage.getItem(CACHE_CATS)));
-            
-            // Restore category focus protocol
-            const savedCat = localStorage.getItem('pizz_king_focus_cat');
-            if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
-            return;
+            restoreState(); return;
         }
 
         try {
-            // Load Categories
             const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
             const cats = await catRes.json();
             localStorage.setItem(CACHE_CATS, JSON.stringify(cats));
             renderCategories(cats);
 
-            // Load Products
             const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
             allProducts = await prodRes.json();
             
-            // Fetch Variations (Variations Engine Protocol V35)
             const varProds = allProducts.filter(p => p.type === 'variable');
             for (const vp of varProds) {
                 const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
                 productVariations[vp.id] = await vRes.json();
             }
-
             localStorage.setItem(CACHE_PRODUCTS, JSON.stringify(allProducts));
             localStorage.setItem(CACHE_VAR, JSON.stringify(productVariations));
             localStorage.setItem(CACHE_TIME, now);
-            renderProducts(allProducts);
+            restoreState();
         } catch(e) { document.getElementById('loader').innerText = "⚠️ Offline Mode"; }
     }
 
-    // --- CRC16 ENGINE (CRC-16-CCITT-FALSE Protocol) ---
+    function restoreState() {
+        // Restore cart from vault
+        const savedCart = localStorage.getItem('pizz_king_cart_v36');
+        if(savedCart) { cart = JSON.parse(savedCart); updateCartBasedOnDelivery(); }
+        
+        // Restore focus
+        const savedCat = localStorage.getItem('pizz_king_focus_cat');
+        if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
+    }
+
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -242,13 +231,11 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    // --- V35 Static Bridge (No Amount) ---
     function generateStaticQR() {
         const base = `00020101021130320010A1000000250114087282827@aclb5204581253031165802KH5909SOUR DARA6010PHNOM PENH6304`;
         return base + crc16(base);
     }
 
-    // --- UI RENDERING & FOCUS Protocol ---
     function renderCategories(cats) {
         const container = document.getElementById('cat-slider');
         cats.forEach(c => {
@@ -257,14 +244,11 @@
     }
 
     function filterCatLocal(id) {
-        // High Contrast Focus State protocol
         document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
         const el = document.getElementById(`cat-${id}`);
         if(el) el.classList.add('active');
-        localStorage.setItem('pizz_king_focus_cat', id.toString()); // Persistence focus
-        
-        const filtered = id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id));
-        renderProducts(filtered);
+        localStorage.setItem('pizz_king_focus_cat', id.toString());
+        renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
     }
 
     function renderProducts(items) {
@@ -275,239 +259,126 @@
             if (p.type === 'variable' && productVariations[pid]) {
                 const len = productVariations[pid].length;
                 if (len <= 2) {
-                    // Render Chips (20% smaller protocol)
                     variations = `<div class="var-container">` + 
                         productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + 
                         `</div>`;
                 } else {
-                    // Render Dynamic Dropdown protocol
-                    variations = `<select class="var-selector" id="var-select-${pid}" onchange="selectVariationDropdown(${pid}, this)">` + 
-                        `<option value="">-- រើសប្រភេទ --</option>` + 
-                        productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + 
-                        `</select>`;
+                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + 
+                        productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
                 }
             }
-
-            return `<div class="card" id="card-${pid}">
-                <img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})">
-                <div class="card-body">
-                    <div class="title">${p.name}</div>
-                    <div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>
-                    ${variations}
-                    <div class="qty-control">
-                        <button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button>
-                        <span id="q-${pid}">1</span>
-                        <button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button>
-                    </div>
-                    <button class="btn-add-cart" onclick="addToCart(${pid})">
-                        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                        បន្ថែមក្នុងកន្ត្រក
-                    </button>
-                </div>
-            </div>`;
+            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
         }).join('');
     }
 
-    // --- 🛒 VARIATION & CART Engine Protocols (ZERO OMISSION) ---
     function selectVariation(pid, vid) {
         variationSelections[pid] = vid;
-        const card = document.getElementById(`card-${pid}`);
-        card.querySelectorAll('.var-chip').forEach(c => c.classList.remove('active'));
-        const chip = document.getElementById(`var-${pid}-${vid}`);
-        if(chip) chip.classList.add('active');
+        document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
+        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active');
         tg.HapticFeedback.impactOccurred('light');
     }
-
-    function selectVariationDropdown(pid, selectEl) {
-        const vid = selectEl.value;
-        if(vid) variationSelections[pid] = vid; else delete variationSelections[pid];
-        tg.HapticFeedback.impactOccurred('light');
-    }
+    function selectVariationDropdown(pid, selectEl) { variationSelections[pid] = selectEl.value; tg.HapticFeedback.impactOccurred('light'); }
 
     function addToCart(pid) {
-        const p = allProducts.find(x => x.id === pid);
-        const q = cardQtys[pid] || 1;
+        const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
         let name = p.name, price = parseFloat(p.price), cid = pid;
-
         if (p.type === 'variable') {
-            const vid = variationSelections[pid];
-            if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
+            const vid = variationSelections[pid]; if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
             const vData = productVariations[pid].find(v => v.id == vid);
-            name = `${p.name} (${vData.attributes[0].option})`;
-            price = parseFloat(vData.price);
-            cid = `${pid}-${vid}`;
+            name = `${p.name} (${vData.attributes[0].option})`; price = parseFloat(vData.price); cid = `${pid}-${vid}`;
         }
-
         const existing = cart.find(i => i.cartId === cid);
-        if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q, baseId: pid });
-        
+        if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
         cardQtys[pid] = 1; if(document.getElementById(`q-${pid}`)) document.getElementById(`q-${pid}`).innerText = 1;
-        updateCartBasedOnDelivery(); // Re-calculate logic protocol
-        tg.HapticFeedback.impactOccurred('medium');
+        saveCartToStorage(); updateCartBasedOnDelivery(); tg.HapticFeedback.impactOccurred('medium');
     }
 
     function updateCartItemQty(cid, delta) {
         const i = cart.find(x => x.cartId === cid);
-        if (i && !i.cartId.toString().startsWith('delivery')) { // Ignore delivery fee item
-            i.qty = Math.max(1, i.qty + delta);
-            updateCartBasedOnDelivery();
-        }
+        if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
     }
-
     function removeFromCart(cid) {
         cart = cart.filter(x => x.cartId !== cid);
         if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
-        
-        // Final sanity check: if remove all real items, remove delivery fee too
-        const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery'));
-        if(realItems.length === 0) cart = []; 
-
-        updateCartBasedOnDelivery();
+        saveCartToStorage(); updateCartBasedOnDelivery();
     }
 
-    // --- V35 Smart Delivery Engine logic protocol ---
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery'));
         if(realItems.length === 0) { cart = []; updateUI([]); return; }
-
         const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-        const name = document.getElementById('user-name').value;
-        const phone = document.getElementById('user-phone').value;
-        const locRaw = document.getElementById('user-loc').value;
-        
-        // Remove old delivery item logic
+        const locRaw = document.getElementById('user-loc').value.toLowerCase();
         cart = realItems;
-
-        // If form is valid logic protocol
-        if(name.length > 1 && phone.length > 8 && locRaw.length > 3) {
-            const normalized = locRaw.toLowerCase();
-            let fee = 0;
-            let itemNameKh = "";
-            let cartId = "";
-
-            const isSiemReap = DELIVERY_CONFIG.siem_reap_keywords.some(k => normalized.includes(k));
-
-            if(isSiemReap) {
-                if(subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel) {
-                    fee = DELIVERY_CONFIG.siem_reap_charge_riel;
-                } // else fee remains 0
-                itemNameKh = DELIVERY_CONFIG.siem_reap_item_name_kh;
-                cartId = "delivery_fee_sr";
+        if(locRaw.length > 3) {
+            const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
+            let fee = 0, nameKh = "", cartId = "";
+            if(isSR) {
+                fee = subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel ? DELIVERY_CONFIG.siem_reap_charge_riel : 0;
+                nameKh = DELIVERY_CONFIG.siem_reap_item_name_kh; cartId = "delivery_fee_sr";
             } else {
-                if(subtotal < DELIVERY_CONFIG.other_location_threshold_riel) {
-                    fee = DELIVERY_CONFIG.other_location_charge_below_riel;
-                } else {
-                    fee = DELIVERY_CONFIG.other_location_charge_over_or_equal_riel;
-                }
-                itemNameKh = DELIVERY_CONFIG.other_location_item_name_kh;
-                cartId = "delivery_fee_other";
+                fee = subtotal < DELIVERY_CONFIG.other_location_threshold_riel ? DELIVERY_CONFIG.other_location_charge_below_riel : DELIVERY_CONFIG.other_location_charge_over_or_equal_riel;
+                nameKh = DELIVERY_CONFIG.other_location_item_name_kh; cartId = "delivery_fee_other";
             }
-
-            if(fee > 0) {
-                // Add flexible fee item logic
-                cart.push({ cartId: cartId, id: cartId, name: itemNameKh, price: fee, qty: 1, baseId: cartId });
-            }
+            if(fee > 0) cart.push({ cartId, id: cartId, name: nameKh, price: fee, qty: 1 });
         }
         updateUI(cart);
     }
 
     function updateUI(itemsList) {
-        document.getElementById('footer-ui').style.display = itemsList.length > 0 ? 'block' : 'none';
-        const grandTotal = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
+        const show = itemsList.length > 0;
+        document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         
-        // Filter out logic items for item count logic
-        const realItemCount = itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length;
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${realItemCount} មុខ (មើលលម្អិត)`;
-        
-        document.getElementById('cart-total').innerText = `${grandTotal.toLocaleString()}៛`;
+        // Smart Dynamic Shift Protocol V36
+        const floatBtn = document.getElementById('float-contact-btn');
+        if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
+
+        const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
+        document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
-            const isDelivery = i.cartId.toString().startsWith('delivery');
-            return `<div class="cart-item-row">
-                <div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div>
-                <div class="cart-item-actions">
-                    ${isDelivery ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}
-                    <span class="qty-num">${i.qty}</span>
-                    ${isDelivery ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}
-                    <button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">🗑️</button>
-                </div>
-            </div>`;
+            const isD = i.cartId.toString().startsWith('delivery');
+            return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}<button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">🗑️</button></div></div>`;
         }).join('');
     }
 
-    // --- 🏦 PAYMENT & FORM persistence protocol ---
     function openPayment() {
-        // Grand total is dynamic cart total logic protocol
-        const grandTotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('pay-amt-label').innerText = grandTotal.toLocaleString();
+        document.getElementById('pay-amt-label').innerText = cart.reduce((s, i) => s + (i.price * i.qty), 0).toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        // V35: Static QR protocol (Amount Removed CRC-Locked Bridge)
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(generateStaticQR())}`;
         startTimer(900);
-        
-        // Prevent form changes logic
-        document.getElementById('user-loc').readOnly = true;
-        document.getElementById('user-phone').readOnly = true;
+        document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
     }
-
     async function submitFinalOrder() {
-        const phone = document.getElementById('user-phone').value;
-        const loc = document.getElementById('user-loc').value;
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        
-        // Hardened Cross-device Device persistence protocol V35
-        localStorage.setItem('pizz_king_tel', phone);
-        localStorage.setItem('pizz_king_loc', loc);
-
-        // Render Receives phone logic protocol V35
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: phone, location: loc, items: cart, total: total };
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total };
         document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-            // V35 alerted successful logic protocol
+            localStorage.removeItem('pizz_king_cart_v36'); // Clear only after success
             tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
         } catch (e) { document.getElementById('confirm-btn').innerText = "✅ បង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
-    // --- 🚀 V35 Popups (Magnify link, clear close protocol) ---
     function openDetail(pid) {
         const p = allProducts.find(x => x.id === pid);
-        document.getElementById('popup-content').innerHTML = `
-            <div class="popup-img-container">
-                <img src="${p.images[0]?.src || ''}" style="width:100%; border-radius:12px;">
-                <a onclick="tg.openLink('${p.images[0]?.src || ''}')" class="magnify-link">
-                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
-                </a>
-            </div>
-            <h3>${p.name}</h3>
-            <div style="font-size:0.85rem; line-height:1.6; color:#7f8c8d;">${p.description || "គ្មានការពិពណ៌នា។"}</div>`;
+        document.getElementById('popup-content').innerHTML = `<img src="${p.images[0]?.src || ''}" style="width:100%; border-radius:12px; margin-bottom:15px;"><h3>${p.name}</h3><div style="font-size:0.85rem; line-height:1.6; color:#7f8c8d;">${p.description || "គ្មានការពិពណ៌នា។"}</div>`;
         document.getElementById('popup-screen').style.display = 'flex';
-        tg.HapticFeedback.impactOccurred('light');
     }
     function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
-
-    // --- UTILS ---
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
-        const btn = document.getElementById('pre-pay-btn');
-        if(n.length > 1 && p.length > 8 && l.length > 3) { btn.disabled = false; btn.style.background = "#2ecc71"; btn.innerText = "💳 បន្តទៅការបង់ប្រាក់"; }
-        else { btn.disabled = true; btn.style.background = "#bdc3c7"; btn.innerText = "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់"; }
+        document.getElementById('pre-pay-btn').disabled = !(n.length > 1 && p.length > 8 && l.length > 3);
     }
     function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { 
-        document.getElementById('payment-screen').style.display = 'none'; 
-        // Re-enable form changes logic protocol
-        document.getElementById('user-loc').readOnly = false;
-        document.getElementById('user-phone').readOnly = false;
-    }
+    function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
     
-    // START
+    // BOOTSTRAP
     fetchData();
-    // Device persistence restore logic protocol
     document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
     document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
-    if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
+    document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
     checkForm();
 </script>
 </body>
