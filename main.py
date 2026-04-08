@@ -1,412 +1,123 @@
-<!DOCTYPE html>
-<html lang="km">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V47</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
-        
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-        
-        /* Category Slider Focus */
-        .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
-        .cat-slider::-webkit-scrollbar { display: none; }
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
-        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
-        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
-        .cat-item.active span { color: var(--pizz-green); font-weight: 700; }
-        .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
+import os
+import asyncio
+import logging
+from aiogram import Bot, Dispatcher, types, Router, F
+from aiogram.filters import Command
+from aiogram.types import WebAppInfo
+from aiohttp import web
+from woocommerce import API
 
-        .container { padding: 10px; padding-bottom: 250px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
-        .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
-        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
-        .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
-        
-        .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
-        .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
-        .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
-        .var-selector { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #e0e0e0; font-family: inherit; font-size: 0.7rem; margin-bottom: 8px; }
+# --- CONFIG ---
+# YOUR HARDENED BOT TOKEN
+API_TOKEN = '8503376154:AAGsDQEaLHCq3E_ttoCAT46SygrD2VubP-E' 
 
-        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .qty-num { font-size: 0.95rem; font-weight: 700; }
-        
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
-        .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
+WC_URL = "https://1.phsar.me"
+WC_KEY = "ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03"
+WC_SECRET = "cs_63c256e1b4eba0a65723f054159e55d2148c3c57"
+MINI_APP_URL = "https://darasour2005.github.io/pizzaking_bot/"
 
-        .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .float-contact svg { width: 30px; height: 30px; fill: white; }
-        .float-contact.shift-up { transform: translateY(-110px); }
+# YOUR SPECIFIC GROUP CHAT ID
+GROUP_CHAT_ID = '-1003499575831' 
 
-        .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher()
+router = Router()
+wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version="wc/v3", timeout=20)
 
-        /* Footer Cart Manager - STRICT 3-COLUMN GRID */
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
-        .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .cart-header.open { display: flex; }
-        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
-        .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        
-        .summary-title { font-weight:700; display:flex; align-items:center; gap:10px; font-size:1.1rem; }
-        .summary-title svg { width:28px; height:28px; fill:black; }
-        
-        .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
-        .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
-        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
-        
-        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
+# --- BOT HANDLERS ---
+@router.message(Command("start"))
+async def start_handler(message: types.Message):
+    markup = types.ReplyKeyboardMarkup(
+        keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=MINI_APP_URL))]], 
+        resize_keyboard=True
+    )
+    await message.answer("🇰🇭 **ស្វាគមន៍មកកាន់ Pizz King!**\nសូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលមើលទំនិញ និងកម្ម៉ង់។", reply_markup=markup, parse_mode="Markdown")
 
-        /* Payment Overlay - V47 SOVEREIGN GEOMETRY */
-        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        
-        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
-        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
-        .qr-body { padding: 15px; background: #fff; }
-        
-        .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
-        .qr-name-small { font-size: 0.8rem; color: #7f8c8d; }
-        .qr-amount-bold { font-size: 1.1rem; color: var(--pizz-red); }
-
-        .qr-img-main { width: 220px; height: 220px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
-        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 15px; line-height: 1.3; }
-
-        .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 8px 20px; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        
-        .pay-summary-toggle { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 310px; padding: 8px; font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #7f8c8d; }
-        .pay-summary-list { width: 100%; max-width: 310px; max-height: 0; overflow: hidden; transition: 0.3s; background: #fff; border-radius: 8px; }
-        .pay-summary-list.open { max-height: 150px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
-
-        .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
-        .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
-
-        .clear-close { position:absolute; top:10px; right:10px; background:#fff; border:1px solid #ddd; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--pizz-red); cursor:pointer; font-weight:bold; z-index:10; }
-        footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
-        #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
-    </style>
-</head>
-<body>
-
-<a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="float-contact-btn">
-    <svg viewBox="0 0 24 24"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
-</a>
-
-<div id="payment-screen" class="pay-overlay">
-    <div style="font-weight:700; margin-bottom:8px;">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
-
-    <div class="qr-capture-area" id="invoice-card">
-        <div class="qr-header">KHQR</div>
-        <div class="qr-body">
-            <div class="qr-one-line">
-                <span class="qr-name-small">SOUR DARA —</span>
-                <span class="qr-amount-bold"><span id="pay-amt-label">0</span>៛</span>
-            </div>
-            <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
-            <div class="qr-scan-note">សូមស្កេនដើម្បីបង់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់</div>
-        </div>
-    </div>
-
-    <button onclick="downloadQRImage()" class="btn-save-qr">
-        <svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
-        រក្សាទុក QR Code
-    </button>
-
-    <button class="pay-summary-toggle" onclick="togglePaySummary()">
-        <span>📝 ពិនិត្យទំនិញឡើងវិញ</span>
-        <span id="summary-caret">▼</span>
-    </button>
-    <div id="pay-summary-list" class="pay-summary-list"></div>
+# --- ORDER API ENDPOINT ---
+async def create_order_endpoint(request):
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+    }
     
-    <button class="mini-paid-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-    <button onclick="closePay()" style="background:none; border:none; margin-top:10px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
-</div>
+    if request.method == "OPTIONS": 
+        return web.Response(status=200, headers=headers)
+        
+    try:
+        data = await request.json()
+        tid = data.get('telegram_id')
+        name = data.get('name', 'N/A')
+        phone = data.get('phone', 'N/A') # CAPTURING PHONE
+        loc = data.get('location', 'N/A')
+        items = data.get('items', [])
+        total = data.get('total', 0)
+        
+        # 1. WooCommerce Sync Protocol (Hardened)
+        line_items = []
+        for i in items:
+            item_id = str(i.get('id', ''))
+            if item_id.isdigit():
+                line_items.append({"product_id": int(item_id), "quantity": i['qty']})
+        
+        # We send all data to WC so it appears correctly in your WP Admin panel
+        wcapi.post("orders", {
+            "status": "processing",
+            "billing": {
+                "first_name": name, 
+                "address_1": loc, 
+                "phone": phone  # SYNC PHONE TO WC
+            },
+            "line_items": line_items,
+            "customer_note": f"MiniApp Order | Phone: {phone} | Loc: {loc}"
+        })
 
-<div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
-    <p style="font-weight:700;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
-    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:20px;">
-</div>
+        # 2. Format High-Visibility Report (Zero-Omission)
+        item_list_str = ""
+        for i in items:
+            item_list_str += f"• {i['name']} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n"
 
-<div class="cat-slider" id="cat-slider">
-    <div class="cat-item active" id="cat-0" onclick="filterCatLocal(0)"><div class="cat-icon">🏠</div><span>ទាំងអស់</span></div>
-</div>
+        report_text = (
+            f"👤 ឈ្មោះ: **{name}**\n"
+            f"📞 លេខទូរស័ព្ទ: `{phone}`\n"
+            f"📍 ទីតាំង: `{loc}`\n\n"
+            f"📦 **ទំនិញ៖**\n{item_list_str}\n"
+            f"💰 **សរុប៖ {int(total):,} ៛**"
+        )
 
-<div class="container">
-    <div id="loader">🚀 កំពុងទាញយកទិន្នន័យ...</div>
-    <div id="product-grid" class="grid"></div>
-    <div class="order-form">
-        <h4 style="margin:0 0 12px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
-        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="saveFormData()"></div>
-        <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
-        <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="saveFormData(); updateCartBasedOnDelivery();"></div>
-    </div>
-</div>
+        # 3. Notification: Send to Customer (Receipt)
+        if tid:
+            try:
+                # Adding Greeting and Order ID Context
+                await bot.send_message(tid, f"✅ **ការកម្ម៉ង់បានជោគជ័យ!**\n\n{report_text}\n\n🙏 សូមអរគុណសម្រាប់ការកម្ម៉ង់!", parse_mode="Markdown")
+            except Exception as e:
+                logging.error(f"User Receipt Failure: {e}")
 
-<div class="footer-cart" id="footer-ui" style="display:none;">
-    <div class="cart-header" id="cart-header">
-        <span class="summary-title">
-            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            ទំនិញដែលបានរើស
-        </span>
-        <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
-    </div>
-    <div id="cart-list" class="cart-details"></div>
-    <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
-        <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
-    </div>
-    <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
-</div>
+        # 4. Notification: Send Copy to Admin Group (@Mulberrysrbot)
+        try:
+            await bot.send_message(GROUP_CHAT_ID, f"🚀 **ការកម្ម៉ង់ថ្មី (Mini App)**\n\n{report_text}", parse_mode="Markdown")
+        except Exception as e:
+            logging.error(f"Group Copy Failure: {e}")
 
-<footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V47</p>
-</footer>
+        return web.json_response({"status": "success"}, headers=headers)
+        
+    except Exception as e:
+        logging.error(f"Global Endpoint Error: {e}")
+        return web.json_response({"status": "error", "message": str(e)}, status=500, headers=headers)
 
-<script>
-    const tg = window.Telegram.WebApp;
-    const RENDER_URL = "https://pizzaking-bot.onrender.com"; 
-    const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
-    const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
+async def main():
+    dp.include_router(router)
+    app = web.Application()
+    app.router.add_get("/", lambda r: web.Response(text="Pizz King Backend is Live"))
+    app.router.add_post("/create-order", create_order_endpoint)
+    app.router.add_options("/create-order", create_order_endpoint)
     
-    tg.expand(); tg.ready();
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
+    runner = web.AppRunner(app)
+    await runner.setup()
+    await web.TCPSite(runner, '0.0.0.0', int(os.environ.get("PORT", 10000))).start()
+    
+    await dp.start_polling(bot)
 
-    const DELIVERY_CONFIG = {
-      "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"],
-      "siem_reap_free_over_riel": 40000, "siem_reap_charge_riel": 3000,
-      "siem_reap_item_name_kh": "ថ្លៃសេវាដឹកជញ្ជូន (វីរៈប៊ុនថាំ - សៀមរាប)",
-      "other_location_threshold_riel": 80000, "other_location_charge_below_riel": 8000,
-      "other_location_charge_over_or_equal_riel": 11000,
-      "other_location_item_name_kh": "ថ្លៃសេវាដឹកជញ្ជូន (វីរៈប៊ុនថាំ - ផ្សេងទៀត)"
-    };
-
-    function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
-    function saveFormData() {
-        localStorage.setItem('pizz_king_tel', document.getElementById('user-phone').value);
-        localStorage.setItem('pizz_king_loc', document.getElementById('user-loc').value);
-        localStorage.setItem('pizz_king_name', document.getElementById('user-name').value);
-        checkForm();
-    }
-
-    async function fetchData() {
-        const C_PROD = "pizz_cache_products_v36", C_CAT = "pizz_cache_cats_v36", C_TIME = "pizz_cache_timestamp_v36", C_VAR = "pizz_cache_variations_v36";
-        const now = Date.now(), lastSync = localStorage.getItem(C_TIME);
-        if (lastSync && (now - lastSync < 24 * 60 * 60 * 1000)) {
-            allProducts = JSON.parse(localStorage.getItem(C_PROD));
-            productVariations = JSON.parse(localStorage.getItem(C_VAR));
-            renderCategories(JSON.parse(localStorage.getItem(C_CAT)));
-            restoreState(); return;
-        }
-        try {
-            const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
-            const cats = await catRes.json();
-            localStorage.setItem(C_CAT, JSON.stringify(cats));
-            renderCategories(cats);
-            const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
-            allProducts = await prodRes.json();
-            const varProds = allProducts.filter(p => p.type === 'variable');
-            for (const vp of varProds) {
-                const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
-                productVariations[vp.id] = await vRes.json();
-            }
-            localStorage.setItem(C_PROD, JSON.stringify(allProducts));
-            localStorage.setItem(C_VAR, JSON.stringify(productVariations));
-            localStorage.setItem(C_TIME, now);
-            restoreState();
-        } catch(e) { document.getElementById('loader').innerText = "⚠️ Offline Mode"; }
-    }
-
-    function restoreState() {
-        document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
-        document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
-        document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
-        const savedCart = localStorage.getItem('pizz_king_cart_v36');
-        if(savedCart) cart = JSON.parse(savedCart);
-        updateCartBasedOnDelivery();
-        checkForm();
-        const savedCat = localStorage.getItem('pizz_king_focus_cat');
-        if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
-    }
-
-    // --- CRC16 HEXADECIMAL ENGINE (SOVEREIGN PROTOCOL) ---
-    function crc16(d) {
-        let c = 0xFFFF;
-        for (let i = 0; i < d.length; i++) {
-            let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF;
-            x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
-        }
-        // FIXED: Return Hexadecimal instead of Decimal
-        return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-    }
-
-    // --- SOVEREIGN 100% ABA MASTER DNA ENGINE V47 ---
-    function generateDynamicABAQR(amt) {
-        // TEMPLATE: Strictly based on user prompt
-        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
-        
-        // TAG 54: [digit][amount] logic
-        const amtVal = amt.toString() + ".0";
-        const digitCount = (amt.toString().length + 2).toString().padStart(2, '0');
-        const amtTag = `54${digitCount}${amtVal}`;
-        
-        const suffix = "5802KH5909SOUR DARA6010Phnom Penh993400131775624346406011318071603";
-        
-        // EMVCo Checksum Tag 6304
-        const partialPayload = prefix + amtTag + suffix + "6304";
-        const checksum = crc16(partialPayload);
-        
-        return partialPayload + checksum;
-    }
-
-    function filterCatLocal(id) {
-        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-        const el = document.getElementById(`cat-${id}`); if(el) el.classList.add('active');
-        localStorage.setItem('pizz_king_focus_cat', id.toString());
-        renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
-    }
-
-    function renderCategories(cats) {
-        const container = document.getElementById('cat-slider');
-        cats.forEach(c => { container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; });
-    }
-
-    function renderProducts(items) {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('product-grid').innerHTML = items.map(p => {
-            const pid = p.id; cardQtys[pid] = 1;
-            let variations = "";
-            if (p.type === 'variable' && productVariations[pid]) {
-                if (productVariations[pid].length <= 2) {
-                    variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
-                } else {
-                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
-                }
-            }
-            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
-        }).join('');
-    }
-
-    function selectVariation(pid, vid) {
-        variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
-        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); tg.HapticFeedback.impactOccurred('light');
-    }
-    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; tg.HapticFeedback.impactOccurred('light'); }
-
-    function addToCart(pid) {
-        const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
-        let name = p.name, price = parseFloat(p.price), cid = pid;
-        if (p.type === 'variable') {
-            const vid = variationSelections[pid]; if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
-            const vData = productVariations[pid].find(v => v.id == vid);
-            name = `${p.name} (${vData.attributes[0].option})`; price = parseFloat(vData.price); cid = `${pid}-${vid}`;
-        }
-        const existing = cart.find(i => i.cartId === cid);
-        if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
-        cardQtys[pid] = 1; if(document.getElementById(`q-${pid}`)) document.getElementById(`q-${pid}`).innerText = 1;
-        saveCartToStorage(); updateCartBasedOnDelivery(); tg.HapticFeedback.impactOccurred('medium');
-    }
-
-    function updateCartItemQty(cid, delta) {
-        const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
-    }
-    function removeFromCart(cid) {
-        cart = cart.filter(x => x.cartId !== cid); if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
-        saveCartToStorage(); updateCartBasedOnDelivery();
-    }
-
-    function updateCartBasedOnDelivery() {
-        const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
-        const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-        const locRaw = document.getElementById('user-loc').value.toLowerCase(); cart = realItems;
-        if(locRaw.length > 3) {
-            const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
-            let fee = 0, nameKh = "", cartId = "";
-            if(isSR) { fee = subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel ? DELIVERY_CONFIG.siem_reap_charge_riel : 0; nameKh = DELIVERY_CONFIG.siem_reap_item_name_kh; cartId = "delivery_fee_sr"; }
-            else { fee = subtotal < DELIVERY_CONFIG.other_location_threshold_riel ? DELIVERY_CONFIG.other_location_charge_below_riel : DELIVERY_CONFIG.other_location_charge_over_or_equal_riel; nameKh = DELIVERY_CONFIG.other_location_item_name_kh; cartId = "delivery_fee_other"; }
-            if(fee > 0) cart.push({ cartId, id: cartId, name: nameKh, price: fee, qty: 1 });
-        }
-        updateUI(cart);
-    }
-
-    function updateUI(itemsList) {
-        const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
-        const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
-        const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
-        document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = itemsList.map(i => {
-            const isD = i.cartId.toString().startsWith('delivery');
-            return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`;
-        }).join(''); checkForm();
-    }
-
-    function togglePaySummary() { const list = document.getElementById('pay-summary-list'); const caret = document.getElementById('summary-caret'); list.classList.toggle('open'); caret.innerText = list.classList.contains('open') ? "▲" : "▼"; }
-
-    async function downloadQRImage() {
-        const target = document.getElementById('invoice-card'); const btn = document.querySelector('.btn-save-qr'); btn.innerHTML = "⏳ កំពុងរៀបចំ...";
-        try {
-            const canvas = await html2canvas(target, { scale: 3, useCORS: true });
-            const dataUrl = canvas.toDataURL("image/png");
-            if (window.innerWidth > 900 || !navigator.userAgent.match(/Android|iPhone|iPad/i)) {
-                const link = document.createElement("a"); link.download = `PizzKing_QR_${Date.now()}.png`; link.href = dataUrl; link.click();
-            } else {
-                document.getElementById('fallback-img').src = dataUrl; document.getElementById('save-fallback').style.display = 'flex';
-            }
-            btn.innerHTML = "✅ រួចរាល់";
-            setTimeout(() => { btn.innerHTML = `<svg style="width:14px; height:14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 2000);
-        } catch(e) { btn.innerHTML = "⚠️ កំហុស"; }
-    }
-
-    function openPayment() {
-        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
-        document.getElementById('payment-screen').style.display = 'flex';
-        document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
-        
-        // NEW DYNAMIC ABA LOGIC
-        const dynamicQR = generateDynamicABAQR(total);
-        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        
-        startTimer(900); document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
-    }
-
-    async function submitFinalOrder() {
-        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total };
-        document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
-        try {
-            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-            localStorage.removeItem('pizz_king_cart_v36'); tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
-        } catch (e) { document.getElementById('confirm-btn').innerText = "✅ បង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
-    }
-
-    function openDetail(pid) {
-        const p = allProducts.find(x => x.id === pid);
-        document.getElementById('popup-content').innerHTML = `<img src="${p.images[0]?.src || ''}" style="width:100%; border-radius:12px; margin-bottom:15px;"><h3>${p.name}</h3><div style="font-size:0.85rem; line-height:1.6; color:#7f8c8d;">${p.description || "គ្មានការពិពណ៌នា។"}</div>`;
-        document.getElementById('popup-screen').style.display = 'flex';
-    }
-    function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
-    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
-    function checkForm() {
-        const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
-        const btn = document.getElementById('pre-pay-btn'); const isValid = (n.length > 1 && p.length > 8 && l.length > 3);
-        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7"; btn.innerText = isValid ? "💳 បន្តទៅការបង់ប្រាក់" : "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
-    }
-    function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
-    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
-    fetchData();
-</script>
-</body>
-</html>
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
