@@ -3,106 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V32</title>
+    <title>Pizz King Sovereign V34</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* Desktop Blur Fix & Reset */
-        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .v-tag { position: absolute; top: 5px; right: 10px; font-size: 0.6rem; color: #bbb; z-index: 1000; font-weight: bold; }
 
-        /* Category Slider */
-        .cat-slider { display: flex; overflow-x: auto; padding: 10px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
+        /* Category Slider - High Contrast Active State */
+        .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
-        .cat-item { text-align: center; min-width: 55px; cursor: pointer; flex-shrink: 0; }
-        .cat-icon { width: 42px; height: 42px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 4px; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
-        .cat-icon img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
-        .cat-item span { font-size: 0.65rem; font-weight: 700; display: block; white-space: nowrap; }
+        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
+        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 4px; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Active Category Highlight */
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .cat-item.active span { color: var(--pizz-green); font-weight: 700; }
+        .cat-item span { font-size: 0.7rem; font-weight: 400; display: block; white-space: nowrap; color: #7f8c8d; }
 
-        /* Grid & Cards */
         .container { padding: 10px; padding-bottom: 250px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; background: #eee; }
-        .card-body { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
-        .title { font-size: 0.8rem; font-weight: 700; height: 35px; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
-        .price { color: var(--pizz-red); font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; }
+        .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; position: relative; }
+        .card img { width: 100%; height: 130px; object-fit: cover; background: #eee; cursor: pointer; }
+        .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
+        .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
         
-        /* Variation Selector */
-        .var-selector { width: 100%; padding: 5px; border-radius: 6px; border: 1px solid #ddd; font-family: inherit; font-size: 0.75rem; margin-bottom: 8px; background: #fff; }
+        /* Variation Chips */
+        .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .var-chip { padding: 6px 12px; background: #f8f9fa; color: #2c3e50; border: 1px solid #e0e0e0; border-radius: 20px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
 
-        /* Card Actions */
-        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 6px; padding: 2px; margin-bottom: 8px; }
-        .qty-btn { width: 26px; height: 26px; border: none; background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .qty-num { font-size: 0.85rem; font-weight: 700; }
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; gap: 5px; }
+        /* QTY Control */
+        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1.1rem; }
+        .qty-num { font-size: 0.95rem; font-weight: 700; }
+        
+        /* Big White Cart Icon Button */
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; transition: 0.2s; }
+        .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
+        .btn-add-cart:active { transform: scale(0.98); background: #27ae60; }
 
-        /* Form Logics */
+        /* Floating Telegram Support */
+        .float-contact { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: 0.3s; }
+        .float-contact svg { width: 25px; height: 25px; fill: white; }
+        .float-contact:hover { transform: scale(1.1); }
+
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; -webkit-appearance: none; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
 
-        /* Footer Cart Manager (High Clarity) */
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 200; border-radius: 18px 18px 0 0; }
+        /* Footer Cart */
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
-        .cart-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
-        .cart-details.open { max-height: 280px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
+        .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 4px 0; border-bottom: 1px solid #fafafa; }
-        .cart-item-info { flex-grow: 1; font-size: 0.8rem; font-weight: 700; line-height: 1.3; }
-        .cart-item-actions { display: flex; align-items: center; gap: 10px; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
+        .cart-item-info { flex-grow: 1; font-size: 0.85rem; font-weight: 700; }
+        .cart-item-actions { display: flex; align-items: center; gap: 12px; }
         .cart-del-btn { color: var(--pizz-red); background: none; border: none; font-size: 18px; cursor: pointer; padding: 5px; }
-        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2); }
+        .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
 
-        /* Payment Overlay (Responsive Fix) */
-        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; padding-bottom: 60px; box-sizing: border-box; overflow-y: auto; }
-        .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; text-align: center; flex-shrink: 0; margin-bottom: 20px; }
-        .qr-header { background: var(--pizz-red); padding: 18px; color: white; font-weight: 700; letter-spacing: 3px; font-size: 1.1rem; }
-        .qr-body { padding: 25px 20px; }
-        .qr-img { width: 200px; height: 200px; margin-bottom: 15px; border-radius: 12px; }
+        /* Payment UI Overlay */
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; text-align: center; margin-bottom: 20px; }
+        .qr-header { background: var(--pizz-red); padding: 18px; color: white; font-weight: 700; letter-spacing: 3px; }
+        .qr-body { padding: 30px 20px; }
+        .qr-img { width: 220px; height: 220px; border-radius: 12px; margin-bottom: 10px; }
         .qr-footer { border-top: 1px dashed #ccc; padding: 20px; background: #fafafa; }
-        .qr-name { font-weight: 700; font-size: 1.1rem; color: #2c3e50; margin-bottom: 8px; }
-        .qr-riel { font-weight: 700; font-size: 1.5rem; color: var(--pizz-red); }
+        .qr-riel { font-weight: 700; font-size: 1.7rem; color: var(--pizz-red); }
+
+        /* Popups */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .popup-card { background: #fff; border-radius: 16px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; padding: 25px; box-sizing: border-box; position: relative; }
         
-        #loader { text-align: center; padding: 50px; color: #95a5a6; font-weight: 700; }
+        footer { text-align: center; padding: 30px 20px 120px 20px; font-size: 0.75rem; color: #95a5a6; line-height: 1.6; }
+        #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
         
-        /* Desktop Adjustments */
-        @media screen and (min-width: 600px) {
-            .grid { grid-template-columns: repeat(3, 1fr); }
-            .container { max-width: 800px; margin: 0 auto; }
-        }
+        @media screen and (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } .container { max-width: 900px; margin: 0 auto; } }
     </style>
 </head>
 <body>
 
-<div class="v-tag">V32.04.08</div>
+<div class="v-tag">V34.04.08</div>
+
+<a href="https://t.me/+85587282827" target="_blank" class="float-contact" id="tg-contact">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.49 1.02-.73 4-.17 6.67-2.83 8.01-8.01.31-.12.65-.18.99-.18.33 0 .66.06.96.18.3.12.57.3.79.52.22.22.39.49.5.79.11.3.16.63.15.96z"/></svg>
+</a>
 
 <div id="payment-screen" class="pay-overlay">
-    <div style="font-weight:700; margin-bottom:12px;">⏳ សុពលភាព: <span id="pay-timer">15:00</span></div>
-    
-    <button onclick="tg.openLink('https://pay.ababank.com/oRF8/fj3kp697')" style="background:#007bff; color:white; border:none; padding:12px 24px; border-radius:25px; font-weight:700; font-size:0.85rem; margin-bottom:20px; display:flex; align-items:center; gap:8px; cursor:pointer;">
-        📱 បើកកម្មវិធី ABA ដើម្បីបង់ប្រាក់
-    </button>
-
+    <div style="font-weight:700; margin-bottom:12px; color:#7f8c8d;">ទូទាត់ប្រាក់តាម KHQR</div>
     <div class="qr-invoice">
         <div class="qr-header">KHQR</div>
         <div class="qr-body">
-            <div class="qr-name">SOUR DARA</div>
+            <div style="font-weight:700; margin-bottom:10px; font-size:1.1rem;">SOUR DARA</div>
             <img src="" id="dynamic-khqr" class="qr-img">
-            <div style="margin-top:5px;"><button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" style="background:none; border:none; color:#007bff; font-size:0.8rem; text-decoration:underline; cursor:pointer;">📥 រក្សាទុក QR ក្នុងទូរស័ព្ទ</button></div>
+            <div style="margin-top:10px;"><button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" style="background:none; border:none; color:#007bff; font-size:0.85rem; text-decoration:underline; cursor:pointer;">📥 រក្សាទុក QR ក្នុងទូរស័ព្ទ</button></div>
         </div>
         <div class="qr-footer">
+            <div style="font-size: 0.8rem; color:#95a5a6; margin-bottom: 5px;">សូមវាយបញ្ចូលចំនួនទឹកប្រាក់ខាងក្រោម៖</div>
             <div class="qr-riel"><span id="pay-amt-label">0</span> ៛</div>
         </div>
     </div>
-    
-    <button class="checkout-btn" style="width:100%; max-width:310px;" id="confirm-btn" onclick="submitFinalOrder()">🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6; padding: 10px;">បោះបង់ការទូទាត់</button>
+    <button class="checkout-btn" style="width:100%; max-width:320px;" id="confirm-btn" onclick="submitFinalOrder()">✅ បង់ប្រាក់រួចរាល់ (បញ្ជូនកម្ម៉ង់)</button>
+    <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">ត្រឡប់ក្រោយ</button>
+</div>
+
+<div id="popup-screen" class="popup-overlay" onclick="closePopup()">
+    <div class="popup-card" onclick="event.stopPropagation()">
+        <button onclick="closePopup()" style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:28px; color:#ccc; cursor:pointer;">×</button>
+        <div id="popup-content"></div>
+    </div>
 </div>
 
 <div class="cat-slider" id="cat-slider">
@@ -110,21 +127,21 @@
 </div>
 
 <div class="container">
-    <div id="loader">📦 កំពុងទាញយកទំនិញ...</div>
+    <div id="loader">🚀 កំពុងទាញយកទិន្នន័យ...</div>
     <div id="product-grid" class="grid"></div>
     
     <div class="order-form">
-        <h4 style="margin:0 0 12px 0; font-size: 0.9rem; color: #34495e;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
-        <div class="input-group"><label>ឈ្មោះអតិថិជន</label><input type="text" id="user-name" oninput="checkForm()"></div>
+        <h4 style="margin:0 0 12px 0; color:var(--pizz-dark);">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
+        <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="checkForm()"></div>
         <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="checkForm()"></div>
-        <div class="input-group"><label>ទីតាំង/អាសយដ្ឋាន</label><input type="text" id="user-loc" oninput="checkForm()"></div>
+        <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="checkForm()"></div>
     </div>
 </div>
 
 <div class="footer-cart" id="footer-ui" style="display:none;">
     <div class="cart-header" id="cart-header">
-        <span style="font-weight:700;">🛒 ទំនិញក្នុងកន្ត្រក</span>
-        <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#95a5a6;">×</button>
+        <span style="font-weight:700;">🛒 ទំនិញដែលបានរើស</span>
+        <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
     </div>
     <div id="cart-list" class="cart-details"></div>
     <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
@@ -133,16 +150,66 @@
     <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled style="background:#bdc3c7;">បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
 </div>
 
+<footer>
+    <p><b>Sour Dara - Pizz King</b></p>
+    <p>អាសយដ្ឋាន៖ រាជធានីភ្នំពេញ, កម្ពុជា</p>
+    <p>© 2024 Sovereignty E-commerce Engine V34</p>
+</footer>
+
 <script>
     const tg = window.Telegram.WebApp;
     const RENDER_URL = "https://pizzaking-bot.onrender.com"; 
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
-
+    
     tg.expand(); tg.ready();
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {};
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
 
-    // --- 🏦 OFFICIAL CRC16 CCITT-FALSE ---
+    // --- 🏦 SOVEREIGN CACHE ENGINE (24H Vault) ---
+    const CACHE_PRODUCTS = "pizz_cache_products_v34";
+    const CACHE_CATS = "pizz_cache_cats_v34";
+    const CACHE_TIME = "pizz_cache_timestamp_v34";
+    const CACHE_VAR = "pizz_cache_variations_v34";
+
+    async function fetchData() {
+        const now = Date.now();
+        const lastSync = localStorage.getItem(CACHE_TIME);
+        
+        // Check if data is less than 24 hours old
+        if (lastSync && (now - lastSync < 24 * 60 * 60 * 1000)) {
+            allProducts = JSON.parse(localStorage.getItem(CACHE_PRODUCTS));
+            productVariations = JSON.parse(localStorage.getItem(CACHE_VAR));
+            renderProducts(allProducts);
+            renderCategories(JSON.parse(localStorage.getItem(CACHE_CATS)));
+            return;
+        }
+
+        try {
+            // Load Categories
+            const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
+            const cats = await catRes.json();
+            localStorage.setItem(CACHE_CATS, JSON.stringify(cats));
+            renderCategories(cats);
+
+            // Load Products
+            const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
+            allProducts = await prodRes.json();
+            
+            // Fetch Variations
+            const varProds = allProducts.filter(p => p.type === 'variable');
+            for (const vp of varProds) {
+                const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
+                productVariations[vp.id] = await vRes.json();
+            }
+
+            localStorage.setItem(CACHE_PRODUCTS, JSON.stringify(allProducts));
+            localStorage.setItem(CACHE_VAR, JSON.stringify(productVariations));
+            localStorage.setItem(CACHE_TIME, now);
+            renderProducts(allProducts);
+        } catch(e) { document.getElementById('loader').innerText = "⚠️ Offline Mode"; }
+    }
+
+    // --- 🏦 CRC16 ENGINE ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -152,56 +219,96 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    function generateUniversalKHQR(amt) {
-        const val = amt.toString();
-        const amtPart = `54${val.length.toString().padStart(2, '0')}${val}`;
-        // UNIVERSAL BRIDGE TAG 30 - ACLEDA ACCOUNT
-        const base = `00020101021130320010A1000000250114087282827@aclb520458125303116${amtPart}5802KH5909SOUR DARA6010PHNOM PENH6304`;
+    function generateStaticQR() {
+        const base = `00020101021130320010A1000000250114087282827@aclb5204581253031165802KH5909SOUR DARA6010PHNOM PENH6304`;
         return base + crc16(base);
     }
 
-    // --- 🛒 CART & VARIATION ENGINE (ZERO OMISSION) ---
+    // --- 🛒 UI RENDERING & LOGIC ---
+    function renderCategories(cats) {
+        const container = document.getElementById('cat-slider');
+        cats.forEach(c => {
+            container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
+        });
+    }
+
+    function filterCatLocal(id) {
+        // Update active class state (The selected state you requested)
+        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`cat-${id}`).classList.add('active');
+        
+        const filtered = id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id));
+        renderProducts(filtered);
+    }
+
+    function renderProducts(items) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('product-grid').innerHTML = items.map(p => {
+            const pid = p.id; cardQtys[pid] = 1;
+            let variations = "";
+            if (p.type === 'variable' && productVariations[pid]) {
+                variations = `<div class="var-container">` + 
+                    productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + 
+                    `</div>`;
+            }
+
+            return `<div class="card" id="card-${pid}">
+                <img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})">
+                <div class="card-body">
+                    <div class="title">${p.name}</div>
+                    <div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>
+                    ${variations}
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button>
+                        <span id="q-${pid}">1</span>
+                        <button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart(${pid})">
+                        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                        បន្ថែមក្នុងកន្ត្រក
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // --- 🛒 VARIATION & CART ---
+    function selectVariation(pid, vid) {
+        variationSelections[pid] = vid;
+        const card = document.getElementById(`card-${pid}`);
+        card.querySelectorAll('.var-chip').forEach(c => c.classList.remove('active'));
+        document.getElementById(`var-${pid}-${vid}`).classList.add('active');
+    }
+
     function addToCart(pid) {
         const p = allProducts.find(x => x.id === pid);
         const q = cardQtys[pid] || 1;
-        let pName = p.name;
-        let pPrice = parseFloat(p.price);
-        let cartUniqueId = pid;
+        let name = p.name, price = parseFloat(p.price), cid = pid;
 
-        // Check for variation selection
-        const selector = document.getElementById(`var-${pid}`);
-        if (selector) {
-            const vId = selector.value;
-            const vData = productVariations[pid].find(v => v.id == vId);
-            pName = `${p.name} (${vData.attributes[0].option})`;
-            pPrice = parseFloat(vData.price);
-            cartUniqueId = `${pid}-${vId}`; // Unique ID per variation
+        if (p.type === 'variable') {
+            const vid = variationSelections[pid];
+            if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
+            const vData = productVariations[pid].find(v => v.id == vid);
+            name = `${p.name} (${vData.attributes[0].option})`;
+            price = parseFloat(vData.price);
+            cid = `${pid}-${vid}`;
         }
 
-        const ex = cart.find(i => i.cartId === cartUniqueId);
-        if(ex) {
-            ex.qty += q;
-        } else {
-            cart.push({ cartId: cartUniqueId, id: pid, name: pName, price: pPrice, qty: q });
-        }
+        const existing = cart.find(i => i.cartId === cid);
+        if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
         
-        cardQtys[pid] = 1; 
-        if(document.getElementById(`q-${pid}`)) document.getElementById(`q-${pid}`).innerText = 1;
-        updateUI(); 
-        tg.HapticFeedback.impactOccurred('medium');
+        cardQtys[pid] = 1; if(document.getElementById(`q-${pid}`)) document.getElementById(`q-${pid}`).innerText = 1;
+        updateUI(); tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function updateCartItemQty(cartId, delta) {
-        const item = cart.find(i => i.cartId === cartId);
-        if (item) {
-            item.qty = Math.max(1, item.qty + delta);
-            updateUI();
-        }
+    function updateCartItemQty(cid, delta) {
+        const i = cart.find(x => x.cartId === cid);
+        if (i) { i.qty = Math.max(1, i.qty + delta); updateUI(); }
     }
 
-    function removeFromCart(cartId) {
-        cart = cart.filter(i => i.cartId !== cartId);
-        if(cart.length === 0) { if(document.getElementById('cart-header').classList.contains('open')) toggleCart(); }
+    function removeFromCart(cid) {
+        cart = cart.filter(x => x.cartId !== cid);
+        if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
         updateUI();
     }
 
@@ -222,88 +329,39 @@
             </div>`).join('');
     }
 
-    // --- 🏦 PAYMENT SYSTEM ---
+    // --- 🏦 PAYMENT & FORM ---
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        const finalQR = generateUniversalKHQR(total);
-        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(finalQR)}`;
+        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(generateStaticQR())}`;
         startTimer(900);
     }
 
     async function submitFinalOrder() {
-        const orderData = { 
-            telegram_id: tg.initDataUnsafe.user?.id, 
-            name: document.getElementById('user-name').value, 
-            phone: document.getElementById('user-phone').value, 
-            location: document.getElementById('user-loc').value, 
-            items: cart, 
-            total: cart.reduce((s, i) => s + (i.price * i.qty), 0) 
-        };
+        const name = document.getElementById('user-name').value;
+        const phone = document.getElementById('user-phone').value;
+        const loc = document.getElementById('user-loc').value;
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        
+        localStorage.setItem('pizz_king_tel', phone);
+        localStorage.setItem('pizz_king_loc', loc);
+
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name, phone, location: loc, items: cart, total };
         document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
         try {
-            const res = await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-            if(res.ok) tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close()); else throw new Error();
-        } catch (e) {
-            document.getElementById('confirm-btn').innerText = "🚀 ខ្ញុំបានបង់ប្រាក់រួចរាល់";
-            tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់");
-        }
+            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
+            tg.showAlert("ការកម្ម៉ង់ជោគជ័យ!", () => tg.close());
+        } catch (e) { document.getElementById('confirm-btn').innerText = "✅ បង់ប្រាក់រួចរាល់"; tg.showAlert("⚠️ បញ្ហាការតភ្ជាប់"); }
     }
 
-    // --- 🚀 SYSTEM STARTUP ---
-    async function init() {
-        if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
-        document.getElementById('user-phone').value = localStorage.getItem('pizz_phone') || "";
-        document.getElementById('user-loc').value = localStorage.getItem('pizz_loc') || "";
-        checkForm(); 
-        await loadCategories(); 
-        await loadAllProducts();
+    // --- 🚀 UTILS ---
+    function openDetail(pid) {
+        const p = allProducts.find(x => x.id === pid);
+        document.getElementById('popup-content').innerHTML = `<img src="${p.images[0]?.src || ''}" style="width:100%; border-radius:12px; margin-bottom:15px;"><h3>${p.name}</h3><div style="font-size:0.85rem; line-height:1.6;">${p.description || "គ្មានការពិពណ៌នា។"}</div>`;
+        document.getElementById('popup-screen').style.display = 'flex';
     }
-
-    async function loadAllProducts() {
-        const res = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`);
-        allProducts = await res.json();
-        
-        // Find variable products and fetch their specific variations
-        const varProds = allProducts.filter(p => p.type === 'variable');
-        for (const vp of varProds) {
-            const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`);
-            productVariations[vp.id] = await vRes.json();
-        }
-        renderProducts(allProducts);
-    }
-
-    function renderProducts(items) {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('product-grid').innerHTML = items.map(p => {
-            const pid = p.id; cardQtys[pid] = 1;
-            let variationHTML = "";
-            
-            // Build variation selector if product is variable (Kilo/Box)
-            if (p.type === 'variable' && productVariations[pid]) {
-                variationHTML = `<select class="var-selector" id="var-${pid}">` + 
-                    productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option} - ${parseInt(v.price).toLocaleString()}៛</option>`).join('') + 
-                    `</select>`;
-            }
-
-            return `<div class="card">
-                <img src="${p.images[0]?.src || ''}">
-                <div class="card-body">
-                    <div class="title">${p.name}</div>
-                    <div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>
-                    ${variationHTML}
-                    <div class="qty-control">
-                        <button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button>
-                        <span id="q-${pid}">1</span>
-                        <button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button>
-                    </div>
-                    <button class="btn-add-cart" onclick="addToCart(${pid})">🛒 បន្ថែមក្នុងកន្ត្រក</button>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
+    function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
@@ -311,17 +369,16 @@
         if(n.length > 1 && p.length > 8 && l.length > 5) { btn.disabled = false; btn.style.background = "#2ecc71"; btn.innerText = "💳 បន្តទៅការបង់ប្រាក់"; }
         else { btn.disabled = true; btn.style.background = "#bdc3c7"; }
     }
-    async function loadCategories() {
-        const res = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`);
-        const cats = await res.json();
-        cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; });
-    }
-    function filterCatLocal(id) { renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
-    function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
+    function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     
-    init();
+    // START
+    fetchData();
+    document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
+    document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
+    if(tg.initDataUnsafe.user) document.getElementById('user-name').value = tg.initDataUnsafe.user.first_name + " " + (tg.initDataUnsafe.user.last_name || "");
+    checkForm();
 </script>
 </body>
 </html>
