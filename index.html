@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V45</title>
+    <title>Pizz King Sovereign V46</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -68,7 +68,7 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - GEOMETRY OPTIMIZED V45 */
+        /* Payment Overlay - V46 Master Protocol */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         
         .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
@@ -156,7 +156,7 @@
     <div class="cart-header" id="cart-header">
         <span class="summary-title">
             <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            ទំនិញដែលបានរើស
+            ទំនិញที่បានរើស
         </span>
         <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
     </div>
@@ -168,7 +168,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V45</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V46</p>
 </footer>
 
 <script>
@@ -246,23 +246,16 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    // --- SOVEREIGN DYNAMIC QR ENGINE V45 ---
+    // --- SOVEREIGN 100% ABA MASTER DNA ENGINE V46 ---
     function generateDynamicABAQR(amt) {
-        // Base string provided by user up to Tag 60
+        // FIXED MASTER BASE (Including 0211 Static Initiation)
         const base = "00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E8591402090872828275204000053031165802KH5909SOUR DARA6010Phnom Penh";
-        // Dynamic Amount Tag 54
+        // DYNAMIC AMOUNT (Tag 54)
         const valStr = amt.toFixed(1);
         const amtTag = `54${valStr.length.toString().padStart(2, '0')}${valStr}`;
-        // Checksum Tag 63
+        // RE-CALCULATE CRC16 (Tag 63)
         const finalBase = base + amtTag + "6304";
         return finalBase + crc16(finalBase);
-    }
-
-    function renderCategories(cats) {
-        const container = document.getElementById('cat-slider');
-        cats.forEach(c => {
-            container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
-        });
     }
 
     function filterCatLocal(id) {
@@ -270,6 +263,11 @@
         const el = document.getElementById(`cat-${id}`); if(el) el.classList.add('active');
         localStorage.setItem('pizz_king_focus_cat', id.toString());
         renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
+    }
+
+    function renderCategories(cats) {
+        const container = document.getElementById('cat-slider');
+        cats.forEach(c => { container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; });
     }
 
     function renderProducts(items) {
@@ -289,10 +287,8 @@
     }
 
     function selectVariation(pid, vid) {
-        variationSelections[pid] = vid;
-        document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
-        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active');
-        tg.HapticFeedback.impactOccurred('light');
+        variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active'));
+        const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); tg.HapticFeedback.impactOccurred('light');
     }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; tg.HapticFeedback.impactOccurred('light'); }
 
@@ -311,62 +307,43 @@
     }
 
     function updateCartItemQty(cid, delta) {
-        const i = cart.find(x => x.cartId === cid);
-        if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
+        const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
     }
     function removeFromCart(cid) {
-        cart = cart.filter(x => x.cartId !== cid);
-        if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
+        cart = cart.filter(x => x.cartId !== cid); if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
         saveCartToStorage(); updateCartBasedOnDelivery();
     }
 
     function updateCartBasedOnDelivery() {
-        const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery'));
-        if(realItems.length === 0) { cart = []; updateUI([]); return; }
+        const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
         const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-        const locRaw = document.getElementById('user-loc').value.toLowerCase();
-        cart = realItems;
+        const locRaw = document.getElementById('user-loc').value.toLowerCase(); cart = realItems;
         if(locRaw.length > 3) {
             const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
             let fee = 0, nameKh = "", cartId = "";
-            if(isSR) {
-                fee = subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel ? DELIVERY_CONFIG.siem_reap_charge_riel : 0;
-                nameKh = DELIVERY_CONFIG.siem_reap_item_name_kh; cartId = "delivery_fee_sr";
-            } else {
-                fee = subtotal < DELIVERY_CONFIG.other_location_threshold_riel ? DELIVERY_CONFIG.other_location_charge_below_riel : DELIVERY_CONFIG.other_location_charge_over_or_equal_riel;
-                nameKh = DELIVERY_CONFIG.other_location_item_name_kh; cartId = "delivery_fee_other";
-            }
+            if(isSR) { fee = subtotal < DELIVERY_CONFIG.siem_reap_free_over_riel ? DELIVERY_CONFIG.siem_reap_charge_riel : 0; nameKh = DELIVERY_CONFIG.siem_reap_item_name_kh; cartId = "delivery_fee_sr"; }
+            else { fee = subtotal < DELIVERY_CONFIG.other_location_threshold_riel ? DELIVERY_CONFIG.other_location_charge_below_riel : DELIVERY_CONFIG.other_location_charge_over_or_equal_riel; nameKh = DELIVERY_CONFIG.other_location_item_name_kh; cartId = "delivery_fee_other"; }
             if(fee > 0) cart.push({ cartId, id: cartId, name: nameKh, price: fee, qty: 1 });
         }
         updateUI(cart);
     }
 
     function updateUI(itemsList) {
-        const show = itemsList.length > 0;
-        document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
-        const floatBtn = document.getElementById('float-contact-btn');
-        if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
+        const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
+        const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
             const isD = i.cartId.toString().startsWith('delivery');
             return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`;
-        }).join('');
-        checkForm();
+        }).join(''); checkForm();
     }
 
-    function togglePaySummary() {
-        const list = document.getElementById('pay-summary-list');
-        const caret = document.getElementById('summary-caret');
-        list.classList.toggle('open');
-        caret.innerText = list.classList.contains('open') ? "▲" : "▼";
-    }
+    function togglePaySummary() { const list = document.getElementById('pay-summary-list'); const caret = document.getElementById('summary-caret'); list.classList.toggle('open'); caret.innerText = list.classList.contains('open') ? "▲" : "▼"; }
 
     async function downloadQRImage() {
-        const target = document.getElementById('invoice-card');
-        const btn = document.querySelector('.btn-save-qr');
-        btn.innerHTML = "⏳ កំពុងរៀបចំ...";
+        const target = document.getElementById('invoice-card'); const btn = document.querySelector('.btn-save-qr'); btn.innerHTML = "⏳ កំពុងរៀបចំ...";
         try {
             const canvas = await html2canvas(target, { scale: 3, useCORS: true });
             const dataUrl = canvas.toDataURL("image/png");
@@ -387,8 +364,7 @@
         document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
-        startTimer(900);
-        document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
+        startTimer(900); document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
     }
 
     async function submitFinalOrder() {
@@ -410,14 +386,12 @@
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
-        const btn = document.getElementById('pre-pay-btn');
-        const isValid = (n.length > 1 && p.length > 8 && l.length > 3);
+        const btn = document.getElementById('pre-pay-btn'); const isValid = (n.length > 1 && p.length > 8 && l.length > 3);
         btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7"; btn.innerText = isValid ? "💳 បន្តទៅការបង់ប្រាក់" : "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
     }
     function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
-    
     fetchData();
 </script>
 </body>
