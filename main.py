@@ -20,7 +20,10 @@ WC_URL = "https://1.phsar.me"
 WC_KEY = "ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03"
 WC_SECRET = "cs_63c256e1b4eba0a65723f054159e55d2148c3c57"
 MINI_APP_URL = "https://darasour2005.github.io/pizzaking_bot/"
-GROUP_CHAT_ID = '-1003499575831' 
+
+# ADMIN CHANNELS
+GROUP_CHAT_ID = '-1003499575831' # Your Group
+ADMIN_PRIVATE_ID = '123456789'   # REPLACEME: Put your private Telegram ID here for direct alerts
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -29,11 +32,13 @@ wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version=
 
 @router.message(Command("start"))
 async def start_handler(message: types.Message):
+    # This helps you find your private ID: The bot will reply with your ID
+    user_id = message.from_user.id
     markup = types.ReplyKeyboardMarkup(
         keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=MINI_APP_URL))]], 
         resize_keyboard=True
     )
-    await message.answer("🇰🇭 **ស្វាគមន៍មកកាន់ Pizz King!**", reply_markup=markup, parse_mode="Markdown")
+    await message.answer(f"🇰🇭 **ស្វាគមន៍មកកាន់ Pizz King!**\nYour ID: `{user_id}` (Copy this to main.py)", reply_markup=markup, parse_mode="Markdown")
 
 async def create_order_endpoint(request):
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
@@ -45,19 +50,18 @@ async def create_order_endpoint(request):
         name = data.get('name', 'N/A')
         phone = data.get('phone', 'N/A')
         loc = data.get('location', 'N/A')
-        note = data.get('note', '')
+        note = data.get('note', '') # THE NOTE
         items = data.get('items', [])
         total = data.get('total', 0)
         
-        # TIMESTAMP ENGINE (Asia/Phnom_Penh)
         kh_tz = pytz.timezone('Asia/Phnom_Penh')
         now = datetime.now(kh_tz)
         order_date = now.strftime("%d-%m-%Y")
         order_time = now.strftime("%H:%M")
 
-        # 1. Format Telegram Report (Create this FIRST)
+        # 1. Format Telegram Report
         item_list_str = "".join([f"• {i['name']} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n" for i in items])
-        note_display = f"\n📝 **ចំណាំ៖** {note}" if note.strip() else ""
+        note_display = f"\n📝 **ចំណាំ៖** {note}" if note.strip() else "\n📝 **ចំណាំ៖** គ្មាន"
 
         report_text = (
             f"🚀 **ការកម្ម៉ង់ថ្មី (Mini App)**\n"
@@ -70,21 +74,22 @@ async def create_order_endpoint(request):
             f"💰 **សរុប៖ {int(total):,} ៛**"
         )
 
-        # 2. SEND TELEGRAM MESSAGES (High Priority - Do this before WooCommerce)
-        # Send to Admin Group
-        try:
-            await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="Markdown")
-        except Exception as e:
-            logging.error(f"Group Notify Error: {e}")
+        # 2. SEND TELEGRAM MESSAGES (High Priority)
+        # To Group
+        try: await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="Markdown")
+        except: pass
 
-        # Send to Buyer
+        # To Admin Private (If ID is set)
+        if ADMIN_PRIVATE_ID != '123456789':
+            try: await bot.send_message(ADMIN_PRIVATE_ID, f"🔔 **តំណាងចែកចាយ (Admin Only):**\n{report_text}", parse_mode="Markdown")
+            except: pass
+
+        # To Buyer
         if tid:
-            try:
-                await bot.send_message(tid, f"✅ **ការកម្ម៉ង់បានជោគជ័យ!**\n\n{report_text}", parse_mode="Markdown")
-            except Exception as e:
-                logging.error(f"Buyer Notify Error: {e}")
+            try: await bot.send_message(tid, f"✅ **ការកម្ម៉ង់បានជោគជ័យ!**\n\n{report_text}", parse_mode="Markdown")
+            except: pass
 
-        # 3. WOOCOMMERCE SYNC (Lower Priority - Silent failure guard)
+        # 3. WOOCOMMERCE SYNC (Force Note Visibility)
         try:
             line_items = []
             for i in items:
@@ -92,14 +97,24 @@ async def create_order_endpoint(request):
                 if item_id.isdigit():
                     line_items.append({"product_id": int(item_id), "quantity": i['qty']})
             
+            # We inject the note into Billing Address 2 AND Customer Note for double-visibility
             wcapi.post("orders", {
                 "status": "processing",
-                "billing": {"first_name": name, "address_1": loc, "phone": phone},
+                "billing": {
+                    "first_name": name, 
+                    "address_1": loc, 
+                    "address_2": f"NOTE: {note}", # VISIBLE IN ADDRESS BLOCK
+                    "phone": phone
+                },
                 "line_items": line_items,
-                "customer_note": f"Note: {note} | Phone: {phone} | Time: {order_date} {order_time}"
+                "customer_note": note, # VISIBLE IN ORDER NOTES
+                "meta_data": [
+                    {"key": "order_source", "value": "Mini App"},
+                    {"key": "customer_instruction", "value": note}
+                ]
             })
         except Exception as e:
-            logging.error(f"WooCommerce Sync Error (Non-Fatal): {e}")
+            logging.error(f"WC Sync Error: {e}")
 
         return web.json_response({"status": "success"}, headers=headers)
     except Exception as e:
