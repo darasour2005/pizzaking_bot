@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V48</title>
+    <title>Pizz King Sovereign V49</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
-        /* Category Slider Focus */
+        /* Category Slider */
         .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
         .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
@@ -50,6 +50,7 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
+        /* Footer Cart Manager */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -68,7 +69,7 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - GEOMETRY OPTIMIZED V48 */
+        /* Payment Overlay - V49 PROTOCOL */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         
         .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
@@ -168,7 +169,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V48</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V49</p>
 </footer>
 
 <script>
@@ -237,7 +238,7 @@
         if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
     }
 
-    // --- CRC16 HEXADECIMAL ENGINE (EMVCo Corrective Protocol) ---
+    // --- SOVEREIGN HEXADECIMAL CRC16 ENGINE V49 ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
@@ -247,18 +248,25 @@
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    // --- SOVEREIGN STRICT ABA MASTER DNA ENGINE V48 ---
+    // --- SOVEREIGN STRICT ABA DYNAMIC DNA ENGINE V49 ---
     function generateDynamicABAQR(amt) {
-        // TEMPLATE: Strictly based on your successful manual string sequence
-        const prefix = "00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E8591402090872828275204000053031165802KH5909SOUR DARA6010Phnom Penh";
+        // TEMPLATE: Strictly based on successful manual sequence (Dynamic Mode 0212)
+        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
         
-        // TAG 54: [digit][amount].0 logic
+        // DYNAMIC AMOUNT: Tag 54 [digit][amount].0
         const amtVal = amt.toString() + ".0";
         const digitCount = (amt.toString().length + 2).toString().padStart(2, '0');
         const amtTag = `54${digitCount}${amtVal}`;
         
-        // Payload Construction with final CRC16 Hex
-        const payload = prefix + amtTag + "6304";
+        const midSuffix = "5802KH5909SOUR DARA6010Phnom Penh";
+        
+        // PROPRIETARY DATA: Tag 99 (Creation & Expiry Timestamps)
+        const timestamp = Date.now().toString();
+        const expiry = (Date.now() + 31536000000).toString(); // 1 year
+        const tag99 = `99340013${timestamp}0113${expiry}`;
+        
+        // PAYLOAD CONSTRUCTION (Tag 63 CRC Header)
+        const payload = prefix + amtTag + midSuffix + tag99 + "6304";
         const checksum = crc16(payload);
         
         return payload + checksum;
@@ -369,7 +377,7 @@
         document.getElementById('payment-screen').style.display = 'flex';
         document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         
-        // DYNAMIC ABA PROTOCOL V48
+        // NEW SOVEREIGN QR LOGIC V49
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
         
