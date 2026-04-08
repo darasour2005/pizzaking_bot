@@ -1,6 +1,7 @@
 import os
 import asyncio
 import logging
+import html  # CRITICAL FOR HTML SANITIZATION
 from datetime import datetime
 import pytz
 from aiogram import Bot, Dispatcher, types, Router
@@ -37,10 +38,12 @@ async def create_order_endpoint(request):
     try:
         data = await request.json()
         tid = data.get('telegram_id')
-        name = data.get('name', 'N/A')
-        phone = data.get('phone', 'N/A')
-        loc = data.get('location', 'N/A')
-        note = data.get('note', '')
+        
+        # SANITIZE ALL INPUTS TO PREVENT HTML CRASHES
+        name = html.escape(str(data.get('name', 'N/A')))
+        phone = html.escape(str(data.get('phone', 'N/A')))
+        loc = html.escape(str(data.get('location', 'N/A')))
+        note = html.escape(str(data.get('note', '')))
         items = data.get('items', [])
         total = data.get('total', 0)
         
@@ -49,13 +52,15 @@ async def create_order_endpoint(request):
         order_date = now.strftime("%d-%m-%Y")
         order_time = now.strftime("%H:%M")
 
-        # 1. Format High-Visibility Report (HTML SAFE)
+        # 1. Format Item List (Escaped)
         item_list_str = ""
         for i in items:
-            item_list_str += f"• {i['name']} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n"
+            i_name = html.escape(str(i['name']))
+            item_list_str += f"• {i_name} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n"
         
         note_display = f"\n📝 <b>ចំណាំ៖</b> {note}" if note.strip() else "\n📝 <b>ចំណាំ៖</b> គ្មាន"
 
+        # 2. Construct Master HTML Report
         report_text = (
             f"🚀 <b>ការកម្ម៉ង់ថ្មី (Mini App)</b>\n"
             f"📅 ថ្ងៃទី: <code>{order_date}</code> | ម៉ោង: <code>{order_time}</code>\n"
@@ -67,28 +72,27 @@ async def create_order_endpoint(request):
             f"💰 <b>សរុប៖ {int(total):,} ៛</b>"
         )
 
-        # 2. SEND TELEGRAM MESSAGES (High Priority)
-        # To Group
+        # 3. SEND TELEGRAM MESSAGES (Group First)
         try:
             await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="HTML")
         except Exception as e:
             logging.error(f"Group Send Error: {e}")
 
-        # To Buyer
+        # 4. SEND TO BUYER
         if tid:
             try:
                 await bot.send_message(tid, f"✅ <b>ការកម្ម៉ង់បានជោគជ័យ!</b>\n\n{report_text}", parse_mode="HTML")
             except Exception as e:
                 logging.error(f"Buyer Send Error: {e}")
 
-        # 3. WOOCOMMERCE SYNC (Background)
+        # 5. WOOCOMMERCE SYNC (Background)
         try:
             line_items = [{"product_id": int(i['id']), "quantity": i['qty']} for i in items if str(i.get('id', '')).isdigit()]
             wcapi.post("orders", {
                 "status": "processing",
                 "billing": {"first_name": name, "address_1": loc, "address_2": f"Note: {note}", "phone": phone},
                 "line_items": line_items,
-                "customer_note": f"{note} (Ordered at {order_date} {order_time})",
+                "customer_note": f"{note} (Time: {order_date} {order_time})",
                 "meta_data": [{"key": "mini_app_note", "value": note}]
             })
         except Exception as e:
@@ -102,7 +106,7 @@ async def create_order_endpoint(request):
 async def main():
     dp.include_router(router)
     app = web.Application()
-    app.router.add_get("/", lambda r: web.Response(text="Pizz King Backend Active"))
+    app.router.add_get("/", lambda r: web.Response(text="Pizz King Backend is ONLINE"))
     app.router.add_post("/create-order", create_order_endpoint)
     app.router.add_options("/create-order", create_order_endpoint)
     runner = web.AppRunner(app)
