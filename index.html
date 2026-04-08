@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V47</title>
+    <title>Pizz King Sovereign V48</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
-        
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
         /* Category Slider Focus */
@@ -51,7 +50,6 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* Footer Cart Manager - STRICT 3-COLUMN GRID */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -70,7 +68,7 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - V47 SOVEREIGN GEOMETRY */
+        /* Payment Overlay - GEOMETRY OPTIMIZED V48 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         
         .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
@@ -78,11 +76,11 @@
         .qr-body { padding: 15px; background: #fff; }
         
         .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
-        .qr-name-small { font-size: 0.8rem; color: #7f8c8d; }
-        .qr-amount-bold { font-size: 1.1rem; color: var(--pizz-red); }
+        .qr-name-small { font-size: 0.85rem; color: #7f8c8d; }
+        .qr-amount-bold { font-size: 1.15rem; color: var(--pizz-red); }
 
-        .qr-img-main { width: 220px; height: 220px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
-        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 15px; line-height: 1.3; }
+        .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
+        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 12px; line-height: 1.3; }
 
         .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 8px 20px; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         
@@ -170,7 +168,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V47</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V48</p>
 </footer>
 
 <script>
@@ -239,34 +237,31 @@
         if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
     }
 
-    // --- CRC16 HEXADECIMAL ENGINE (SOVEREIGN PROTOCOL) ---
+    // --- CRC16 HEXADECIMAL ENGINE (EMVCo Corrective Protocol) ---
     function crc16(d) {
         let c = 0xFFFF;
         for (let i = 0; i < d.length; i++) {
             let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF;
             x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
         }
-        // FIXED: Return Hexadecimal instead of Decimal
         return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
     }
 
-    // --- SOVEREIGN 100% ABA MASTER DNA ENGINE V47 ---
+    // --- SOVEREIGN STRICT ABA MASTER DNA ENGINE V48 ---
     function generateDynamicABAQR(amt) {
-        // TEMPLATE: Strictly based on user prompt
-        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
+        // TEMPLATE: Strictly based on your successful manual string sequence
+        const prefix = "00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E8591402090872828275204000053031165802KH5909SOUR DARA6010Phnom Penh";
         
-        // TAG 54: [digit][amount] logic
+        // TAG 54: [digit][amount].0 logic
         const amtVal = amt.toString() + ".0";
         const digitCount = (amt.toString().length + 2).toString().padStart(2, '0');
         const amtTag = `54${digitCount}${amtVal}`;
         
-        const suffix = "5802KH5909SOUR DARA6010Phnom Penh993400131775624346406011318071603";
+        // Payload Construction with final CRC16 Hex
+        const payload = prefix + amtTag + "6304";
+        const checksum = crc16(payload);
         
-        // EMVCo Checksum Tag 6304
-        const partialPayload = prefix + amtTag + suffix + "6304";
-        const checksum = crc16(partialPayload);
-        
-        return partialPayload + checksum;
+        return payload + checksum;
     }
 
     function filterCatLocal(id) {
@@ -374,7 +369,7 @@
         document.getElementById('payment-screen').style.display = 'flex';
         document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         
-        // NEW DYNAMIC ABA LOGIC
+        // DYNAMIC ABA PROTOCOL V48
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
         
