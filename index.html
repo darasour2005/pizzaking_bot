@@ -13,143 +13,137 @@
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
         
-        /* STRICT MOBILE SIZE ON DESKTOP */
-        body { 
-            font-family: 'Kantumruy Pro', sans-serif; 
-            background: #121212; /* Pro Desktop Workspace */
-            margin: 0; padding: 0; 
-            display: flex; justify-content: center; 
-            color: var(--pizz-dark); 
-            overflow-x: hidden;
-            height: 100dvh;
-        }
+        /* STRICT V51 UI RESTORATION */
+        body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; padding-top: constant(safe-area-inset-top); padding-top: env(safe-area-inset-top); }
+        
+        /* Force Download Protocol - Prominent Banner */
+        #pwa-install-banner { display: none; background: var(--pizz-red); color: white; padding: 12px; position: fixed; top: 0; width: 100%; z-index: 1000; text-align: center; font-size: 0.8rem; font-weight: 700; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        #pwa-install-banner button { background: white; border: none; color: var(--pizz-red); padding: 5px 15px; border-radius: 20px; font-weight: 700; cursor: pointer; }
 
-        .app-shell {
-            width: 100%;
-            max-width: 450px; 
-            background: #f0f2f5;
-            height: 100dvh; /* Dynamic height to prevent chopping */
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* HEADER V59 - LOGO & MOVIE ON SAME LINE */
-        .master-header {
-            display: flex;
-            align-items: center;
-            background: #fff;
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--pizz-border);
-            z-index: 200;
-        }
-
-        .brand-logo-btn {
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
+        /* SOVEREIGN HEADER SPLIT V59 */
+        .master-header { display: flex; align-items: center; background: #fff; padding: 5px 10px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; gap: 5px; }
+        .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
         .brand-logo-btn.active { border-color: var(--pizz-green); }
 
-        .cat-slider { 
-            display: flex; 
-            overflow-x: auto; 
-            padding: 5px 10px; 
-            gap: 12px; 
-            scrollbar-width: none;
-            flex-grow: 1;
-        }
+        .cat-slider { display: flex; overflow-x: auto; padding: 12px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
         .cat-slider::-webkit-scrollbar { display: none; }
+        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
+        .cat-icon { width: 48px; height: 48px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .cat-item span { font-size: 0.7rem; display: block; white-space: nowrap; color: #7f8c8d; }
 
-        .movie-btn {
-            background: #fdf2f2;
-            border: 1px solid var(--pizz-red);
-            border-radius: 12px;
-            padding: 8px 12px;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-            transition: 0.2s;
-        }
-        .movie-btn span { font-size: 0.6rem; color: var(--pizz-red); font-weight: 700; margin-top: 2px; }
+        /* STANDOUT MOVIE BUTTON V59 */
+        .movie-btn-standout { background: black; border: none; border-radius: 12px; padding: 8px 12px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+        .movie-btn-standout span:first-child { font-size: 1.6rem; color: white; line-height: 1; } /* Bigger icon */
+        .movie-btn-standout span:last-child { font-size: 0.6rem; color: white; font-weight: 700; margin-top: 2px; } /* White text */
 
-        /* V51 COMPONENTS RESTORED */
-        .container { flex-grow: 1; overflow-y: auto; padding: 10px; padding-bottom: 250px; }
+        /* SOVEREIGN BANNER SLIDER STRUCTURE (STATIC FOR NOW) */
+        .banner-slider { width: 100%; max-height: 180px; position: relative; overflow: hidden; background: #fff; margin-bottom: 10px; }
+        .slider-wrapper { display: flex; transition: 0.3s; height: 180px; }
+        .slide { min-width: 100%; height: 100%; position: relative; cursor: pointer; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); color: white; padding: 10px; box-sizing: border-box; font-weight: 700; font-size: 0.85rem; }
+        .slider-dots { position: absolute; bottom: 5px; right: 5px; display: flex; gap: 5px; }
+        .slider-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; }
+        .slider-dot.active { background: #fff; }
+
+        /* Restored V51 Styles 100% Same */
+        .container { padding: 10px; padding-bottom: 250px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
-        .card img { width: 100%; height: 130px; object-fit: cover; }
-        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin: 10px; line-height: 1.2; }
-        .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-left: 10px; margin-bottom: 5px; }
-        
-        .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin: 0 10px 8px 10px; }
+        .card img { width: 100%; height: 130px; object-fit: cover; cursor: pointer; }
+        .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+        .title { font-size: 0.85rem; font-weight: 700; height: 38px; overflow: hidden; margin-bottom: 5px; line-height: 1.2; }
+        .price { color: var(--pizz-red); font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
+        .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
         .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
-
-        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin: 0 10px 10px 10px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        
-        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; margin: 0 10px 10px 10px; height: 42px; border-radius: 8px; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        /* FORMS - V51 STYLE */
+        .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
         .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
-
-        /* FOOTER */
-        .footer-cart { position: absolute; bottom: 0; width: 100%; max-width: 450px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
-        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
-        .cart-details.open { max-height: 250px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; }
-
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
+        .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .cart-header.open { display: flex; }
+        .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
+        .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
+        .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
+        .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
+        .cart-del-btn { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .checkout-btn:disabled { background: #bdc3c7 !important; }
-
-        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+        .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
+        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .btn-add-note.has-note { background: #e8f5e9; color: var(--pizz-green); border-color: var(--pizz-green); }
 
-        /* PAYMENT OVERLAY */
-        .pay-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; overflow: hidden; text-align: center; margin-bottom: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; }
+        /* Payment Restored V51 */
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
+        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
+        .qr-body { padding: 15px; background: #fff; }
+        .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
 
-        /* MODAL */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+
+        /* Modal Restored V51 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; box-sizing: border-box; }
-        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; margin-bottom: 15px; box-sizing: border-box; }
+        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        .modal-card textarea:focus { border-color: var(--pizz-green); }
 
-        .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; }
-        .cat-icon { width: 42px; height: 42px; background: var(--pizz-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; overflow: hidden; }
-        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
+        /* Footer and loader Restored V51 */
+        footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
         #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
+        .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
+        .shift-up { transform: translateY(-110px); }
     </style>
 </head>
 <body>
 
+<div id="pwa-install-banner">
+    <span>📲 តម្លើងកម្មវិធី Pizza King សព្វថ្ងៃ</span>
+    <button onclick="installPWA()">តម្លើង</button>
+</div>
+
 <div class="app-shell">
     <div class="master-header">
-        <img src="logo.png" id="cat-0" class="brand-logo-btn active" onclick="filterCatLocal(0)" alt="Logo">
+        <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         
         <div class="cat-slider" id="cat-slider">
             </div>
 
-        <a href="movie.html" class="movie-btn">
-            <span style="font-size: 1.4rem;">🎬</span>
+        <a href="movie.html" class="movie-btn-standout">
+            <span>🎬</span>
             <span>មើលកុន</span>
         </a>
+    </div>
+
+    <div class="banner-slider">
+        <div class="slider-wrapper" id="slider-wrapper">
+            <div class="slide" onclick="location.href='https://1.phsar.me/product/special-pizza/'">
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&h=180&auto=format&fit=cover" alt="Banner 1">
+                <div class="slide-caption">🚀 ប្រូម៉ូសិនពិសេស៖ Pizza King King!</div>
+            </div>
+            <div class="slide" onclick="location.href='movie.html'">
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&h=180&auto=format&fit=cover" alt="Banner 2">
+                <div class="slide-caption">🎬 កុនថ្មីប្រចាំសប្តាហ៍ មើលដោយសេរី!</div>
+            </div>
+        </div>
+        <div class="slider-dots" id="slider-dots">
+            <div class="slider-dot active" onclick="setSlide(0)"></div>
+            <div class="slider-dot" onclick="setSlide(1)"></div>
+        </div>
     </div>
 
     <div class="container">
         <div id="loader">🚀 កំពុងទាញយកទិន្នន័យ...</div>
         <div id="product-grid" class="grid"></div>
-        
         <div class="order-form">
             <h4 style="margin:0 0 12px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
             <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="saveFormData()"></div>
@@ -159,45 +153,54 @@
     </div>
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
-        <div class="cart-header" id="cart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-weight:700;">🛒 កន្ត្រកទំនិញ</span>
+        <div class="cart-header" id="cart-header">
+            <span class="summary-title">
+                <svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:black;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                ទំនិញដែលបានរើស
+            </span>
             <button class="btn-add-note" id="note-btn" onclick="openNote()">➕ ចំណាំ</button>
             <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
         </div>
         <div id="cart-list" class="cart-details"></div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
-            <span id="cart-count">០ មុខ</span><span id="cart-total">០៛</span>
+            <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
         </div>
         <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
     </div>
+
+    <a href="https://t.me/+85587282827" target="_blank" class="float-contact shift-up" id="float-contact-btn" style="transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <svg viewBox="0 0 24 24" style="width:30px;height:30px;fill:white;"><path d="M11.944 0C5.346 0 0 5.346 0 11.944c0 6.598 5.346 11.944 11.944 11.944 6.598 0 11.944-5.346 11.944-11.944C23.888 5.346 18.542 0 11.944 0zm5.642 8.358c-.161 1.696-.86 5.818-1.215 7.717-.15.805-.45 1.074-.728 1.101-.62.054-1.09-.413-1.689-.806-.94-.616-1.472-1-2.387-1.604-1.057-.698-.372-1.082.23-1.706.158-.163 2.905-2.664 2.958-2.887.007-.028.013-.131-.047-.184s-.149-.035-.213-.021c-.092.019-1.55 1.144-4.37 3.047-.413.284-.787.424-1.12.417-.367-.008-1.071-.208-1.595-.378-.642-.209-1.15-.319-1.106-.673.023-.185.276-.375.76-.569 2.967-1.293 4.945-2.146 5.934-2.558 2.825-1.177 3.412-1.381 3.795-1.387.084-.001.271.02.393.118.102.083.13.195.138.274.008.079.018.256.007.391z"/></svg>
+    </a>
 
     <div id="payment-screen" class="pay-overlay">
         <div style="font-weight:700; margin-bottom:8px;">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
         <div class="qr-capture-area" id="invoice-card">
             <div class="qr-header">KHQR</div>
-            <div class="qr-body" style="padding:15px; background:#fff;">
-                <div class="qr-one-line" style="display:flex; justify-content:center; align-items:center; gap:6px;">
-                    <span style="font-size:0.85rem; color:#7f8c8d;">SOUR DARA —</span>
-                    <span style="font-size:1.15rem; color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
+            <div class="qr-body" style="padding:15px;background:#fff;">
+                <div class="qr-one-line">
+                    <span style="font-size:0.85rem;color:#7f8c8d;">SOUR DARA —</span>
+                    <span style="font-size:1.15rem;color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span>
                 </div>
-                <img src="" id="dynamic-khqr" style="width:210px; height:210px; margin:0 auto; display:block; border-radius:6px; border:1px solid #f0f0f0;" crossOrigin="anonymous">
-                <div style="font-size:0.7rem; color:#2c3e50; font-weight: 700; margin-top: 12px;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
+                <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
+                <div style="font-size:0.7rem;color:#2c3e50;font-weight:700;margin-top:12px;line-height:1.3;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
             </div>
         </div>
-        <button onclick="downloadQRImage()" style="background:#fff; color:#007bff; border:1px solid #007bff; border-radius:20px; padding:8px 20px; font-weight:700; font-size:0.75rem; margin-bottom:12px;">រក្សាទុក QR Code</button>
+        <button onclick="downloadQRImage()" class="btn-save-qr">រក្សាទុក QR Code</button>
         <button class="mini-paid-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-        <button onclick="closePay()" style="background:none; border:none; margin-top:10px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
+        <button onclick="closePay()" style="background:none;border:none;margin-top:10px;color:#95a5a6;font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
+    </div>
+
+    <div id="note-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ</h4>
+            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..."></textarea>
+            <button class="checkout-btn" onclick="saveNote()">រក្សាទុក</button>
+            <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6;">បោះបង់</button>
+        </div>
     </div>
 </div>
 
-<div id="note-modal" class="modal-overlay">
-    <div class="modal-card">
-        <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ</h4>
-        <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..."></textarea>
-        <button class="checkout-btn" onclick="saveNote()">រក្សាទុក</button>
-        <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6;">បោះបង់</button>
-    </div>
-</div>
+<footer><p>Dara Sour 087282827 @2026 Pizza King V59</p></footer>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -207,6 +210,12 @@
     
     tg.expand(); tg.ready();
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
+
+    // PWA CORE (Re-integrated for install protocol)
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwa-install-banner').style.display = 'flex'; });
+    async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('pwa-install-banner').style.display = 'none'; } deferredPrompt = null; } }
 
     const DELIVERY_CONFIG = {
       "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"],
@@ -282,20 +291,6 @@
         return payload + crc16(payload);
     }
 
-    function renderCategories(cats) {
-        const container = document.getElementById('cat-slider');
-        cats.forEach(c => {
-            container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
-        });
-    }
-
-    function filterCatLocal(id) {
-        document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active'));
-        const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`);
-        if(el) el.classList.add('active');
-        renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
-    }
-
     function renderProducts(items) {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('product-grid').innerHTML = items.map(p => {
@@ -305,7 +300,7 @@
                 if (productVariations[pid].length <= 2) {
                     variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
                 } else {
-                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)" style="width:calc(100% - 20px); margin:0 10px 8px 10px; padding:5px; border-radius:5px; font-family:inherit; font-size:0.7rem;"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
+                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)" style="width:calc(100% - 20px);margin:0 10px 8px 10px;padding:5px;border-radius:5px;font-family:inherit;font-size:0.7rem;"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
                 }
             }
             return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart" onclick="addToCart(${pid})">បន្ថែមក្នុងកន្ត្រក</button></div></div>`;
@@ -331,13 +326,8 @@
         saveCartToStorage(); updateCartBasedOnDelivery(); tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function updateCartItemQty(cid, delta) {
-        const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); }
-    }
-    function removeFromCart(cid) {
-        cart = cart.filter(x => x.cartId !== cid); if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart();
-        saveCartToStorage(); updateCartBasedOnDelivery();
-    }
+    function updateCartItemQty(cid, delta) { const i = cart.find(x => x.cartId === cid); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + delta); saveCartToStorage(); updateCartBasedOnDelivery(); } }
+    function removeFromCart(cid) { cart = cart.filter(x => x.cartId !== cid); if(cart.length === 0 && document.getElementById('cart-header').classList.contains('open')) toggleCart(); saveCartToStorage(); updateCartBasedOnDelivery(); }
 
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
@@ -351,10 +341,12 @@
         updateUI(cart);
     }
 
+    // --- Restore V51 UI Exactly Same ---
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ`;
+        const floatBtn = document.getElementById('float-contact-btn'); if(show) floatBtn.classList.add('shift-up'); else floatBtn.classList.remove('shift-up');
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
             const isD = i.cartId.toString().startsWith('delivery');
@@ -406,11 +398,26 @@
     }
 
     function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60, 10), s = parseInt(t%60, 10); document.getElementById('pay-timer').textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
-    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); }
+    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function openDetail(pid) { const p = allProducts.find(x => x.id === pid); tg.showAlert(p.description || "គ្មានការពិពណ៌នា។"); }
-    
+    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
+    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
+
+    // --- SOVEREIGN BANNER SLIDER LOGIC ---
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    function showSlide(index) {
+        currentSlide = index;
+        document.getElementById('slider-wrapper').style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[index].classList.add('active');
+    }
+    function setSlide(index) { showSlide(index); }
+    setInterval(() => { currentSlide = (currentSlide + 1) % slides.length; showSlide(currentSlide); }, 15000);
+
     fetchData();
 </script>
 </body>
