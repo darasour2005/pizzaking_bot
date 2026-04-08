@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V43</title>
+    <title>Pizz King Sovereign V44</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -70,29 +70,31 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - CLEAN GEOMETRY V43 */
-        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* Payment Overlay - V44 MOBILE OPTIMIZED */
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         
-        .qr-capture-area { background: white; border-radius: 20px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 12px; }
-        .qr-header { background: var(--pizz-red); padding: 12px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.9rem; }
-        .qr-body { padding: 20px; background: #fff; }
+        .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
+        .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
+        .qr-body { padding: 15px; background: #fff; }
         
-        /* Name & Amount Single Line V43 */
-        .qr-one-line { font-weight: 700; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .qr-name-small { font-size: 0.9rem; color: #7f8c8d; }
-        .qr-amount-bold { font-size: 1.15rem; color: var(--pizz-red); }
+        /* One-line Compact Header */
+        .qr-one-line { font-weight: 700; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .qr-name-small { font-size: 0.8rem; color: #7f8c8d; }
+        .qr-amount-bold { font-size: 1.1rem; color: var(--pizz-red); }
 
-        .qr-img-main { width: 220px; height: 220px; margin: 0 auto; display: block; border-radius: 8px; border: 1px solid #f0f0f0; }
-        .qr-scan-note { font-size: 0.72rem; color: #2c3e50; font-weight: 700; margin-top: 15px; line-height: 1.4; }
+        .qr-img-main { width: 210px; height: 210px; margin: 0 auto; display: block; border-radius: 6px; border: 1px solid #f0f0f0; }
+        .qr-scan-note { font-size: 0.7rem; color: #2c3e50; font-weight: 700; margin-top: 12px; line-height: 1.3; }
 
-        /* Small Professional Save Button */
-        .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 6px 15px; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-save-qr { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; padding: 8px 20px; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         
         .pay-summary-toggle { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 310px; padding: 8px; font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: #7f8c8d; }
         .pay-summary-list { width: 100%; max-width: 310px; max-height: 0; overflow: hidden; transition: 0.3s; background: #fff; border-radius: 8px; }
-        .pay-summary-list.open { max-height: 160px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
+        .pay-summary-list.open { max-height: 150px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border: 1px solid #eee; }
 
         .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+
+        /* Save Fallback Popup */
+        .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
 
         /* Popups */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -121,17 +123,13 @@
                 <span class="qr-name-small">SOUR DARA —</span>
                 <span class="qr-amount-bold"><span id="pay-amt-label">0</span>៛</span>
             </div>
-            
             <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
-            
-            <div class="qr-scan-note">
-                សូមស្កេនដើម្បីបង់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់
-            </div>
+            <div class="qr-scan-note">សូមស្កេនដើម្បីបង់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់</div>
         </div>
     </div>
 
     <button onclick="downloadQRImage()" class="btn-save-qr">
-        <svg style="width:14px; height:14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
+        <svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
         រក្សាទុក QR Code
     </button>
 
@@ -142,7 +140,14 @@
     <div id="pay-summary-list" class="pay-summary-list"></div>
     
     <button class="mini-paid-btn" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
-    <button onclick="closePay()" style="background:none; border:none; margin-top:12px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
+    <button onclick="closePay()" style="background:none; border:none; margin-top:10px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
+</div>
+
+<div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
+    <p style="font-weight:700;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុកក្នុងទូរស័ព្ទ"</p>
+    <p style="font-size:0.8rem; opacity:0.7;">(Long press image to Save to Photos)</p>
+    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:20px; box-shadow:0 0 30px rgba(255,255,255,0.2);">
+    <button style="margin-top:30px; background:white; color:black; border:none; padding:10px 30px; border-radius:20px; font-weight:700;">រួចរាល់ (Close)</button>
 </div>
 
 <div id="popup-screen" class="popup-overlay" onclick="closePopup()">
@@ -183,7 +188,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V43</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V44</p>
 </footer>
 
 <script>
@@ -252,19 +257,19 @@
         if(savedCat && savedCat !== "0") filterCatLocal(parseInt(savedCat)); else renderProducts(allProducts);
     }
 
+    function renderCategories(cats) {
+        const container = document.getElementById('cat-slider');
+        cats.forEach(c => {
+            container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
+        });
+    }
+
     function filterCatLocal(id) {
         document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
         const el = document.getElementById(`cat-${id}`);
         if(el) el.classList.add('active');
         localStorage.setItem('pizz_king_focus_cat', id.toString());
         renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)));
-    }
-
-    function renderCategories(cats) {
-        const container = document.getElementById('cat-slider');
-        cats.forEach(c => {
-            container.innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`;
-        });
     }
 
     function renderProducts(items) {
@@ -366,18 +371,28 @@
         caret.innerText = list.classList.contains('open') ? "▲" : "▼";
     }
 
-    // --- SOVEREIGN SNAPSHOT ENGINE V43 ---
+    // --- SOVEREIGN MOBILE SAVE PROTOCOL V44 ---
     async function downloadQRImage() {
         const target = document.getElementById('invoice-card');
         const btn = document.querySelector('.btn-save-qr');
-        btn.innerHTML = "⏳ កំពុងទាញយក...";
+        btn.innerHTML = "⏳ កំពុងរៀបចំ...";
         try {
-            const canvas = await html2canvas(target, { scale: 3, useCORS: true });
-            const link = document.createElement("a");
-            link.download = `PizzKing_QR_${Date.now()}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            btn.innerHTML = "✅ រក្សាទុកជោគជ័យ";
+            const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
+            const dataUrl = canvas.toDataURL("image/png");
+            
+            // Check if we are on Desktop
+            if (window.innerWidth > 900 || !navigator.userAgent.match(/Android|iPhone|iPad/i)) {
+                const link = document.createElement("a");
+                link.download = `PizzKing_QR_${Date.now()}.png`;
+                link.href = dataUrl;
+                link.click();
+                btn.innerHTML = "✅ រក្សាទុកជោគជ័យ";
+            } else {
+                // MOBILE FALLBACK: Open in full-screen for Long-Press Save
+                document.getElementById('fallback-img').src = dataUrl;
+                document.getElementById('save-fallback').style.display = 'flex';
+                btn.innerHTML = "✅ រួចរាល់";
+            }
             setTimeout(() => { btn.innerHTML = `<svg style="width:14px; height:14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 2000);
         } catch(e) { btn.innerHTML = "⚠️ កំហុស"; }
     }
@@ -410,6 +425,7 @@
     }
     function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
+    
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
         const btn = document.getElementById('pre-pay-btn');
@@ -418,6 +434,7 @@
         btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
         btn.innerText = isValid ? "💳 បន្តទៅការបង់ប្រាក់" : "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
     }
+
     function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
