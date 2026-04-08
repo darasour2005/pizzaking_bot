@@ -2,8 +2,13 @@ import os
 import asyncio
 import logging
 from datetime import datetime
-import pytz
-from aiogram import Bot, Dispatcher, types, Router, F
+try:
+    import pytz
+except ImportError:
+    os.system('pip install pytz')
+    import pytz
+
+from aiogram import Bot, Dispatcher, types, Router
 from aiogram.filters import Command
 from aiogram.types import WebAppInfo
 from aiohttp import web
@@ -20,9 +25,8 @@ GROUP_CHAT_ID = '-1003499575831'
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 router = Router()
-wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version="wc/v3", timeout=20)
+wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version="wc/v3", timeout=15)
 
-# --- BOT HANDLERS ---
 @router.message(Command("start"))
 async def start_handler(message: types.Message):
     markup = types.ReplyKeyboardMarkup(
@@ -31,7 +35,6 @@ async def start_handler(message: types.Message):
     )
     await message.answer("🇰🇭 **ស្វាគមន៍មកកាន់ Pizz King!**", reply_markup=markup, parse_mode="Markdown")
 
-# --- ORDER API ENDPOINT ---
 async def create_order_endpoint(request):
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
     if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
@@ -42,33 +45,18 @@ async def create_order_endpoint(request):
         name = data.get('name', 'N/A')
         phone = data.get('phone', 'N/A')
         loc = data.get('location', 'N/A')
-        note = data.get('note', '') # CAPTURE NOTE
+        note = data.get('note', '')
         items = data.get('items', [])
         total = data.get('total', 0)
         
-        # TIMESTAMP ENGINE (KH Time)
+        # TIMESTAMP ENGINE (Asia/Phnom_Penh)
         kh_tz = pytz.timezone('Asia/Phnom_Penh')
         now = datetime.now(kh_tz)
         order_date = now.strftime("%d-%m-%Y")
         order_time = now.strftime("%H:%M")
 
-        # 1. WooCommerce Sync
-        line_items = []
-        for i in items:
-            item_id = str(i.get('id', ''))
-            if item_id.isdigit():
-                line_items.append({"product_id": int(item_id), "quantity": i['qty']})
-        
-        wcapi.post("orders", {
-            "status": "processing",
-            "billing": {"first_name": name, "address_1": loc, "phone": phone},
-            "line_items": line_items,
-            "customer_note": f"Note: {note} | Phone: {phone} | Date: {order_date} {order_time}"
-        })
-
-        # 2. Format Telegram Report
+        # 1. Format Telegram Report (Create this FIRST)
         item_list_str = "".join([f"• {i['name']} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n" for i in items])
-        
         note_display = f"\n📝 **ចំណាំ៖** {note}" if note.strip() else ""
 
         report_text = (
@@ -82,18 +70,40 @@ async def create_order_endpoint(request):
             f"💰 **សរុប៖ {int(total):,} ៛**"
         )
 
-        # 3. Notification: Buyer
+        # 2. SEND TELEGRAM MESSAGES (High Priority - Do this before WooCommerce)
+        # Send to Admin Group
+        try:
+            await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="Markdown")
+        except Exception as e:
+            logging.error(f"Group Notify Error: {e}")
+
+        # Send to Buyer
         if tid:
             try:
                 await bot.send_message(tid, f"✅ **ការកម្ម៉ង់បានជោគជ័យ!**\n\n{report_text}", parse_mode="Markdown")
-            except: pass
+            except Exception as e:
+                logging.error(f"Buyer Notify Error: {e}")
 
-        # 4. Notification: Admin Group
-        await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="Markdown")
+        # 3. WOOCOMMERCE SYNC (Lower Priority - Silent failure guard)
+        try:
+            line_items = []
+            for i in items:
+                item_id = str(i.get('id', ''))
+                if item_id.isdigit():
+                    line_items.append({"product_id": int(item_id), "quantity": i['qty']})
+            
+            wcapi.post("orders", {
+                "status": "processing",
+                "billing": {"first_name": name, "address_1": loc, "phone": phone},
+                "line_items": line_items,
+                "customer_note": f"Note: {note} | Phone: {phone} | Time: {order_date} {order_time}"
+            })
+        except Exception as e:
+            logging.error(f"WooCommerce Sync Error (Non-Fatal): {e}")
 
         return web.json_response({"status": "success"}, headers=headers)
     except Exception as e:
-        logging.error(f"Error: {e}")
+        logging.error(f"Global Error: {e}")
         return web.json_response({"status": "error", "message": str(e)}, status=500, headers=headers)
 
 async def main():
