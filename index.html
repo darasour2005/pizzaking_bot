@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V41</title>
+    <title>Pizz King Sovereign V42</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pizz-green: #2ecc71; --pizz-red: #e74c3c; --pizz-dark: #2c3e50; --pizz-gray: #f8f9fa; --pizz-border: #eeeeee; }
@@ -50,7 +51,7 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* Footer Cart Manager */
+        /* Footer Cart Manager - 3-Column Strict Grid */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -60,7 +61,6 @@
         .summary-title { font-weight:700; display:flex; align-items:center; gap:10px; font-size:1.1rem; }
         .summary-title svg { width:28px; height:28px; fill:black; }
         
-        /* 3-COLUMN GRID ALIGNMENT LOCKED */
         .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
         .cart-item-info { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
         .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
@@ -70,22 +70,26 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Overlay - CLEAN UI PROTOCOL V41 */
+        /* Payment Overlay - INVOICE CAPTURE PROTOCOL V42 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; text-align: center; margin-bottom: 15px; }
-        .qr-header { background: var(--pizz-red); padding: 15px; color: white; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
-        .qr-body { padding: 25px 20px; }
-        .qr-merchant-info { font-weight: 700; font-size: 1.1rem; color: #2c3e50; margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .qr-img-centered { width: 180px; height: 180px; border-radius: 12px; border: 1px solid #eee; margin: 0 auto; display: block; }
-        .save-qr-link { color: #007bff; font-size: 0.8rem; text-decoration: underline; background: none; border: none; cursor: pointer; margin-top: 15px; display: inline-block; }
-        .qr-footer-note { font-size: 0.75rem; color: #7f8c8d; font-weight: 700; padding: 10px 15px; }
+        
+        /* The specific area to capture as image */
+        .qr-capture-area { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.12); overflow: hidden; text-align: center; margin-bottom: 10px; }
+        .qr-header { background: var(--pizz-red); padding: 15px; color: white; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 1rem; }
+        .qr-body { padding: 25px 20px; background: #fff; }
+        .qr-merchant-info { font-weight: 700; font-size: 1.2rem; color: #2c3e50; margin-bottom: 5px; }
+        .qr-riel-total { color: var(--pizz-red); font-size: 2.2rem; font-weight: 700; margin-bottom: 15px; line-height: 1; }
+        .qr-img-main { width: 200px; height: 200px; border: 1px solid #eee; margin: 0 auto; display: block; border-radius: 8px; }
+        .qr-instruction { font-size: 0.75rem; color: #7f8c8d; font-weight: 700; padding: 15px; line-height: 1.4; border-top: 1px dashed #eee; margin-top: 15px; }
 
-        /* Compact Summary Toggle V41 */
-        .pay-summary-toggle { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; padding: 10px; border: 1px solid #ddd; font-family: inherit; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #7f8c8d; }
+        .btn-save-invoice { background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 30px; padding: 8px 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s; }
+        .btn-save-invoice:active { background: #f0f7ff; transform: scale(0.95); }
+
+        .pay-summary-toggle { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; padding: 10px; font-family: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #7f8c8d; }
         .pay-summary-list { width: 100%; max-height: 0; overflow: hidden; transition: 0.3s; background: #fff; border-radius: 8px; }
         .pay-summary-list.open { max-height: 200px; overflow-y: auto; margin-bottom: 10px; padding: 12px; border: 1px solid #eee; }
 
-        .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 320px; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+        .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 320px; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
 
         /* Popups */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -107,19 +111,22 @@
 <div id="payment-screen" class="pay-overlay">
     <div style="font-weight:700; margin-bottom:10px;">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer" style="color:var(--pizz-red);">15:00</span></div>
 
-    <div class="qr-invoice">
+    <div class="qr-capture-area" id="invoice-card">
         <div class="qr-header">KHQR</div>
         <div class="qr-body">
-            <div class="qr-merchant-info">SOUR DARA — <span id="pay-amt-label" style="color:var(--pizz-red);">0</span>៛</div>
-            
-            <img src="" id="dynamic-khqr" class="qr-img-centered">
-            
-            <button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" class="save-qr-link">
-                📥 រក្សាទុក QR
-            </button>
+            <div class="qr-merchant-info">SOUR DARA</div>
+            <div class="qr-riel-total"><span id="pay-amt-label">0</span>៛</div>
+            <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
+            <div class="qr-instruction">
+                សូមស្កេនដើម្បីទូទាត់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់ឱ្យបានត្រឹមត្រូវ
+            </div>
         </div>
-        <div class="qr-footer-note">សូមស្កេនដើម្បីទូទាត់ប្រាក់ និងពិនិត្យចំនួនទឹកប្រាក់ឱ្យបានត្រឹមត្រូវ</div>
     </div>
+
+    <button onclick="downloadInvoiceImage()" class="btn-save-invoice">
+        <svg style="width:18px; height:18px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
+        រក្សាទុកវិក្កយបត្រ (Save Invoice)
+    </button>
 
     <div style="width:100%; max-width:320px;">
         <button class="pay-summary-toggle" onclick="togglePaySummary()">
@@ -171,7 +178,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V41</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V42</p>
 </footer>
 
 <script>
@@ -334,7 +341,15 @@
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
             const isD = i.cartId.toString().startsWith('delivery');
-            return `<div class="cart-item-row"><div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div class="cart-item-actions">${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}<span class="qty-num">${i.qty}</span>${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`;
+            return `<div class="cart-item-row">
+                <div class="cart-item-info">${i.name}<br><small>${i.price.toLocaleString()}៛</small></div>
+                <div class="cart-item-actions">
+                    ${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', -1)">−</button>`}
+                    <span class="qty-num">${i.qty}</span>
+                    ${isD ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}', 1)">+</button>`}
+                </div>
+                <button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+            </div>`;
         }).join('');
         checkForm();
     }
@@ -346,14 +361,37 @@
         caret.innerText = list.classList.contains('open') ? "▲" : "▼";
     }
 
+    // --- SOVEREIGN SNAPSHOT ENGINE V42 ---
+    async function downloadInvoiceImage() {
+        const target = document.getElementById('invoice-card');
+        const btn = document.querySelector('.btn-save-invoice');
+        btn.innerHTML = "⏳ កំពុងទាញយក...";
+        
+        try {
+            const canvas = await html2canvas(target, { scale: 2, useCORS: true });
+            const dataUrl = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `PizzKing_Invoice_${Date.now()}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            btn.innerHTML = `<svg style="width:18px; height:18px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុកបានជោគជ័យ`;
+            setTimeout(() => { btn.innerHTML = `<svg style="width:18px; height:18px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុកវិក្កយបត្រ (Save Invoice)`; }, 3000);
+        } catch(e) { btn.innerHTML = "⚠️ កំហុសក្នុងការទាញយក"; }
+    }
+
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
+        
         document.getElementById('pay-summary-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
+        
         const finalQR = "00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E8591402090872828275204000053031165802KH5909SOUR DARA6010Phnom Penh63046125";
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(finalQR)}`;
-        startTimer(900);
+        
+        startTimer(900); // RESTORED 15M TIMER
         document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
     }
 
@@ -374,6 +412,7 @@
     }
     function closePopup() { document.getElementById('popup-screen').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
+    
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
         const btn = document.getElementById('pre-pay-btn');
@@ -382,6 +421,7 @@
         btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
         btn.innerText = isValid ? "💳 បន្តទៅការបង់ប្រាក់" : "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
     }
+
     function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
