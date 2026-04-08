@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V50</title>
+    <title>Pizz King Sovereign V51</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -32,7 +32,6 @@
         .var-container { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
         .var-chip { padding: 4px 10px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 18px; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
         .var-chip.active { background: var(--pizz-green); color: #fff; border-color: var(--pizz-green); }
-        .var-selector { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #e0e0e0; font-family: inherit; font-size: 0.7rem; margin-bottom: 8px; }
 
         .qty-control { display: flex; align-items: center; justify-content: space-between; background: var(--pizz-gray); border-radius: 8px; padding: 3px; margin-bottom: 10px; }
         .qty-btn { width: 30px; height: 30px; border: none; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -50,6 +49,7 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
+        /* Footer Cart Manager */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
@@ -68,7 +68,11 @@
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-        /* Payment Screen Protocol V50 */
+        /* Note Button Styling */
+        .btn-add-note { background: #f0f2f5; color: #7f8c8d; border: 1px dashed #ccc; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-add-note.has-note { background: #e8f5e9; color: var(--pizz-green); border-color: var(--pizz-green); }
+
+        /* Payment Screen Protocol V51 */
         .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .qr-capture-area { background: white; border-radius: 18px; width: 100%; max-width: 310px; padding: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.1); overflow: hidden; text-align: center; margin-bottom: 10px; }
         .qr-header { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; letter-spacing: 2px; font-size: 0.85rem; }
@@ -87,7 +91,11 @@
 
         .mini-paid-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; max-width: 310px; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
         
-        /* Save Instruction Overlay (Fallback) */
+        /* Modal for Note V51 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; box-sizing: border-box; }
+        .modal-card textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box; margin-bottom: 15px; }
+
         .save-fallback-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:white; }
 
         .clear-close { position:absolute; top:10px; right:10px; background:#fff; border:1px solid #ddd; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--pizz-red); cursor:pointer; font-weight:bold; z-index:10; }
@@ -131,18 +139,18 @@
     <button onclick="closePay()" style="background:none; border:none; margin-top:10px; color:#95a5a6; font-size:0.8rem;">ត្រឡប់ក្រោយ</button>
 </div>
 
-<div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
-    <p style="font-weight:700; margin-bottom:5px;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
-    <p style="font-size:0.75rem; opacity:0.6;">(Long press to save to Photos)</p>
-    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:15px; box-shadow:0 0 20px rgba(255,255,255,0.3);">
-    <button style="margin-top:20px; background:#fff; color:#000; border:none; padding:10px 30px; border-radius:20px; font-weight:700;">រួចរាល់ (Close)</button>
+<div id="note-modal" class="modal-overlay">
+    <div class="modal-card">
+        <h4 style="margin-top:0;">📝 បន្ថែមចំណាំ (Add Note)</h4>
+        <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ, ដាក់នៅមុខផ្ទះ..."></textarea>
+        <button class="checkout-btn" onclick="saveNote()">រក្សាទុក</button>
+        <button onclick="closeNote()" style="background:none; border:none; width:100%; margin-top:10px; color:#95a5a6;">បោះបង់</button>
+    </div>
 </div>
 
-<div id="popup-screen" class="popup-overlay" onclick="closePopup()">
-    <div class="popup-card" onclick="event.stopPropagation()">
-        <button class="clear-close" onclick="closePopup()">×</button>
-        <div id="popup-content"></div>
-    </div>
+<div id="save-fallback" class="save-fallback-overlay" onclick="this.style.display='none'">
+    <p style="font-weight:700;">សង្កត់លើរូបភាពខាងក្រោមដើម្បី "រក្សាទុក"</p>
+    <img id="fallback-img" style="width:100%; max-width:310px; border-radius:15px; margin-top:20px;">
 </div>
 
 <div class="cat-slider" id="cat-slider">
@@ -166,6 +174,7 @@
             <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
             ទំនិញដែលបានរើស
         </span>
+        <button class="btn-add-note" id="note-btn" onclick="openNote()">➕ ចំណាំ</button>
         <button onclick="toggleCart()" style="background:none; border:none; font-size:24px; color:#ccc;">×</button>
     </div>
     <div id="cart-list" class="cart-details"></div>
@@ -176,7 +185,7 @@
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V50</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V51</p>
 </footer>
 
 <script>
@@ -186,7 +195,7 @@
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
     tg.expand(); tg.ready();
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     const DELIVERY_CONFIG = {
       "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"],
@@ -351,31 +360,29 @@
 
     function togglePaySummary() { const list = document.getElementById('pay-summary-list'); const caret = document.getElementById('summary-caret'); list.classList.toggle('open'); caret.innerText = list.classList.contains('open') ? "▲" : "▼"; }
 
-    // --- SOVEREIGN NATIVE SAVE PROTOCOL V50 ---
+    // --- NOTE LOGIC V51 ---
+    function openNote() { document.getElementById('note-modal').style.display = 'flex'; document.getElementById('note-input').value = customerNote; }
+    function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
+    function saveNote() { 
+        customerNote = document.getElementById('note-input').value; 
+        const btn = document.getElementById('note-btn');
+        if(customerNote.trim() !== "") { btn.classList.add('has-note'); btn.innerText = "✅ ចំណាំ"; }
+        else { btn.classList.remove('has-note'); btn.innerText = "➕ ចំណាំ"; }
+        closeNote(); 
+    }
+
     async function downloadQRImage() {
-        const target = document.getElementById('invoice-card');
-        const btn = document.querySelector('.btn-save-qr');
-        btn.innerHTML = "⏳ កំពុងរៀបចំ...";
+        const target = document.getElementById('invoice-card'); const btn = document.querySelector('.btn-save-qr'); btn.innerHTML = "⏳ កំពុងរៀបចំ...";
         try {
             const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
             const dataUrl = canvas.toDataURL("image/png");
-            
-            // 1. Convert to Blob for Sharing
             const blob = await (await fetch(dataUrl)).blob();
             const file = new File([blob], "PizzKing_QR.png", { type: "image/png" });
-
-            // 2. Try Native Share API (Perfect for iPhone/Android Native Function)
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: 'Pizz King QR Code',
-                    text: 'សូមរក្សាទុកដើម្បីបង់ប្រាក់'
-                });
+                await navigator.share({ files: [file], title: 'Pizz King QR Code', text: 'សូមរក្សាទុកដើម្បីបង់ប្រាក់' });
                 btn.innerHTML = "✅ រក្សាទុកជោគជ័យ";
             } else {
-                // 3. FALLBACK: Full-screen Image for Long-press Save
-                document.getElementById('fallback-img').src = dataUrl;
-                document.getElementById('save-fallback').style.display = 'flex';
+                document.getElementById('fallback-img').src = dataUrl; document.getElementById('save-fallback').style.display = 'flex';
                 btn.innerHTML = "✅ រួចរាល់";
             }
             setTimeout(() => { btn.innerHTML = `<svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg> រក្សាទុក QR Code`; }, 3000);
@@ -394,7 +401,15 @@
 
     async function submitFinalOrder() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total };
+        const orderData = { 
+            telegram_id: tg.initDataUnsafe.user?.id, 
+            name: document.getElementById('user-name').value, 
+            phone: document.getElementById('user-phone').value, 
+            location: document.getElementById('user-loc').value, 
+            items: cart, 
+            total,
+            note: customerNote  // SENDING NOTE TO BACKEND
+        };
         document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
