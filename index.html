@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizz King Sovereign V38</title>
+    <title>Pizz King Sovereign V39</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +11,7 @@
         
         body { font-family: 'Kantumruy Pro', sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
-        /* Category Slider Focus */
+        /* Category Focus Glow */
         .cat-slider { display: flex; overflow-x: auto; padding: 12px; background: #fff; gap: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
         .cat-slider::-webkit-scrollbar { display: none; }
         .cat-item { text-align: center; min-width: 60px; cursor: pointer; flex-shrink: 0; transition: 0.3s; }
@@ -41,6 +41,7 @@
         .btn-add-cart { background: var(--pizz-green); color: #fff; border: none; width: 100%; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; gap: 8px; }
         .btn-add-cart svg { width: 22px; height: 22px; fill: white; }
 
+        /* Floating Contact & Jump Protocol */
         .float-contact { position: fixed; bottom: 35px; right: 20px; width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,136,204,0.4); z-index: 150; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .float-contact svg { width: 30px; height: 30px; fill: white; }
         .float-contact.shift-up { transform: translateY(-110px); }
@@ -50,26 +51,39 @@
         .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
 
-        /* Footer Cart Manager - PRO GRID ALIGNMENT FIX */
+        /* Footer Cart summary icon 黑加大 Alignment */
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 200; border-radius: 20px 20px 0 0; }
         .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cart-header.open { display: flex; }
         .cart-details { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
         .cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        .summary-title { font-weight:700; display:flex; align-items:center; gap:8px; font-size:1.1rem; }
-        .summary-title svg { width:26px; height:26px; fill:black; }
+        .summary-title { font-weight:700; display:flex; align-items:center; gap:10px; font-size:1.1rem; }
+        .summary-title svg { width:28px; height:28px; fill:black; }
         
-        /* THE ALIGNMENT FIX */
-        .cart-item-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
-        .cart-item-info { font-size: 0.82rem; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
-        .cart-item-actions { display: flex; align-items: center; gap: 6px; }
-        
-        .cart-del-btn { color: var(--pizz-red); background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-        .cart-del-btn svg { width: 16px; height: 16px; fill: var(--pizz-red); }
+        /* 3-Column Strict Grid Alignment Fix (V39 Sovereign) */
+        .cart-item-row { display: grid; grid-template-columns: 1fr 100px 40px; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f9f9f9; }
+        .cart-item-info { font-size: 0.82rem; font-weight: 700; line-height: 1.2; overflow: hidden; }
+        .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
+        .cart-del-btn { color: var(--pizz-red); background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cart-del-btn svg { width: 18px; height: 18px; fill: var(--pizz-red); }
         
         .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
         .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
+
+        /* Payment Overlay - High Visibility Invoice */
+        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; text-align: center; margin-bottom: 15px; }
+        .qr-header { background: var(--pizz-red); padding: 15px; color: white; font-weight: 700; letter-spacing: 2px; }
+        .qr-body { padding: 25px 20px; }
+        .qr-img { width: 220px; height: 220px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 5px; }
+        .qr-riel-label { font-size: 0.85rem; color: #7f8c8d; font-weight: 700; margin-top: 10px; }
+        .qr-riel { font-weight: 700; font-size: 2.8rem; color: var(--pizz-red); line-height: 1; margin: 5px 0 15px 0; }
+        
+        /* Collapsible Pay Summary */
+        .pay-summary-toggle { background: #eee; border-radius: 8px; width: 100%; padding: 12px; border: none; font-family: inherit; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .pay-summary-list { width: 100%; max-height: 0; overflow: hidden; transition: 0.3s; background: #fff; border-radius: 8px; }
+        .pay-summary-list.open { max-height: 200px; overflow-y: auto; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; }
 
         /* Popups */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -79,14 +93,6 @@
         footer { text-align: center; padding: 30px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
         #loader { text-align: center; padding: 60px; color: #95a5a6; font-weight: 700; }
         
-        /* Payment Overlay */
-        .pay-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 300; display: none; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .qr-invoice { background: white; border-radius: 24px; width: 100%; max-width: 320px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; text-align: center; margin-bottom: 20px; }
-        .qr-header { background: var(--pizz-red); padding: 18px; color: white; font-weight: 700; letter-spacing: 3px; }
-        .qr-body { padding: 30px 20px; }
-        .qr-img { width: 220px; height: 220px; border-radius: 12px; margin-bottom: 10px; }
-        .qr-riel { font-weight: 700; font-size: 2.4rem; color: var(--pizz-red); line-height: 1; margin-top: 10px; }
-
         @media screen and (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } .container { max-width: 900px; margin: 0 auto; } }
     </style>
 </head>
@@ -97,20 +103,28 @@
 </a>
 
 <div id="payment-screen" class="pay-overlay">
-    <div style="font-weight:700; margin-bottom:12px; color:#7f8c8d;">ទូទាត់ប្រាក់តាម KHQR</div>
     <div class="qr-invoice">
         <div class="qr-header">KHQR</div>
         <div class="qr-body">
-            <div style="font-weight:700; margin-bottom:10px; font-size:1.1rem;">SOUR DARA</div>
+            <div style="font-weight:700; margin-bottom:15px; font-size:1.1rem; color:#2c3e50;">SOUR DARA</div>
             <img src="" id="dynamic-khqr" class="qr-img">
             <div style="margin-top:10px;"><button onclick="tg.openLink(document.getElementById('dynamic-khqr').src)" style="background:none; border:none; color:#007bff; font-size:0.85rem; text-decoration:underline; cursor:pointer;">📥 រក្សាទុក QR</button></div>
         </div>
         <div class="qr-footer">
-            <div style="font-size: 0.8rem; color:#95a5a6; margin-bottom: 5px;">សូមវាយបញ្ចូលចំនួនទឹកប្រាក់ខាងក្រោម៖</div>
+            <div class="qr-riel-label">សូមវាយបញ្ចូលចំនួនទឹកប្រាក់ខាងក្រោម៖</div>
             <div class="qr-riel"><span id="pay-amt-label">0</span> ៛</div>
         </div>
     </div>
-    <button class="checkout-btn" style="width:100%; max-width:320px;" id="confirm-btn" onclick="submitFinalOrder()">✅ បង់ប្រាក់រួចរាល់ (បញ្ជូនកម្ម៉ង់)</button>
+
+    <div style="width:100%; max-width:320px;">
+        <button class="pay-summary-toggle" onclick="togglePaySummary()">
+            <span>📝 បង្ហាញទំនិញដែលត្រូវបង់</span>
+            <span id="summary-caret">▼</span>
+        </button>
+        <div id="pay-summary-list" class="pay-summary-list"></div>
+    </div>
+    
+    <button class="checkout-btn" style="width:100%; max-width:320px; margin-top:5px;" id="confirm-btn" onclick="submitFinalOrder()">✅ ខ្ញុំបានវាយចំនួន និងបង់ប្រាក់រួចរាល់</button>
     <button onclick="closePay()" style="background:none; border:none; margin-top:20px; color:#95a5a6;">ត្រឡប់ក្រោយ</button>
 </div>
 
@@ -148,11 +162,11 @@
     <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
         <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
     </div>
-    <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានเพื่อបង់ប្រាក់</button>
+    <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>បំពេញព័ត៌មានដើម្បីបង់ប្រាក់</button>
 </div>
 
 <footer>
-    <p>Dara Sour 087282827 @2026 Pizza King V38</p>
+    <p>Dara Sour 087282827 @2026 Pizza King V39</p>
 </footer>
 
 <script>
@@ -210,11 +224,10 @@
             localStorage.setItem(C_VAR, JSON.stringify(productVariations));
             localStorage.setItem(C_TIME, now);
             restoreState();
-        } catch(e) { document.getElementById('loader').innerText = "⚠️ Offline Mode"; }
+        } catch(e) { document.getElementById('loader').innerText = "⚠️ គ្មានការតភ្ជាប់"; }
     }
 
     function restoreState() {
-        // PRO FIX: Restore form fields BEFORE triggering logic
         document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
         document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
         document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
@@ -222,7 +235,6 @@
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) { cart = JSON.parse(savedCart); }
         
-        // RE-CALCULATE EVERYTHING IMMEDIATELY
         updateCartBasedOnDelivery();
         checkForm();
 
@@ -327,6 +339,7 @@
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
+        
         document.getElementById('cart-list').innerHTML = itemsList.map(i => {
             const isD = i.cartId.toString().startsWith('delivery');
             return `<div class="cart-item-row">
@@ -341,24 +354,42 @@
                 </button>
             </div>`;
         }).join('');
-        checkForm(); // Re-validate button state
+        checkForm();
+    }
+
+    function togglePaySummary() {
+        const list = document.getElementById('pay-summary-list');
+        const caret = document.getElementById('summary-caret');
+        if(list.classList.contains('open')) {
+            list.classList.remove('open'); caret.innerText = "▼";
+        } else {
+            list.classList.add('open'); caret.innerText = "▲";
+        }
     }
 
     function openPayment() {
-        document.getElementById('pay-amt-label').innerText = cart.reduce((s, i) => s + (i.price * i.qty), 0).toLocaleString();
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('payment-screen').style.display = 'flex';
-        // USER MASTER STRING:
+        
+        // Render Pay Summary Verification Logic V39
+        document.getElementById('pay-summary-list').innerHTML = cart.map(i => `
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
+                <span>${i.name} x${i.qty}</span>
+                <span>${(i.price * i.qty).toLocaleString()}៛</span>
+            </div>
+        `).join('') + `<div style="border-top:1px solid #eee; margin-top:5px; padding-top:5px; font-weight:700; display:flex; justify-content:space-between;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
+
+        // MASTER ABA STRING
         const finalQR = "00020101021129450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E8591402090872828275204000053031165802KH5909SOUR DARA6010Phnom Penh63046125";
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(finalQR)}`;
-        startTimer(900);
+        
         document.getElementById('user-loc').readOnly = true; document.getElementById('user-phone').readOnly = true;
     }
 
     async function submitFinalOrder() {
-        const phone = document.getElementById('user-phone').value;
-        const loc = document.getElementById('user-loc').value;
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone, location: loc, items: cart, total };
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id, name: document.getElementById('user-name').value, phone: document.getElementById('user-phone').value, location: document.getElementById('user-loc').value, items: cart, total };
         document.getElementById('confirm-btn').innerText = "⏳ កំពុងបញ្ជូន...";
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
@@ -378,14 +409,12 @@
     function checkForm() {
         const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
         const btn = document.getElementById('pre-pay-btn');
-        if(n.length > 1 && p.length > 8 && l.length > 3) {
-            btn.disabled = false; btn.style.background = "#2ecc71"; btn.innerText = "💳 បន្តទៅការបង់ប្រាក់";
-        } else {
-            btn.disabled = true; btn.style.background = "#bdc3c7"; btn.innerText = "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់";
-        }
+        const isValid = (n.length > 1 && p.length > 8 && l.length > 3);
+        btn.disabled = !isValid;
+        if(isValid) { btn.style.background = "#2ecc71"; btn.innerText = "💳 បន្តទៅការបង់ប្រាក់"; }
+        else { btn.style.background = "#bdc3c7"; btn.innerText = "បំពេញព័ត៌មានដើម្បីបង់ប្រាក់"; }
     }
 
-    function startTimer(d) { let t = d, m, s; const disp = document.getElementById('pay-timer'); clearInterval(window.payInt); window.payInt = setInterval(() => { m = parseInt(t/60, 10); s = parseInt(t%60, 10); disp.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s); if(--t < 0) t=0; }, 1000); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; document.getElementById('user-loc').readOnly = false; document.getElementById('user-phone').readOnly = false; }
     
