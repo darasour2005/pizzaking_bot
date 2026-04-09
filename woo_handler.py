@@ -1,6 +1,7 @@
 # woo_handler.py - DEDICATED WOOCOMMERCE & ORDER ENGINE
 import logging
 import html
+import asyncio  # <-- NEW: Added for Background Threading
 from datetime import datetime
 import pytz
 from aiohttp import web
@@ -15,6 +16,16 @@ wcapi = API(
     version="wc/v3", 
     timeout=15
 )
+
+def background_wc_sync(order_payload):
+    """
+    Synchronous helper function.
+    This runs in a background thread so it doesn't freeze the main server.
+    """
+    try:
+        wcapi.post("orders", order_payload)
+    except Exception as e:
+        logging.error(f"WC Sync Error: {e}")
 
 async def create_order_endpoint(request):
     """
@@ -102,23 +113,24 @@ async def create_order_endpoint(request):
             except Exception as e:
                 logging.error(f"Buyer Send Error: {e}")
 
-        # 4. WOOCOMMERCE SYNC
-        try:
-            wcapi.post("orders", {
-                "status": "processing",
-                "billing": {
-                    "first_name": name, 
-                    "address_1": loc, 
-                    "phone": phone,
-                    "email": account_email 
-                },
-                "line_items": wp_line_items,
-                "shipping_lines": wp_shipping_lines,
-                "customer_note": f"{note} (Time: {order_date} {order_time})",
-            })
-        except Exception as e:
-            logging.error(f"WC Sync Error: {e}")
+        # 4. WOOCOMMERCE SYNC (THE FIX: Non-Blocking Thread)
+        wc_payload = {
+            "status": "processing",
+            "billing": {
+                "first_name": name, 
+                "address_1": loc, 
+                "phone": phone,
+                "email": account_email 
+            },
+            "line_items": wp_line_items,
+            "shipping_lines": wp_shipping_lines,
+            "customer_note": f"{note} (Time: {order_date} {order_time})",
+        }
+        
+        # This tells Python: "Send this to WooCommerce in the background, do not make the user wait."
+        asyncio.create_task(asyncio.to_thread(background_wc_sync, wc_payload))
 
+        # Server replies to the Telegram App instantly, avoiding the Connection Error timeout.
         return web.json_response({"status": "success"}, headers=headers)
         
     except Exception as e:
