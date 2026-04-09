@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pizza King Store V2.2</title>
+    <title>Pizza King Store V2.3 - Restored</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -12,30 +13,73 @@
 </head>
 <body class="notranslate">
 
-<div id="loader"><img src="logo.png" class="loader-img"></div>
+<div id="toast"><svg style="width:16px;height:16px;fill:white;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>បន្ថែមក្នុងកន្ត្រករួចរាល់!</span></div>
+<div id="loader"><img src="logo.png" class="loader-img"><div style="font-weight:700; color:var(--pizz-red); margin-top:15px;">🚀 កំពុងទាញយកទិន្នន័យ...</div></div>
 
 <div id="app-shell">
     <div class="master-header index-header">
-        <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)">
+        <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
-        <a href="movie.html" class="movie-btn-pro">🎬</a>
+        <a href="movie.html" class="movie-btn-pro"><span>🎬</span><span>មើលកុន</span></a>
     </div>
 
     <div class="container">
         <div id="slider-container"></div>
-
-        <div id="product-slider-container"></div>
 
         <div id="product-grid" class="grid"></div>
         
         <div id="shipping-form-placeholder"></div>
     </div>
 
-    <div id="mini-cart-placeholder"></div>
+    <div id="footer-ui-container"></div>
 
-    <div id="payment-screen" class="pay-overlay">...</div>
-    <div id="success-modal" class="modal-overlay">...</div>
-    <div id="detail-popup" class="popup-screen" onclick="closeDetail()">...</div>
+    <div id="payment-screen" class="pay-overlay">
+        <div class="qr-card" id="invoice-card">
+            <div class="qr-header-bar">KHQR V2.0</div>
+            <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
+            <div id="recap-list" class="recap-list"></div>
+            <div id="qr-container">
+                <div style="font-weight:700; margin-bottom:10px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
+                <div class="qr-one-line"><span style="color:#7f8c8d; font-size:0.9rem;">SOUR DARA —</span><span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span></div>
+                <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
+                <div style="font-size:0.75rem; color:#2c3e50; font-weight: 700; margin: 10px 0;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
+            </div>
+            <button onclick="downloadQRImage()" class="btn-save-qr-mini">រក្សាទុក QR Code</button>
+            <button class="btn-paid-final" id="confirm-btn" onclick="submitFinalOrder()">
+                <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>
+            </button>
+            <button onclick="closePay()" style="background:none; border:none; color:#95a5a6; font-weight:700; cursor:pointer; font-size:0.9rem; margin-bottom:5px;">ត្រឡប់ក្រោយ</button>
+        </div>
+    </div>
+
+    <div id="note-modal" class="modal-overlay">
+        <div class="isolated-note-card">
+            <h4 style="margin:0 0 15px 0; color:#2c3e50; font-size: 1.1rem;">📝 បន្ថែមចំណាំ</h4>
+            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..." style="height:100px; width:100%; box-sizing:border-box;"></textarea>
+            <button class="btn-paid-final" onclick="saveNote()" style="margin-bottom:10px;">រក្សាទុក (Save)</button>
+            <button onclick="closeNote()" style="background:none; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:1rem;">បោះបង់ (Cancel)</button>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal-overlay">
+        <div class="isolated-note-card" style="padding: 30px 20px;">
+            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0;">ការកម្ម៉ង់ជោគជ័យ!</h3>
+            <p id="success-text" style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px;">
+                អរគុណ <span id="success-name-kh" style="color:var(--pizz-red); font-weight:700;"></span> សម្រាប់ការកម្ម៉ង់!
+            </p>
+            <button class="btn-paid-final" onclick="location.reload()">យល់ព្រម (OK)</button>
+        </div>
+    </div>
+
+    <div id="detail-popup" class="popup-screen" onclick="closeDetail()">
+        <div class="popup-card" onclick="event.stopPropagation()">
+            <button class="close-x" onclick="closeDetail()">×</button>
+            <div id="popup-content"></div>
+        </div>
+    </div>
     
     <div id="bottom-nav-placeholder"></div>
 </div>
@@ -43,33 +87,61 @@
 <script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="slider.js"></script>
-<script src="product-slider.js"></script>
 <script src="mini-cart.js"></script>
 <script src="shipping-form.js"></script>
 <script src="aba-qr.js"></script>
 
 <script>
-    // --- 100% ORIGINAL LOGIC HUB ---
+    // --- RESTORED GLOBAL STATE ---
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
+    // --- INITIALIZATION ---
     function init() {
         loadBottomNav('home');
         initSlider();      // Movie Slider
-        loadShippingForm(); // Shipping Bloc
-        renderMiniCart();   // Cart Bloc
+        renderMiniCart();   // Cart Footer
+        loadShippingForm(); // Shipping Inputs
+        
+        const tg = window.Telegram.WebApp;
+        tg.expand(); tg.ready();
+        
         fetchData();
     }
 
     async function fetchData() {
-        const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`);
-        allProducts = await prodRes.json();
-        renderProducts(allProducts);
-        renderProductSlider(0); // Featured Sale Slider
-        restoreState();
-        document.getElementById('loader').style.display = 'none';
+        try {
+            // Fetch Categories
+            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`);
+            const cats = await catRes.json();
+            renderCategories(cats);
+
+            // Fetch Products
+            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`);
+            allProducts = await prodRes.json();
+            
+            // Fetch Variations
+            for (const vp of allProducts.filter(p => p.type === 'variable')) {
+                const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`);
+                productVariations[vp.id] = await vRes.json();
+            }
+
+            filterCatLocal(0);
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
+        } catch(e) { 
+            console.error("Fetch Error:", e);
+            document.getElementById('loader').style.display = 'none'; 
+        }
     }
 
-    // 100% Original renderProducts function preserved
+    function restoreState() {
+        const savedCart = localStorage.getItem('pizz_king_cart_v36');
+        if(savedCart) cart = JSON.parse(savedCart);
+        updateCartBasedOnDelivery();
+        renderProducts(allProducts);
+    }
+
+    // --- GRID ENGINE (Restored to 2-Column Standard) ---
     function renderProducts(items) {
         document.getElementById('product-grid').innerHTML = items.map(p => {
             const pid = p.id;
@@ -83,7 +155,7 @@
                         <div class="action-row">
                             <div class="qty-control">
                                 <button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button>
-                                <span id="q-${pid}" style="font-weight:bold;">${qty}</span>
+                                <span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">${qty}</span>
                                 <button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button>
                             </div>
                             <button class="btn-add-cart-icon" onclick="addToCart(${pid})">
@@ -96,8 +168,121 @@
         }).join('');
     }
 
-    // All original state, cart, and payment functions remain here as the Read-Only Ledger
-    // ... addToCart, updateCartBasedOnDelivery, updateUI, checkForm, openPayment, etc ...
+    // --- CART LOGIC (Carried Forward from V2.0 Ledger) ---
+    function addToCart(pid) {
+        const p = allProducts.find(x => x.id === pid);
+        const q = cardQtys[pid] || 1;
+        const existing = cart.find(i => i.id === pid && !i.cartId.toString().includes('-'));
+        
+        if(existing) existing.qty += q; 
+        else cart.push({ cartId: pid, id: pid, name: p.name, price: parseFloat(p.price), qty: q });
+        
+        localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart));
+        updateCartBasedOnDelivery();
+        
+        const t = document.getElementById('toast');
+        t.style.display='flex';
+        setTimeout(() => t.style.display='none', 2000);
+    }
+
+    function updateCartBasedOnDelivery() {
+        const realItems = cart.filter(i => i.id !== 'delivery');
+        if(realItems.length === 0) { cart = []; updateUI([]); return; }
+        
+        const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
+        const locRaw = (localStorage.getItem('pizz_king_loc') || "").toLowerCase();
+        
+        cart = realItems;
+        if(locRaw.length > 3) {
+            const isSR = APP_CONFIG.DELIVERY.siem_reap_keywords.some(k => locRaw.includes(k));
+            let fee = isSR ? 
+                (subtotal < APP_CONFIG.DELIVERY.siem_reap_free_over_riel ? APP_CONFIG.DELIVERY.siem_reap_charge_riel : 0) : 
+                (subtotal < APP_CONFIG.DELIVERY.other_location_threshold_riel ? APP_CONFIG.DELIVERY.other_location_charge_below_riel : APP_CONFIG.DELIVERY.other_location_charge_over_or_equal_riel);
+            
+            if(fee > 0) cart.push({ cartId: "delivery", id: "delivery", name: "ថ្លៃដឹកជញ្ជូន", price: fee, qty: 1 });
+        }
+        updateUI(cart);
+    }
+
+    function updateUI(itemsList) {
+        const show = itemsList.length > 0;
+        document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
+        
+        const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => i.id !== 'delivery').length} មុខ`;
+        document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
+        
+        const cartList = document.getElementById('cart-list');
+        if(cartList) {
+            cartList.innerHTML = itemsList.map(i => `
+                <div class="cart-item-row">
+                    <div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span>${i.qty}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        checkForm();
+    }
+
+    function checkForm() {
+        const n = localStorage.getItem('pizz_king_name') || "";
+        const p = localStorage.getItem('pizz_king_tel') || "";
+        const l = localStorage.getItem('pizz_king_loc') || "";
+        
+        const hasItems = cart.filter(i => i.id !== 'delivery').length > 0;
+        const btn = document.getElementById('pre-pay-btn');
+        const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
+        
+        btn.disabled = !isValid;
+        btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
+        btn.innerText = isValid ? "ទូទាត់ប្រាក់ឥឡូវនេះ" : "ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន";
+    }
+
+    // --- OTHER UI HANDLERS ---
+    function renderCategories(cats) {
+        document.getElementById('cat-slider').innerHTML = cats.map(c => `
+            <div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})">
+                <span>${c.name}</span>
+            </div>`).join('');
+    }
+
+    function filterCatLocal(id) {
+        document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active'));
+        const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`);
+        if(el) el.classList.add('active');
+        const filtered = id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id));
+        renderProducts(filtered);
+    }
+
+    function changeCardQty(pid, d) {
+        cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d);
+        document.getElementById(`q-${pid}`).innerText = cardQtys[pid];
+    }
+
+    function openDetail(pid) {
+        const p = allProducts.find(x => x.id === pid);
+        document.getElementById('popup-content').innerHTML = `
+            <img src="${p.images[0].src}" style="width:100%; max-height:200px; object-fit:contain; margin-bottom:15px;">
+            <h3>${p.name}</h3>
+            <div style="font-size:0.85rem; color:#7f8c8d; text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>
+        `;
+        document.getElementById('detail-popup').style.display = 'flex';
+    }
+
+    function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
+    function openPayment() { 
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('pay-amt-label').innerText = total.toLocaleString();
+        document.getElementById('payment-screen').style.display = 'flex'; 
+        const dynamicQR = generateDynamicABAQR(total);
+        document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
+    }
+    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
+    function openNote() { document.getElementById('note-modal').style.display = 'flex'; }
+    function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
+    function saveNote() { customerNote = document.getElementById('note-input').value; closeNote(); }
 
     init();
 </script>
