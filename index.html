@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V3.7</title>
+    <title>Pizza King Store V2.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -21,7 +21,8 @@
 
 <div id="install-guard">
     <img src="logo.png" class="guard-logo">
-    <div style="font-size:1.4rem; font-weight:700; color:var(--pizz-red); margin-bottom:10px;">Pizza King Store</div>
+    <div style="font-size:1.4rem; font-weight:700; color:var(--pizz-red); margin-bottom:10px;">Pizza King</div>
+    <div style="font-size:0.9rem; color:#7f8c8d; margin-bottom:30px;">សូមដំឡើងកម្មវិធី ដើម្បីបន្តការទិញទំនិញ!<br>(Please install the App)</div>
     <button class="btn-install-force" onclick="installPWA()">📲 ដំឡើងកម្មវិធីឥឡូវនេះ</button>
 </div>
 
@@ -29,15 +30,14 @@
     <div class="master-header index-header">
         <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
-        <a href="movie.html" class="movie-btn-pro">
-            <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-2z"/></svg>
-        </a>
+        <a href="movie.html" class="movie-btn-pro"><span>🎬</span><span>មើលកុន</span></a>
     </div>
 
     <div class="container">
-        <div id="slider-container"></div>
         <div id="product-grid" class="grid"></div>
+        
         <div id="shipping-form-placeholder"></div>
+        
     </div>
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
@@ -62,8 +62,12 @@
                 <div style="font-weight:700; margin-bottom:10px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
                 <div class="qr-one-line"><span style="color:#7f8c8d; font-size:0.9rem;">SOUR DARA —</span><span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span></div>
                 <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
+                <div style="font-size:0.75rem; color:#2c3e50; font-weight: 700; margin: 10px 0;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
             </div>
-            <button class="btn-paid-final" id="confirm-btn" onclick="submitFinalOrder()">ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
+            <button onclick="downloadQRImage()" class="btn-save-qr-mini">រក្សាទុក QR Code</button>
+            <button class="btn-paid-final" id="confirm-btn" onclick="submitFinalOrder()">
+                <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>
+            </button>
             <button onclick="closePay()" style="background:none; border:none; color:#95a5a6; font-weight:700; cursor:pointer; font-size:0.9rem; margin-bottom:5px;">ត្រឡប់ក្រោយ</button>
         </div>
     </div>
@@ -79,12 +83,19 @@
 
     <div id="success-modal" class="modal-overlay">
         <div class="isolated-note-card" style="padding: 30px 20px;">
-            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);">
                 <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
-            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0;">ការកម្ម៉ង់ជោគជ័យ!</h3>
-            <p id="success-text" style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!</p>
-            <button class="btn-paid-final" onclick="location.reload()">យល់ព្រម (OK)</button>
+            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0; font-size: 1.3rem;">ការកម្ម៉ង់ជោគជ័យ!</h3>
+            <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
+                អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
+                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ។</span>
+            </p>
+            <p style="font-size: 0.8rem; color: #7f8c8d; line-height: 1.4; margin-bottom: 25px;">
+                Thank you <span id="success-name-en" style="color:var(--pizz-red); font-weight:700;"></span> for your order.<br>
+                Please find your order details in the Order Box.
+            </p>
+            <button class="btn-paid-final" onclick="location.reload()" style="margin-bottom:0;">យល់ព្រម (OK)</button>
         </div>
     </div>
 
@@ -101,33 +112,17 @@
 <script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
-<script src="slider.js"></script> 
 <script src="aba-qr.js"></script> 
 <script src="shipping-form.js"></script> 
+<script src="shopcart-payment.js"></script> <script>
+    loadBottomNav('home'); 
+    loadShippingForm();
 
-<script>
-    // --- MASTER LOGIC LEDGER RESTORED BIT BY BIT ---
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
-
-    function init() {
-        loadBottomNav('home'); 
-        loadShippingForm();
-        initSlider(); 
-        fetchData();
-    }
-
-    function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
+    const tg = window.Telegram.WebApp;
+    tg.expand(); tg.ready();
     
-    function saveFormData() { 
-        const nameInput = document.getElementById('user-name');
-        const phoneInput = document.getElementById('user-phone');
-        const locInput = document.getElementById('user-loc');
-        if(nameInput) localStorage.setItem('pizz_king_name', nameInput.value); 
-        if(phoneInput) localStorage.setItem('pizz_king_tel', phoneInput.value); 
-        if(locInput) localStorage.setItem('pizz_king_loc', locInput.value); 
-        updateCartBasedOnDelivery();
-        checkForm(); 
-    }
+    // Globals maintained in master file
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     async function fetchData() {
         const C_PROD = "pizz_cache_prod_v2", C_VAR = "pizz_cache_var_v2", C_CAT = "pizz_cache_cat_v2", C_TIME = "pizz_cache_time_v2";
@@ -147,9 +142,11 @@
         const nameInput = document.getElementById('user-name');
         const phoneInput = document.getElementById('user-phone');
         const locInput = document.getElementById('user-loc');
-        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || "";
+
+        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
         if(phoneInput) phoneInput.value = localStorage.getItem('pizz_king_tel') || "";
         if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
+        
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
         updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
@@ -162,63 +159,20 @@
                 variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
                 if(productVariations[pid].length > 2) { variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`; }
             }
-            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
+            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
         }).join('');
     }
 
-    function addToCart(pid) {
-        const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
-        const existing = cart.find(i => i.id === pid);
-        if(existing) existing.qty += q; else cart.push({ cartId: pid, id: pid, name: p.name, price: parseFloat(p.price), qty: q });
-        saveCartToStorage(); updateCartBasedOnDelivery();
-        const t = document.getElementById('toast'); t.style.display='flex'; setTimeout(() => t.style.display='none', 2000);
-    }
-
-    function updateCartBasedOnDelivery() {
-        const realItems = cart.filter(i => i.cartId.toString() !== 'delivery'); 
-        const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-        const locRaw = (localStorage.getItem('pizz_king_loc') || "").toLowerCase();
-        cart = realItems;
-        if(locRaw.length > 3) {
-            const isSR = APP_CONFIG.DELIVERY.siem_reap_keywords.some(k => locRaw.includes(k));
-            let fee = isSR ? (subtotal < APP_CONFIG.DELIVERY.siem_reap_free_over_riel ? APP_CONFIG.DELIVERY.siem_reap_charge_riel : 0) : (subtotal < APP_CONFIG.DELIVERY.other_location_threshold_riel ? APP_CONFIG.DELIVERY.other_location_charge_below_riel : APP_CONFIG.DELIVERY.other_location_charge_over_or_equal_riel);
-            if(fee > 0) cart.push({ cartId: "delivery", id: "delivery", name: "ថ្លៃដឹកជញ្ជូន", price: fee, qty: 1 });
-        }
-        updateUI(cart);
-    }
-
-    function updateUI(itemsList) {
-        const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
-        const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => i.cartId !== 'delivery').length} មុខ`;
-        document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}</div><div>${i.qty} x ${i.price.toLocaleString()}៛</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">×</button></div>`).join('');
-        checkForm();
-    }
-
-    function checkForm() {
-        const n = localStorage.getItem('pizz_king_name') || ""; const p = localStorage.getItem('pizz_king_tel') || ""; const l = localStorage.getItem('pizz_king_loc') || "";
-        const hasItems = cart.filter(i => i.cartId !== 'delivery').length > 0;
-        const btn = document.getElementById('pre-pay-btn'); const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
-        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
-        // 💳 Icon Restored
-        btn.innerHTML = isValid ? `<svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;margin-right:8px;vertical-align:middle;"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>ទូទាត់ប្រាក់ឥឡូវនេះ` : "ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន";
-    }
-
-    function openNote() { document.getElementById('note-input').value = customerNote; document.getElementById('note-modal').style.display = 'flex'; }
-    function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
-    function saveNote() { customerNote = document.getElementById('note-input').value; document.getElementById('note-btn').innerText = "✅ ចំណាំ"; closeNote(); }
-    function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); document.getElementById('cart-header').classList.toggle('open'); }
-    function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
-    function openPayment() { const total = cart.reduce((s, i) => s + (i.price * i.qty), 0); document.getElementById('pay-amt-label').innerText = total.toLocaleString(); document.getElementById('payment-screen').style.display = 'flex'; const dynamicQR = generateDynamicABAQR(total); document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`; }
-    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
-    function removeFromCart(cid) { cart = cart.filter(x => x.cartId.toString() !== cid.toString()); updateCartBasedOnDelivery(); }
-    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
+    function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
+    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
+    
+    function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%; max-height:250px; object-fit:contain; border-radius:12px; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`; document.getElementById('detail-popup').style.display = 'flex'; }
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
-    function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<h3>${p.name}</h3><p>${p.description || "គ្មានការពិពណ៌នា"}</p>`; document.getElementById('detail-popup').style.display = 'flex'; }
+    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
+    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
 
-    init();
+    fetchData();
 </script>
 </body>
 </html>
