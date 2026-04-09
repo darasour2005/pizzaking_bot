@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e74c3c">
-    <title>Pizza King Store</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pizza King Store V1.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> </head>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body class="notranslate">
 
 <div id="toast"><svg style="width:16px;height:16px;fill:white;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>បន្ថែមក្នុងកន្ត្រករួចរាល់!</span></div>
@@ -55,7 +58,7 @@
 
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card" id="invoice-card">
-            <div class="qr-header-bar">KHQR V1.0</div>
+            <div class="qr-header-bar">KHQR V1.4</div>
             <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
             <div id="recap-list" class="recap-list"></div>
             <div id="qr-container">
@@ -107,10 +110,11 @@
     </div>
     
     <div id="bottom-nav-placeholder"></div>
-    <footer><p>Dara Sour 087282827 @2026 Pizza King V1.0</p></footer>
 </div>
 
 <script src="nav.js"></script>
+<script src="pwa.js"></script> 
+
 <script>
     loadBottomNav('home'); 
 
@@ -270,9 +274,6 @@
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
     function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
 
-    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const isTelegram = (tg.initData !== ""); if (!isPWA && !isTelegram) { document.getElementById('install-guard').style.display = 'flex'; }
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); } let deferredPrompt; window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; }); async function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('install-guard').style.display = 'none'; } } else { alert("សូមចុចលើប៊ូតុង Share រួចរើសយក 'Add to Home Screen'"); } }
-    
     fetchData();
 </script>
 </body>
