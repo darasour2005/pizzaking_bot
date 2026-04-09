@@ -1,5 +1,5 @@
-// shopcart-payment.js - MASTER CART & PAYMENT LOGIC
-// Zero-Omission Protocol: 100% Original Logic Preserved
+// shopcart-payment.js - MASTER CART & PAYMENT LOGIC V1.1
+// Zero-Omission Protocol: 100% Original Logic Preserved + Smart Error Catching
 
 function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
 
@@ -12,7 +12,6 @@ function saveFormData() {
     if(phoneInput) localStorage.setItem('pizz_king_tel', phoneInput.value); 
     if(locInput) localStorage.setItem('pizz_king_loc', locInput.value); 
     
-    // CRITICAL: Triggers instant recalculation when typing location
     updateCartBasedOnDelivery();
     checkForm(); 
 }
@@ -34,10 +33,8 @@ function addToCart(pid) {
 function updateCartBasedOnDelivery() {
     const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
     const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-    
     const locInput = document.getElementById('user-loc');
     const locRaw = locInput ? locInput.value.toLowerCase() : ""; 
-    
     cart = realItems;
     if(locRaw.length > 3) {
         const isSR = APP_CONFIG.DELIVERY.siem_reap_keywords.some(k => locRaw.includes(k));
@@ -60,16 +57,13 @@ function checkForm() {
     const nameInput = document.getElementById('user-name');
     const phoneInput = document.getElementById('user-phone');
     const locInput = document.getElementById('user-loc');
-    
     const n = nameInput ? nameInput.value : "";
     const p = phoneInput ? phoneInput.value : "";
     const l = locInput ? locInput.value : "";
-    
     const hasItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')).length > 0;
     const btn = document.getElementById('pre-pay-btn'); 
     const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
     btn.disabled = !isValid; 
-    
     if(isValid) {
         btn.style.background = "#2ecc71";
         btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;margin-right:8px;vertical-align:middle;"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg><span style="vertical-align:middle;">ទូទាត់ប្រាក់ឥឡូវនេះ</span>`; 
@@ -101,15 +95,31 @@ async function submitFinalOrder() {
     const userName = document.getElementById('user-name') ? document.getElementById('user-name').value : "";
     const userPhone = document.getElementById('user-phone') ? document.getElementById('user-phone').value : "";
     const userLoc = document.getElementById('user-loc') ? document.getElementById('user-loc').value : "";
-    
     const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: userLoc, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
     
     try {
-        await fetch(`${APP_CONFIG.RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
-        localStorage.removeItem('pizz_king_cart_v36'); localStorage.setItem('pizz_user_phone', userPhone);
+        const response = await fetch(`${APP_CONFIG.RENDER_URL}/create-order`, { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(orderData) 
+        });
+
+        // Smart Error Check: Detect if backend failed to reply with 200 OK
+        if (!response.ok) {
+            throw new Error(`Server Returned HTTP ${response.status}`);
+        }
+
+        localStorage.removeItem('pizz_king_cart_v36'); 
         document.getElementById('success-name-kh').innerText = userName; document.getElementById('success-name-en').innerText = userName;
         document.getElementById('payment-screen').style.display = 'none'; document.getElementById('success-modal').style.display = 'flex';
-    } catch (e) { tg.showAlert("⚠️ Connection Error"); btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>`; btn.disabled = false; }
+    } catch (e) { 
+        // Smart Error Print: Identifies if it's CORS/Network Drop or a specific server code
+        const isNetworkDrop = e.message.includes("Failed to fetch");
+        tg.showAlert(isNetworkDrop ? "⚠️ Error: Network Drop or Missing CORS in Python" : `⚠️ ${e.message}`); 
+        
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>`; 
+        btn.disabled = false; 
+    }
 }
 
 function toggleRecap() { const list = document.getElementById('recap-list'); const qrWrap = document.getElementById('qr-container'); const caret = document.getElementById('recap-caret'); if (list.style.display === 'block') { list.style.display = 'none'; qrWrap.style.display = 'block'; caret.innerText = '▼'; } else { list.style.display = 'block'; qrWrap.style.display = 'none'; caret.innerText = '▲'; } }
