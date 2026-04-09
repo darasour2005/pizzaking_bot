@@ -6,12 +6,11 @@
     <title>បញ្ជីទិញរបស់ខ្ញុំ - Pizza King</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="pdf-generator.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* UI ACCORDION & PDF BUTTON */
+        /* UI ACCORDION & PDF BUTTON ONLY */
         .order-details-drawer { display: none; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; }
         .order-details-drawer.open { display: block; animation: slideDown 0.3s ease-out; }
         .info-section { background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #f0f0f0; }
@@ -37,7 +36,7 @@
             <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
             <h3 style="margin:0 0 10px 0; color:var(--pizz-red);">ស្នើសុំបោះបង់ / បង្វិលប្រាក់</h3>
             <p style="font-size:0.85rem; color:#7f8c8d; line-height:1.5; margin-bottom:20px;">សូមបញ្ជាក់ពីមូលហេតុនៃការបោះបង់ការកម្ម៉ង់ <strong id="cancel-order-id"></strong>។ ក្រុមការងារនឹងទាក់ទងទៅអ្នកវិញតាម Telegram។</p>
-            <textarea id="cancel-reason" placeholder="ឧទាហរណ៍៖ កម្ម៉ង់ខុស..." style="height:100px;"></textarea>
+            <textarea id="cancel-reason" placeholder="ឧទាហរណ៍៖ កម្ម៉ង់ខុស..." style="height:100px; width:100%; box-sizing:border-box;"></textarea>
             <button class="btn-paid-final" onclick="submitCancelRequest()" style="margin-bottom:0;">បញ្ជូនការស្នើសុំ</button>
         </div>
     </div>
@@ -47,29 +46,61 @@
 
 <script src="nav.js"></script>
 <script src="pwa.js"></script>
+<script src="aba-qr.js"></script>
+<script src="pdf-generator.js"></script>
+
 <script>
+    // 1. Initialize Master Menu
     loadBottomNav('orders'); 
     
+    // 2. Environment Variables
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
-    let globalOrders = []; let currentCancelOrderId = null;
-    const statusMap = { 'pending': { text: '⏳ រង់ចាំការយល់ព្រម', class: 'status-pending' }, 'processing': { text: '👨‍🍳 កំពុងរៀបចំ', class: 'status-processing' }, 'on-hold': { text: '⏳ កំពុងផ្ទៀងផ្ទាត់', class: 'status-pending' }, 'completed': { text: '✅ ជោគជ័យ', class: 'status-completed' }, 'cancelled': { text: '❌ បានបោះបង់', class: 'status-cancelled' }, 'refunded': { text: '💵 បានបង្វិលប្រាក់', class: 'status-refunded' }, 'failed': { text: '⚠️ បរាជ័យ', class: 'status-cancelled' } };
+    let globalOrders = []; 
+    let currentCancelOrderId = null;
+    
+    const statusMap = { 
+        'pending': { text: '⏳ រង់ចាំការយល់ព្រម', class: 'status-pending' }, 
+        'processing': { text: '👨‍🍳 កំពុងរៀបចំ', class: 'status-processing' }, 
+        'on-hold': { text: '⏳ កំពុងផ្ទៀងផ្ទាត់', class: 'status-pending' }, 
+        'completed': { text: '✅ ជោគជ័យ', class: 'status-completed' }, 
+        'cancelled': { text: '❌ បានបោះបង់', class: 'status-cancelled' }, 
+        'refunded': { text: '💵 បានបង្វិលប្រាក់', class: 'status-refunded' }, 
+        'failed': { text: '⚠️ បរាជ័យ', class: 'status-cancelled' } 
+    };
 
+    // 3. Core Logic
     function initPage() {
         const phone = localStorage.getItem('pizz_user_phone') || localStorage.getItem('pizz_king_tel');
-        if (!phone) { renderLogin(); document.getElementById('loader').style.display = 'none'; } 
-        else { fetchUserOrders(phone); }
+        if (!phone) { 
+            renderLogin(); 
+            document.getElementById('loader').style.display = 'none'; 
+        } else { 
+            fetchUserOrders(phone); 
+        }
     }
 
     function renderLogin() {
-        document.getElementById('main-container').innerHTML = `<div class="login-box"><div style="font-size:3rem; margin-bottom:10px;">📱</div><h3 style="margin:0 0 10px 0; color:var(--pizz-dark);">ស្វែងរកបញ្ជីទិញរបស់អ្នក</h3><p style="font-size:0.85rem; color:#7f8c8d; line-height:1.5;">សូមបញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើប្រាស់ពេលកម្ម៉ង់ទិញ។</p><input type="tel" id="manual-phone" placeholder="បញ្ចូលលេខទូរស័ព្ទ..."><button class="btn-solid-green" onclick="manualLogin()">ស្វែងរកការកម្ម៉ង់</button></div>`;
+        document.getElementById('main-container').innerHTML = `
+            <div class="login-box">
+                <div style="font-size:3rem; margin-bottom:10px;">📱</div>
+                <h3 style="margin:0 0 10px 0; color:var(--pizz-dark);">ស្វែងរកបញ្ជីទិញរបស់អ្នក</h3>
+                <p style="font-size:0.85rem; color:#7f8c8d; line-height:1.5;">សូមបញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើប្រាស់ពេលកម្ម៉ង់ទិញ។</p>
+                <input type="tel" id="manual-phone" placeholder="បញ្ចូលលេខទូរស័ព្ទ...">
+                <button class="btn-paid-final" onclick="manualLogin()">ស្វែងរកការកម្ម៉ង់</button>
+            </div>`;
     }
 
     function manualLogin() {
         const input = document.getElementById('manual-phone').value;
-        if(input.length > 8) { localStorage.setItem('pizz_user_phone', input); document.getElementById('loader').style.display = 'flex'; fetchUserOrders(input); } 
-        else { alert("សូមបញ្ចូលលេខទូរស័ព្ទឲ្យបានត្រឹមត្រូវ!"); }
+        if(input.length > 8) { 
+            localStorage.setItem('pizz_user_phone', input); 
+            document.getElementById('loader').style.display = 'flex'; 
+            fetchUserOrders(input); 
+        } else { 
+            alert("សូមបញ្ចូលលេខទូរស័ព្ទឲ្យបានត្រឹមត្រូវ!"); 
+        }
     }
 
     async function fetchUserOrders(phoneNumber) {
@@ -82,23 +113,39 @@
             document.getElementById('loader').style.display = 'none';
             
             if(orders.length === 0) {
-                document.getElementById('main-container').innerHTML = `<div style="text-align:center; margin-top:50px;"><div style="font-size:4rem; margin-bottom:15px; opacity:0.5;">🛒</div><h3 style="color:#2c3e50;">មិនមានប្រវត្តិទិញទេ</h3><p style="color:#7f8c8d; font-size:0.9rem;">លេខទូរស័ព្ទ <strong>${phoneNumber}</strong> មិនទាន់មានទិន្នន័យកម្ម៉ង់ទេ។</p><button class="btn-solid-green" style="width:auto; padding:10px 30px; margin-top:20px;" onclick="window.location.href='index.html'">ទៅកាន់ទំព័រដើម</button><br><br><button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; cursor:pointer;">ប្តូរលេខទូរស័ព្ទ</button></div>`;
-            } else { renderOrdersList(orders, phoneNumber); }
+                document.getElementById('main-container').innerHTML = `
+                    <div style="text-align:center; margin-top:50px;">
+                        <div style="font-size:4rem; margin-bottom:15px; opacity:0.5;">🛒</div>
+                        <h3 style="color:#2c3e50;">មិនមានប្រវត្តិទិញទេ</h3>
+                        <p style="color:#7f8c8d; font-size:0.9rem;">លេខទូរស័ព្ទ <strong>${phoneNumber}</strong> មិនទាន់មានទិន្នន័យកម្ម៉ង់ទេ។</p>
+                        <button class="btn-paid-final" style="width:auto; padding:10px 30px; margin-top:20px;" onclick="window.location.href='index.html'">ទៅកាន់ទំព័រដើម</button>
+                        <br><br>
+                        <button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; cursor:pointer;">ប្តូរលេខទូរស័ព្ទ</button>
+                    </div>`;
+            } else { 
+                renderOrdersList(orders, phoneNumber); 
+            }
         } catch (e) { 
             document.getElementById('loader').style.display = 'none'; 
             document.getElementById('main-container').innerHTML = `<div style="text-align:center; color:var(--pizz-red); margin-top:40px; font-weight:bold;">⚠️ បញ្ហាប្រព័ន្ធអុីនធឺណិត។</div>`; 
         }
     }
 
-    function formatDate(dateString) { const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }; return new Date(dateString).toLocaleDateString('km-KH', options); }
+    function formatDate(dateString) { 
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }; 
+        return new Date(dateString).toLocaleDateString('km-KH', options); 
+    }
 
     function renderOrdersList(orders, phone) {
-        let html = `<div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;"><span>គណនី: <strong style="color:var(--pizz-dark);">${phone}</strong></span><button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; font-size:0.75rem; cursor:pointer;">ចាកចេញ</button></div>`;
+        let html = `
+            <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>គណនី: <strong style="color:var(--pizz-dark);">${phone}</strong></span>
+                <button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; font-size:0.75rem; cursor:pointer;">ចាកចេញ</button>
+            </div>`;
         
         orders.forEach(order => {
             const statusConfig = statusMap[order.status] || { text: order.status, class: 'status-pending' };
             const itemsPreview = order.line_items.map(i => `${i.name} (x${i.quantity})`).join(', ');
-            
             const canCancel = ['pending', 'processing', 'on-hold'].includes(order.status);
             const cancelBtnHTML = canCancel ? `<button class="btn-danger-outline" onclick="openCancelModal(${order.id})">ស្នើសុំបោះបង់</button>` : `<button class="btn-outline" onclick="window.location.href='index.html'">ទិញម្ដងទៀត</button>`;
             
@@ -107,9 +154,10 @@
             const noteHtml = order.customer_note ? `<div class="info-section"><div style="font-weight:700; margin-bottom:5px; color:#2c3e50;">📝 ចំណាំពីអតិថិជន (Note)</div><div style="color:#7f8c8d; font-size:0.8rem; line-height:1.5;">${order.customer_note}</div></div>` : '';
 
             let itemsHTML = order.line_items.map(item => `<div class="detail-item-row"><span style="font-weight:700; max-width:70%;">${item.name} <span style="color:var(--pizz-red);">x${item.quantity}</span></span><span>${parseFloat(item.total).toLocaleString()}៛</span></div>`).join('');
-            
             const shippingTotal = parseFloat(order.shipping_total || 0);
-            if (shippingTotal > 0) { itemsHTML += `<div class="detail-item-row"><span style="font-weight:700; max-width:70%; color:#7f8c8d;">🚚 ថ្លៃដឹកជញ្ជូន (Shipping)</span><span>${shippingTotal.toLocaleString()}៛</span></div>`; }
+            if (shippingTotal > 0) { 
+                itemsHTML += `<div class="detail-item-row"><span style="font-weight:700; max-width:70%; color:#7f8c8d;">🚚 ថ្លៃដឹកជញ្ជូន (Shipping)</span><span>${shippingTotal.toLocaleString()}៛</span></div>`; 
+            }
 
             html += `
                 <div class="order-card">
@@ -120,7 +168,6 @@
                         </div>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                             <div class="status-badge ${statusConfig.class}">${statusConfig.text}</div>
-                            
                             <button class="btn-pdf" onclick="handlePDFDownload(${order.id})" title="ទាញយកវិក្កយបត្រ">
                                 <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg> PDF
                             </button>
@@ -161,12 +208,11 @@
         document.getElementById('main-container').innerHTML = html;
     }
 
-    // THE SECURE PDF HANDLER
+    // THE DATA BRIDGE TO THE STANDALONE PDF ENGINE
     function handlePDFDownload(orderId) {
         const order = globalOrders.find(o => o.id === orderId);
         if(!order) return;
 
-        // Map the raw WooCommerce data into a clean object to pass to our standalone engine
         const invoiceData = {
             id: order.id,
             date: formatDate(order.date_created),
@@ -179,13 +225,32 @@
             grandTotal: parseFloat(order.total)
         };
 
-        // Call the standalone engine
+        // Fire engine stored in pdf-generator.js
         generateInvoicePDF(invoiceData);
     }
 
-    function toggleDetails(orderId) { const drawer = document.getElementById(`drawer-${orderId}`); const caret = document.getElementById(`caret-${orderId}`); if (drawer.classList.contains('open')) { drawer.classList.remove('open'); caret.innerText = '▼'; } else { drawer.classList.add('open'); caret.innerText = '▲'; } }
-    function openCancelModal(orderId) { currentCancelOrderId = orderId; document.getElementById('cancel-order-id').innerText = `#${orderId}`; document.getElementById('cancel-reason').value = ''; document.getElementById('cancel-modal').style.display = 'flex'; }
-    function closeCancelModal() { document.getElementById('cancel-modal').style.display = 'none'; }
+    function toggleDetails(orderId) { 
+        const drawer = document.getElementById(`drawer-${orderId}`); 
+        const caret = document.getElementById(`caret-${orderId}`); 
+        if (drawer.classList.contains('open')) { 
+            drawer.classList.remove('open'); 
+            caret.innerText = '▼'; 
+        } else { 
+            drawer.classList.add('open'); 
+            caret.innerText = '▲'; 
+        } 
+    }
+
+    function openCancelModal(orderId) { 
+        currentCancelOrderId = orderId; 
+        document.getElementById('cancel-order-id').innerText = `#${orderId}`; 
+        document.getElementById('cancel-reason').value = ''; 
+        document.getElementById('cancel-modal').style.display = 'flex'; 
+    }
+    
+    function closeCancelModal() { 
+        document.getElementById('cancel-modal').style.display = 'none'; 
+    }
     
     function submitCancelRequest() {
         const reason = document.getElementById('cancel-reason').value;
@@ -201,6 +266,7 @@
         closeCancelModal();
     }
 
+    // IGNITION
     initPage();
 </script>
 </body>
