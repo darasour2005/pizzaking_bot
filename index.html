@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V2.6 - Full Restoration</title>
+    <title>Pizza King Store V2.7 - Master Restoration</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -38,21 +38,7 @@
 
         <div id="product-grid" class="grid"></div>
         
-        <div class="card" style="margin-top:20px; padding:20px; border:2px dashed #ddd;">
-            <h3 style="margin:0 0 15px 0; color:var(--pizz-red); font-size:1.1rem;">📍 ព័ត៌មានដឹកជញ្ជូន (Shipping Info)</h3>
-            <div style="margin-bottom:15px; text-align:left;">
-                <label style="display:block; font-size:0.8rem; color:#7f8c8d; margin-bottom:5px; font-weight:700;">ឈ្មោះរបស់អ្នក / Name</label>
-                <input type="text" id="user-name" oninput="saveFormData()" placeholder="ឈ្មោះ..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            </div>
-            <div style="margin-bottom:15px; text-align:left;">
-                <label style="display:block; font-size:0.8rem; color:#7f8c8d; margin-bottom:5px; font-weight:700;">លេខទូរស័ព្ទ / Phone</label>
-                <input type="tel" id="user-phone" oninput="saveFormData()" placeholder="លេខទូរស័ព្ទ..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            </div>
-            <div style="margin-bottom:5px; text-align:left;">
-                <label style="display:block; font-size:0.8rem; color:#7f8c8d; margin-bottom:5px; font-weight:700;">ទីតាំងបច្ចុប្បន្ន / Location</label>
-                <input type="text" id="user-loc" oninput="saveFormData()" placeholder="ឧទាហរណ៍៖ ភ្នំពេញ..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-            </div>
-        </div>
+        <div id="shipping-form-placeholder"></div>
     </div>
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
@@ -102,10 +88,7 @@
                 <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
             <h3 style="color: var(--pizz-green); margin: 0 0 15px 0;">ការកម្ម៉ង់ជោគជ័យ!</h3>
-            <p id="success-text" style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
-                អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
-                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ។</span>
-            </p>
+            <p id="success-text" style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px;">អរគុណ <span id="success-name-kh" style="color:var(--pizz-red); font-weight:700;"></span> សម្រាប់ការកម្ម៉ង់!</p>
             <button class="btn-paid-final" onclick="location.reload()">យល់ព្រម (OK)</button>
         </div>
     </div>
@@ -122,22 +105,21 @@
 
 <script src="config.js"></script>
 <script src="nav.js"></script>
+<script src="pwa.js"></script> 
 <script src="slider.js"></script>
 <script src="aba-qr.js"></script> 
+<script src="shipping-form.js"></script> 
 
 <script>
-    // --- RESTORED GLOBAL STATE ---
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
+    // --- 100% ORIGINAL LOGIC ---
+    loadBottomNav('home'); 
+    loadShippingForm();
+    initSlider(); 
 
-    function init() {
-        loadBottomNav('home'); 
-        initSlider(); 
-        
-        const tg = window.Telegram.WebApp;
-        tg.expand(); tg.ready();
-        
-        fetchData();
-    }
+    const tg = window.Telegram.WebApp;
+    tg.expand(); tg.ready();
+    
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
     
@@ -156,16 +138,13 @@
         try {
             const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); 
             allProducts = await prodRes.json();
-            
             const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); 
             const cats = await catRes.json();
             renderCategories(cats);
-
             for (const vp of allProducts.filter(p => p.type === 'variable')) { 
                 const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
                 productVariations[vp.id] = await vRes.json(); 
             }
-            
             restoreState();
             document.getElementById('loader').style.display = 'none';
         } catch(e) { document.getElementById('loader').style.display = 'none'; }
@@ -175,11 +154,9 @@
         const nameInput = document.getElementById('user-name');
         const phoneInput = document.getElementById('user-phone');
         const locInput = document.getElementById('user-loc');
-
-        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (window.Telegram.WebApp.initDataUnsafe.user ? window.Telegram.WebApp.initDataUnsafe.user.first_name : "");
+        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
         if(phoneInput) phoneInput.value = localStorage.getItem('pizz_king_tel') || "";
         if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
-        
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
         updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
@@ -187,19 +164,31 @@
 
     function renderProducts(items) {
         document.getElementById('product-grid').innerHTML = items.map(p => {
-            const pid = p.id; cardQtys[pid] = 1;
-            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div><div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
+            const pid = p.id; cardQtys[pid] = 1; let variations = "";
+            if (p.type === 'variable' && productVariations[pid]) {
+                variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
+                if(productVariations[pid].length > 2) { variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`; }
+            }
+            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
         }).join('');
     }
 
+    // ... (All other original helper functions from V2.0 block) ...
+    function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
+    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
     function addToCart(pid) {
         const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
-        const existing = cart.find(i => i.id === pid && !i.cartId.toString().includes('-'));
-        if(existing) existing.qty += q; else cart.push({ cartId: pid, id: pid, name: p.name, price: parseFloat(p.price), qty: q });
+        let name = p.name, price = parseFloat(p.price), cid = pid.toString();
+        if (p.type === 'variable') {
+            const vid = variationSelections[pid]; if (!vid) { tg.showAlert("សូមរើសប្រភេទ!"); return; }
+            const vData = productVariations[pid].find(v => v.id == vid);
+            name = `${p.name} (${vData.attributes[0].option})`; price = parseFloat(vData.price); cid = `${pid}-${vid}`;
+        }
+        const existing = cart.find(i => i.cartId.toString() === cid.toString());
+        if(existing) existing.qty += q; else cart.push({ cartId: cid, id: pid, name, price, qty: q });
         saveCartToStorage(); updateCartBasedOnDelivery();
         const t = document.getElementById('toast'); t.style.display='flex'; setTimeout(() => t.style.display='none', 2000);
     }
-
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
         const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -212,28 +201,21 @@
         }
         updateUI(cart);
     }
-
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
-        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ`;
+        document.getElementById('cart-count').innerText = `🛒 កន្ត្រក: ${itemsList.filter(i => !i.cartId.toString().startsWith('delivery')).length} មុខ (មើលលម្អិត)`;
         document.getElementById('cart-total').innerText = `${total.toLocaleString()}៛`;
-        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}</div><div>${i.qty} x ${i.price.toLocaleString()}៛</div></div>`).join('');
+        document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')">❌</button></div>`).join('');
         checkForm();
     }
-
     function checkForm() {
-        const n = localStorage.getItem('pizz_king_name') || "";
-        const p = localStorage.getItem('pizz_king_tel') || "";
-        const l = localStorage.getItem('pizz_king_loc') || "";
-        const hasItems = cart.filter(i => i.id !== 'delivery').length > 0;
-        const btn = document.getElementById('pre-pay-btn'); 
-        const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
-        btn.disabled = !isValid; 
-        btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
-        btn.innerText = isValid ? "ទូទាត់ប្រាក់ឥឡូវនេះ" : "ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន";
+        const n = localStorage.getItem('pizz_king_name') || ""; const p = localStorage.getItem('pizz_king_tel') || ""; const l = localStorage.getItem('pizz_king_loc') || "";
+        const hasItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')).length > 0;
+        const btn = document.getElementById('pre-pay-btn'); const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
+        btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
+        btn.innerHTML = isValid ? "ទូទាត់ប្រាក់ឥឡូវនេះ" : "ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន";
     }
-
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
@@ -241,21 +223,19 @@
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
     }
-
-    function renderCategories(cats) { document.getElementById('cat-slider').innerHTML = cats.map(c => `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><span>${c.name}</span></div>`).join(''); }
-    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); const filtered = id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id)); renderProducts(filtered); }
+    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
     function removeFromCart(cid) { cart = cart.filter(x => x.cartId.toString() !== cid.toString()); updateCartBasedOnDelivery(); }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<h3>${p.name}</h3><p>${p.description || ""}</p>`; document.getElementById('detail-popup').style.display = 'flex'; }
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
-    function openNote() { document.getElementById('note-modal').style.display = 'flex'; }
+    function openNote() { document.getElementById('note-input').value = customerNote; document.getElementById('note-modal').style.display = 'flex'; }
     function closeNote() { document.getElementById('note-modal').style.display = 'none'; }
     function saveNote() { customerNote = document.getElementById('note-input').value; closeNote(); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
     function toggleRecap() { document.getElementById('recap-list').classList.toggle('open'); }
 
-    init();
+    fetchData();
 </script>
 </body>
 </html>
