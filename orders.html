@@ -42,6 +42,7 @@
     <div id="bottom-nav-placeholder"></div>
 </div>
 
+<script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script>
 <script src="aba-qr.js"></script>
@@ -49,9 +50,6 @@
 
 <script>
     loadBottomNav('orders'); 
-    
-    const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
-    const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
     let globalOrders = []; 
     let currentCancelOrderId = null;
@@ -101,7 +99,9 @@
     async function fetchUserOrders(phoneNumber) {
         try {
             const statusFilter = "pending,processing,on-hold,completed,cancelled,refunded,failed";
-            const res = await fetch(`${WC_BASE}/orders${AUTH}&search=${phoneNumber}&status=${statusFilter}`); 
+            
+            // CRITICAL FIX: Dynamically fetching from APP_CONFIG
+            const res = await fetch(`${APP_CONFIG.WC_BASE}/orders${APP_CONFIG.WC_AUTH}&search=${phoneNumber}&status=${statusFilter}`); 
             
             const orders = await res.json(); 
             globalOrders = orders; 
