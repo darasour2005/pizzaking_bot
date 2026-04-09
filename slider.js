@@ -1,11 +1,12 @@
-// slider.js - MOVIE PROMO ENGINE V1.0
+// slider.js - SLIM MOVIE PROMO ENGINE V1.1
 function initSlider() {
-    const sliderData = [
-        { img: "https://image.tmdb.org/t/p/w500/8Gxv8ZnlsuSqzZCUpa2sxb9O9Uz.jpg", link: "movie.html" },
-        { img: "https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjS3Ky0S2.jpg", link: "movie.html" },
-        { img: "https://image.tmdb.org/t/p/w500/mD60Yp7IatSTun9Z9oXpSTGvSNo.jpg", link: "movie.html" },
-        { img: "https://image.tmdb.org/t/p/w500/u3YvU2UNisOM0sWF2Zoufe9SxtM.jpg", link: "movie.html" },
-        { img: "https://image.tmdb.org/t/p/w500/A76tUvNf99797mB0sES9ff7YpAc.jpg", link: "movie.html" }
+    // 5 High-Quality, Fast-Loading Movie Banners
+    const movies = [
+        { img: "https://images.alphacoders.com/134/1341054.jpeg", link: "movie.html" },
+        { img: "https://wallpapercave.com/wp/wp12061005.jpg", link: "movie.html" },
+        { img: "https://images7.alphacoders.com/131/1315518.jpg", link: "movie.html" },
+        { img: "https://wallpaperaccess.com/full/1089154.jpg", link: "movie.html" },
+        { img: "https://wallpapercave.com/wp/wp12140401.jpg", link: "movie.html" }
     ];
 
     const container = document.getElementById('slider-container');
@@ -14,26 +15,33 @@ function initSlider() {
     container.innerHTML = `
         <div class="main-slider">
             <div class="slider-track" id="slider-track">
-                ${sliderData.map(s => `<div class="slide"><img src="${s.img}" onclick="location.href='${s.link}'"></div>`).join('')}
+                ${movies.map(m => `
+                    <div class="slide">
+                        <img src="${m.img}" onclick="location.href='${m.link}'" onerror="this.src='https://via.placeholder.com/500x120?text=Pizza+King+Movies'">
+                    </div>
+                `).join('')}
             </div>
             <div class="slider-dots" id="slider-dots"></div>
         </div>
     `;
 
-    let current = 0;
+    let cur = 0;
     const track = document.getElementById('slider-track');
-    const dots = document.getElementById('slider-dots');
-    
-    // Create dots
-    sliderData.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = `dot ${i === 0 ? 'active' : ''}`;
-        dots.appendChild(dot);
+    const dotsContainer = document.getElementById('slider-dots');
+
+    // Create Navigation Dots
+    movies.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = `dot ${i === 0 ? 'active' : ''}`;
+        dotsContainer.appendChild(d);
     });
 
+    // Auto-Run Logic
     setInterval(() => {
-        current = (current + 1) % sliderData.length;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-    }, 4000);
+        cur = (cur + 1) % movies.length;
+        if (track) {
+            track.style.transform = `translateX(-${cur * 100}%)`;
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+        }
+    }, 4500);
 }
