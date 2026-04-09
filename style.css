@@ -1,4 +1,4 @@
-/* style.css - MASTER PRODUCT ENGINE V3.1 (SLIM EDITION) */
+/* style.css - MASTER PRODUCT ENGINE V2.5 (CLEAN & RESTORED) */
 
 :root {
     --pizz-red: #e74c3c;
@@ -11,45 +11,17 @@
     --shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-/* GLOBAL ARCHITECTURE */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { 
     margin: 0; 
     font-family: 'Kantumruy Pro', sans-serif; 
     background-color: var(--pizz-gray); 
     color: var(--pizz-text);
-    padding-bottom: 140px; 
+    padding-bottom: 120px; 
     overflow-x: hidden;
 }
 
-/* 🎬 SLIM MOVIE SLIDER (Fixed Height: 120px) */
-.main-slider { 
-    width: 100%; 
-    height: 120px; /* SHORTER: Won't eat all space */
-    overflow: hidden; 
-    position: relative; 
-    border-radius: var(--radius); 
-    margin: 10px 0; 
-    background: #eee; /* Light gray while loading to prevent dizziness */
-    box-shadow: var(--shadow);
-}
-.slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; }
-.slide { min-width: 100%; height: 100%; position: relative; }
-.slide img { width: 100%; height: 100%; object-fit: cover; }
-
-/* Soft Overlay to make text/icons pop */
-.slide::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; width: 100%; height: 40%;
-    background: linear-gradient(transparent, rgba(0,0,0,0.5));
-}
-
-.slider-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
-.dot { width: 6px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
-.dot.active { background: #fff; width: 12px; border-radius: 3px; }
-
-/* HEADER & CATEGORIES */
+/* Header & Categories */
 .master-header { position: sticky; top: 0; background: #fff; z-index: 1000; padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
 .brand-logo-btn { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; }
 .brand-logo-btn.active { border-color: var(--pizz-red); }
@@ -58,26 +30,32 @@ body {
 .cat-item { white-space: nowrap; padding: 8px 16px; background: #f0f2f5; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
 .cat-item.active { background: var(--pizz-red); color: #fff; }
 
-/* GRID (STRICT 2-COLUMN) */
+/* 🎬 Movie Slider (RESTORED CLEAN) */
+.main-slider { width: 100%; height: 120px; overflow: hidden; position: relative; border-radius: var(--radius); margin: 10px 0; background: #eee; }
+.slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; }
+.slide { min-width: 100%; height: 100%; }
+.slide img { width: 100%; height: 100%; object-fit: cover; }
+.slider-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+.dot { width: 6px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 50%; }
+.dot.active { background: #fff; width: 12px; border-radius: 3px; }
+
+/* 🛒 Grid & Cards (STRICT 2-COLUMN) */
 .container { padding: 0 10px; }
 .grid { display: grid; grid-template-columns: repeat(2, 1fr) !important; gap: 12px; margin-top: 15px; }
 .card { background: #fff; border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); position: relative; }
 .card img { width: 100%; height: 110px; object-fit: contain; }
-.card .title { font-size: 0.8rem; font-weight: 700; height: 30px; overflow: hidden; margin-top: 5px; }
-.price { color: var(--pizz-red); font-weight: 800; font-size: 0.9rem; }
+.card .title { font-size: 0.8rem; font-weight: 700; height: 30px; overflow: hidden; margin-top: 5px; line-height: 1.2; }
+.price { color: var(--pizz-red); font-weight: 800; font-size: 0.9rem; margin-top: 5px; }
 
-/* MINI-CART BLOC */
-#footer-ui-container { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 2000; }
-.footer-cart { background: #fff; border-top: 1px solid #eee; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); padding: 15px; }
-.summary-top { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 10px; }
-.summary-actions { display: flex; gap: 10px; }
-.shipping-trigger-btn { flex: 1.2; background: #f0f2f5; border: 1px dashed #ccc; border-radius: var(--radius); padding: 10px; font-weight: 700; font-size: 0.8rem; }
-.checkout-btn { flex: 1; border-radius: var(--radius); border: none; font-weight: 700; color: #fff; background: #bdc3c7; }
+.action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.qty-control { display: flex; align-items: center; background: #f0f2f5; border-radius: 15px; padding: 2px 5px; }
+.qty-btn { background: none; border: none; font-weight: 800; cursor: padding: 0 5px; }
+.btn-add-cart-icon { width: 30px; height: 30px; background: var(--pizz-red); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-/* MODALS */
+/* Mini-Cart Block */
+.footer-cart { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; z-index: 2000; border-radius: 20px 20px 0 0; padding: 15px; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); }
+.checkout-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: none; color: #fff; font-weight: 800; margin-top: 10px; }
+
+/* Modals */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; }
-.isolated-note-card { background: #fff; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; position: relative; }
-.input-group { margin-bottom: 15px; text-align: left; }
-.input-group label { display: block; font-size: 0.75rem; color: #7f8c8d; margin-bottom: 5px; font-weight: 700; }
-.input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
-.close-x { position: absolute; top: 15px; right: 15px; border: none; background: #f0f2f5; border-radius: 50%; width: 30px; height: 30px; font-weight: 800; }
+.isolated-note-card { background: #fff; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; text-align: center; }
