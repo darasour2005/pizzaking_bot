@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V2.8</title>
+    <title>Pizza King Store V2.9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
     <div class="master-header index-header">
         <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
-        <a href="movie.html" class="movie-btn-pro"><span>🎬</span></a>
+        <a href="movie.html" class="movie-btn-pro">🎬</a>
     </div>
 
     <div class="container">
@@ -87,12 +87,9 @@
             <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
                 <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
-            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0; font-size: 1.3rem;">ការកម្ម៉ង់ជោគជ័យ!</h3>
-            <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
-                អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
-                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ។</span>
-            </p>
-            <button class="btn-paid-final" onclick="location.reload()" style="margin-bottom:0;">យល់ព្រម (OK)</button>
+            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0;">ការកម្ម៉ង់ជោគជ័យ!</h3>
+            <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px;">អរគុណ <span id="success-name-kh" style="color:var(--pizz-red); font-weight:700;"></span> សម្រាប់ការកម្ម៉ង់!</p>
+            <button class="btn-paid-final" onclick="location.reload()">យល់ព្រម (OK)</button>
         </div>
     </div>
 
@@ -109,13 +106,14 @@
 <script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
-<script src="slider.js"></script> <script src="aba-qr.js"></script> 
+<script src="slider.js"></script> 
+<script src="aba-qr.js"></script> 
 <script src="shipping-form.js"></script> 
 
 <script>
     loadBottomNav('home'); 
     loadShippingForm();
-    initSlider(); // Initialize Movie Slider
+    initSlider(); // RE-ACTIVATE MOVIE SLIDER
 
     const tg = window.Telegram.WebApp;
     tg.expand(); tg.ready();
@@ -174,7 +172,6 @@
 
     function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
-    
     function addToCart(pid) {
         const p = allProducts.find(x => x.id === pid); const q = cardQtys[pid] || 1;
         let name = p.name, price = parseFloat(p.price), cid = pid.toString();
@@ -188,7 +185,6 @@
         saveCartToStorage(); updateCartBasedOnDelivery();
         const t = document.getElementById('toast'); t.style.display='flex'; setTimeout(() => t.style.display='none', 2000);
     }
-
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
         const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -201,7 +197,6 @@
         }
         updateUI(cart);
     }
-
     function updateUI(itemsList) {
         const show = itemsList.length > 0; document.getElementById('footer-ui').style.display = show ? 'block' : 'none';
         const total = itemsList.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -210,7 +205,6 @@
         document.getElementById('cart-list').innerHTML = itemsList.map(i => `<div class="cart-item-row"><div>${i.name}<br><small>${i.price.toLocaleString()}៛</small></div><div style="display:flex;align-items:center;justify-content:center;gap:10px;">${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',-1)">−</button>`}<span>${i.qty}</span>${i.cartId.toString().startsWith('delivery') ? '' : `<button class="qty-btn" onclick="updateCartItemQty('${i.cartId}',1)">+</button>`}</div><button class="cart-del-btn" onclick="removeFromCart('${i.cartId}')"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:red;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`).join('');
         checkForm();
     }
-
     function checkForm() {
         const n = localStorage.getItem('pizz_king_name') || ""; const p = localStorage.getItem('pizz_king_tel') || ""; const l = localStorage.getItem('pizz_king_loc') || "";
         const hasItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')).length > 0;
@@ -218,7 +212,6 @@
         btn.disabled = !isValid; btn.style.background = isValid ? "#2ecc71" : "#bdc3c7";
         btn.innerHTML = isValid ? "ទូទាត់ប្រាក់ឥឡូវនេះ" : "ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន";
     }
-
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
@@ -228,13 +221,10 @@
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
         startTimer(900);
     }
-
     async function submitFinalOrder() {
         const btn = document.getElementById('confirm-btn'); btn.innerHTML = "⏳ កំពុងបញ្ជូន..."; btn.disabled = true;
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const userName = localStorage.getItem('pizz_king_name') || "";
-        const userPhone = localStorage.getItem('pizz_king_tel') || "";
-        const userLoc = localStorage.getItem('pizz_king_loc') || "";
+        const userName = localStorage.getItem('pizz_king_name') || ""; const userPhone = localStorage.getItem('pizz_king_tel') || ""; const userLoc = localStorage.getItem('pizz_king_loc') || "";
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: userLoc, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
         try {
             await fetch(`${APP_CONFIG.RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
@@ -243,13 +233,11 @@
             document.getElementById('payment-screen').style.display = 'none'; document.getElementById('success-modal').style.display = 'flex';
         } catch (e) { tg.showAlert("⚠️ Connection Error"); btn.innerHTML = `<span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>`; btn.disabled = false; }
     }
-
     async function downloadQRImage() {
         const target = document.getElementById('invoice-card');
         const canvas = await html2canvas(target, { scale: 3, useCORS: true, logging: false });
         const link = document.createElement('a'); link.download = 'PizzKing_Receipt.png'; link.href = canvas.toDataURL("image/png"); link.click();
     }
-
     function toggleRecap() { const list = document.getElementById('recap-list'); if (list.style.display === 'block') list.style.display = 'none'; else list.style.display = 'block'; }
     function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<h3>${p.name}</h3><p>${p.description || "គ្មានការពិពណ៌នា"}</p>`; document.getElementById('detail-popup').style.display = 'flex'; }
     function openNote() { document.getElementById('note-input').value = customerNote; document.getElementById('note-modal').style.display = 'flex'; }
@@ -257,13 +245,13 @@
     function saveNote() { customerNote = document.getElementById('note-input').value; document.getElementById('note-btn').innerText = "✅ ចំណាំ"; closeNote(); }
     function toggleCart() { document.getElementById('cart-list').classList.toggle('open'); }
     function closePay() { document.getElementById('payment-screen').style.display = 'none'; }
+    function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
+    function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
+    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
     function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
     function removeFromCart(cid) { cart = cart.filter(x => x.cartId.toString() !== cid.toString()); updateCartBasedOnDelivery(); }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
     function updateCartItemQty(cid, d) { const i = cart.find(x => x.cartId.toString() === cid.toString()); if (i && !i.cartId.toString().startsWith('delivery')) { i.qty = Math.max(1, i.qty + d); updateCartBasedOnDelivery(); } }
-    function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
-    function startTimer(d) { let t = d; setInterval(() => { let m = parseInt(t/60,10), s = parseInt(t%60,10); document.getElementById('pay-timer').textContent = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s); if(--t < 0) t=0; }, 1000); }
-    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
 
     fetchData();
 </script>
