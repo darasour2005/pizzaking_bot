@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V2.0</title>
+    <title>Pizza King Store V3.8</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -32,14 +32,18 @@
     <div class="master-header index-header">
         <img src="logo.png" class="brand-logo-btn active" id="cat-0" onclick="filterCatLocal(0)" alt="Logo">
         <div class="cat-slider" id="cat-slider"></div>
-        <a href="movie.html" class="movie-btn-pro"><span>🎬</span><span>មើលកុន</span></a>
+        <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-left: 10px;">
+            <a href="movie.html" class="movie-btn-pro" style="width: 44px; height: 44px; background: #111111; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 2px solid #ffffff; text-decoration: none;">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #ffffff;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-2z"/></svg>
+            </a>
+            <span style="font-size: 0.55rem; font-weight: 800; color: #111111; margin-top: 2px;">មើលកុន</span>
+        </div>
     </div>
 
     <div class="container">
+        <div id="slider-container"></div>
         <div id="product-grid" class="grid"></div>
-        
         <div id="shipping-form-placeholder"></div>
-        
     </div>
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
@@ -91,11 +95,7 @@
             <h3 style="color: var(--pizz-green); margin: 0 0 15px 0; font-size: 1.3rem;">ការកម្ម៉ង់ជោគជ័យ!</h3>
             <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
                 អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
-                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ។</span>
-            </p>
-            <p style="font-size: 0.8rem; color: #7f8c8d; line-height: 1.4; margin-bottom: 25px;">
-                Thank you <span id="success-name-en" style="color:var(--pizz-red); font-weight:700;"></span> for your order.<br>
-                Please find your order details in the Order Box.
+                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ</span>
             </p>
             <button class="btn-paid-final" onclick="location.reload()" style="margin-bottom:0;">យល់ព្រម (OK)</button>
         </div>
@@ -114,29 +114,25 @@
 <script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
-<script src="aba-qr.js"></script> 
+<script src="slider.js"></script> <script src="aba-qr.js"></script> 
 <script src="shipping-form.js"></script> 
 <script src="shopcart-payment.js"></script> <script>
     loadBottomNav('home'); 
     loadShippingForm();
+    initSlider(); // INITIALIZE MOVIE SLIDER
 
     const tg = window.Telegram.WebApp;
     tg.expand(); tg.ready();
     
-    // Globals maintained in master file
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     async function fetchData() {
-        const C_PROD = "pizz_cache_prod_v2", C_VAR = "pizz_cache_var_v2", C_CAT = "pizz_cache_cat_v2", C_TIME = "pizz_cache_time_v2";
-        const now = Date.now(), last = localStorage.getItem(C_TIME);
-        if(last && (now - last < 86400000)) { 
-            allProducts = JSON.parse(localStorage.getItem(C_PROD)); productVariations = JSON.parse(localStorage.getItem(C_VAR)); renderCategories(JSON.parse(localStorage.getItem(C_CAT))); renderProducts(allProducts); restoreState(); document.getElementById('loader').style.display = 'none'; return;
-        }
         try {
-            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); const cats = await catRes.json(); renderCategories(cats); localStorage.setItem(C_CAT, JSON.stringify(cats));
+            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); const cats = await catRes.json(); renderCategories(cats);
             const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); allProducts = await prodRes.json();
             for (const vp of allProducts.filter(p => p.type === 'variable')) { const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); productVariations[vp.id] = await vRes.json(); }
-            localStorage.setItem(C_PROD, JSON.stringify(allProducts)); localStorage.setItem(C_VAR, JSON.stringify(productVariations)); localStorage.setItem(C_TIME, now); document.getElementById('loader').style.display = 'none'; restoreState();
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
         } catch(e) { document.getElementById('loader').style.display = 'none'; }
     }
 
@@ -144,11 +140,9 @@
         const nameInput = document.getElementById('user-name');
         const phoneInput = document.getElementById('user-phone');
         const locInput = document.getElementById('user-loc');
-
         if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
         if(phoneInput) phoneInput.value = localStorage.getItem('pizz_king_tel') || "";
         if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
-        
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
         updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
@@ -167,7 +161,6 @@
 
     function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
-    
     function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%; max-height:250px; object-fit:contain; border-radius:12px; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`; document.getElementById('detail-popup').style.display = 'flex'; }
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
