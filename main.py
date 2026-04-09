@@ -1,3 +1,4 @@
+# main.py - CORE BACKEND ENGINE
 import os
 import asyncio
 import logging
@@ -10,23 +11,24 @@ from aiogram.types import WebAppInfo
 from aiohttp import web
 from woocommerce import API
 
-# --- HARDENED CONFIG ---
-API_TOKEN = '8503376154:AAGsDQEaLHCq3E_ttoCAT46SygrD2VubP-E' 
-WC_URL = "https://1.phsar.me"
-WC_KEY = "ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03"
-WC_SECRET = "cs_63c256e1b4eba0a65723f054159e55d2148c3c57"
-MINI_APP_URL = "https://darasour2005.github.io/pizzaking_bot/"
-GROUP_CHAT_ID = '-1003499575831' 
+# Import centralized configuration
+import config
 
-bot = Bot(token=API_TOKEN)
+bot = Bot(token=config.TELEGRAM_API_TOKEN)
 dp = Dispatcher()
 router = Router()
-wcapi = API(url=WC_URL, consumer_key=WC_KEY, consumer_secret=WC_SECRET, version="wc/v3", timeout=15)
+wcapi = API(
+    url=config.WC_URL, 
+    consumer_key=config.WC_KEY, 
+    consumer_secret=config.WC_SECRET, 
+    version="wc/v3", 
+    timeout=15
+)
 
 @router.message(Command("start"))
 async def start_handler(message: types.Message):
     markup = types.ReplyKeyboardMarkup(
-        keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=MINI_APP_URL))]], 
+        keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=config.MINI_APP_URL))]], 
         resize_keyboard=True
     )
     await message.answer(f"🇰🇭 <b>ស្វាគមន៍មកកាន់ Pizz King!</b>\nYour ID: <code>{message.from_user.id}</code>", reply_markup=markup, parse_mode="HTML")
@@ -39,28 +41,48 @@ async def create_order_endpoint(request):
         data = await request.json()
         tid = data.get('telegram_id')
         
-        # SANITIZE ALL INPUTS TO PREVENT HTML CRASHES
+        # SANITIZE ALL INPUTS
         name = html.escape(str(data.get('name', 'N/A')))
         phone = html.escape(str(data.get('phone', 'N/A')))
         loc = html.escape(str(data.get('location', 'N/A')))
         note = html.escape(str(data.get('note', '')))
         items = data.get('items', [])
         total = data.get('total', 0)
+        account_email = data.get('account_email', '') # Fetched from frontend auto-account generator
         
         kh_tz = pytz.timezone('Asia/Phnom_Penh')
         now = datetime.now(kh_tz)
         order_date = now.strftime("%d-%m-%Y")
         order_time = now.strftime("%H:%M")
 
-        # 1. Format Item List (Escaped)
+        # 1. Format Item List & Separate Shipping for WP
         item_list_str = ""
+        wp_line_items = []
+        wp_shipping_lines = []
+
         for i in items:
             i_name = html.escape(str(i['name']))
-            item_list_str += f"• {i_name} x{i['qty']} — {int(i['price'] * i['qty']):,}៛\n"
+            i_qty = int(i['qty'])
+            i_price = float(i['price'])
+            
+            item_list_str += f"• {i_name} x{i_qty} — {int(i_price * i_qty):,}៛\n"
+            
+            # WP Logic: Separate delivery from real products
+            if str(i.get('id')) == 'delivery':
+                wp_shipping_lines.append({
+                    "method_id": "flat_rate",
+                    "method_title": "ថ្លៃដឹកជញ្ជូន (Delivery)",
+                    "total": str(i_price * i_qty)
+                })
+            elif str(i.get('id')).isdigit():
+                wp_line_items.append({
+                    "product_id": int(i['id']),
+                    "quantity": i_qty
+                })
         
         note_display = f"\n📝 <b>ចំណាំ៖</b> {note}" if note.strip() else "\n📝 <b>ចំណាំ៖</b> គ្មាន"
 
-        # 2. Construct Master HTML Report
+        # 2. Construct Master HTML Report for Telegram
         report_text = (
             f"🚀 <b>ការកម្ម៉ង់ថ្មី (Mini App)</b>\n"
             f"📅 ថ្ងៃទី: <code>{order_date}</code> | ម៉ោង: <code>{order_time}</code>\n"
@@ -72,28 +94,31 @@ async def create_order_endpoint(request):
             f"💰 <b>សរុប៖ {int(total):,} ៛</b>"
         )
 
-        # 3. SEND TELEGRAM MESSAGES (Group First)
+        # 3. SEND TELEGRAM MESSAGES
         try:
-            await bot.send_message(GROUP_CHAT_ID, report_text, parse_mode="HTML")
+            await bot.send_message(config.GROUP_CHAT_ID, report_text, parse_mode="HTML")
         except Exception as e:
             logging.error(f"Group Send Error: {e}")
 
-        # 4. SEND TO BUYER
         if tid:
             try:
                 await bot.send_message(tid, f"✅ <b>ការកម្ម៉ង់បានជោគជ័យ!</b>\n\n{report_text}", parse_mode="HTML")
             except Exception as e:
                 logging.error(f"Buyer Send Error: {e}")
 
-        # 5. WOOCOMMERCE SYNC (Background)
+        # 4. WOOCOMMERCE SYNC (Now with Shipping Included!)
         try:
-            line_items = [{"product_id": int(i['id']), "quantity": i['qty']} for i in items if str(i.get('id', '')).isdigit()]
             wcapi.post("orders", {
                 "status": "processing",
-                "billing": {"first_name": name, "address_1": loc, "address_2": f"Note: {note}", "phone": phone},
-                "line_items": line_items,
+                "billing": {
+                    "first_name": name, 
+                    "address_1": loc, 
+                    "phone": phone,
+                    "email": account_email # Will link to an account if email rules are set in WP
+                },
+                "line_items": wp_line_items,
+                "shipping_lines": wp_shipping_lines,
                 "customer_note": f"{note} (Time: {order_date} {order_time})",
-                "meta_data": [{"key": "mini_app_note", "value": note}]
             })
         except Exception as e:
             logging.error(f"WC Sync Error: {e}")
