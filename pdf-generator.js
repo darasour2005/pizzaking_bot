@@ -1,21 +1,20 @@
-// pdf-generator.js - STANDALONE INVOICE ENGINE V1.1 (Anti-Blank & KHQR Integrated)
+// pdf-generator.js - STANDALONE INVOICE ENGINE V1.2 (Anti-Blank & KHQR Integrated)
 
 function generateInvoicePDF(data) {
     // 1. Activate loader
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'flex';
 
-    // 2. Generate the Dynamic ABA KHQR URL
-    // This uses the engine we extracted to aba-qr.js
+    // 2. Generate the Dynamic ABA KHQR URL using the standalone aba-qr.js engine
     const qrString = generateDynamicABAQR(data.grandTotal);
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrString)}`;
 
-    // 3. Create the container dynamically (Fixes the Blank PDF Bug)
+    // 3. Create the container dynamically
     const container = document.createElement('div');
     container.id = 'dynamic-invoice-container';
     
-    // CRITICAL: We hide it behind the app instead of off-screen so mobile browsers are forced to render it.
-    container.style.cssText = "position: absolute; top: 0; left: 0; width: 800px; background: #ffffff; padding: 50px; box-sizing: border-box; color: #000000; font-family: 'Kantumruy Pro', sans-serif; z-index: -9999;";
+    // CRITICAL ANTI-BLANK TRICK: Do not push off-screen. Make it invisible but mathematically present.
+    container.style.cssText = "position: absolute; top: 0; left: 0; width: 800px; background: #ffffff; padding: 50px; box-sizing: border-box; color: #000000; font-family: 'Kantumruy Pro', sans-serif; z-index: -1000; opacity: 0.01; pointer-events: none;";
 
     // 4. Build Item Rows
     let itemsHTML = data.items.map(item => `
@@ -26,17 +25,25 @@ function generateInvoicePDF(data) {
         </tr>
     `).join('');
 
-    // Inject Delivery Fee if it exists
+    // Inject Delivery or Fee Lines if the backend successfully attached them
     if (data.shippingTotal > 0) {
         itemsHTML += `
         <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #ddd; color:#555;">ថ្លៃដឹកជញ្ជូន (Delivery Fee)</td>
+            <td style="padding: 12px; border-bottom: 1px solid #ddd; color:#555;">🚚 ថ្លៃដឹកជញ្ជូន (Shipping)</td>
             <td style="padding: 12px; border-bottom: 1px solid #ddd; text-align:center;">1</td>
             <td style="padding: 12px; border-bottom: 1px solid #ddd; text-align:right;">${data.shippingTotal.toLocaleString()}៛</td>
         </tr>`;
     }
+    if (data.feeTotal > 0) {
+        itemsHTML += `
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #ddd; color:#555;">⚙️ ថ្លៃសេវាផ្សេងៗ (Fees)</td>
+            <td style="padding: 12px; border-bottom: 1px solid #ddd; text-align:center;">1</td>
+            <td style="padding: 12px; border-bottom: 1px solid #ddd; text-align:right;">${data.feeTotal.toLocaleString()}៛</td>
+        </tr>`;
+    }
 
-    // 5. Inject the full HTML Payload including the New Payment Block
+    // 5. Inject the full HTML Payload including the Payment Block
     container.innerHTML = `
         <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #e74c3c; padding-bottom: 20px; margin-bottom: 20px;">
             <div style="font-size: 3rem; font-weight: 800; letter-spacing: 2px; color: #e74c3c;">INVOICE</div>
@@ -119,6 +126,6 @@ function generateInvoicePDF(data) {
         executePDF();
     } else {
         qrImageElement.onload = executePDF;
-        qrImageElement.onerror = executePDF; // If QR fails to load, generate PDF anyway so it doesn't freeze
+        qrImageElement.onerror = executePDF;
     }
 }
