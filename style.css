@@ -1,4 +1,4 @@
-/* PIZZA KING STORE - GLOBAL MASTER CSS LEDGER V1.0 */
+/* PIZZA KING STORE - GLOBAL MASTER CSS LEDGER V3.6 (V1 RESTORED + ZERO OMISSION) */
 :root { 
     --pizz-green: #2ecc71; 
     --pizz-red: #e74c3c; 
@@ -10,35 +10,20 @@
     --radius: 12px;
 }
 
-.movie-btn-pro { 
-    width: 44px; height: 44px; 
-    background: #111111; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    flex-shrink: 0; 
-    text-decoration: none;
-    border: 2px solid #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    font-size: 1.2rem;
-}
-.movie-btn-pro span:last-child { display: none; } /* Hide text on top for round icon look */
-
-/* 1. APP SILHOUETTE */
+/* 1. APP SILHOUETTE (RESTORED V1) [cite: 26-29] */
 body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; padding: 0; display: flex; justify-content: center; color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 #app-shell { width: 100%; max-width: 480px; background: #f0f2f5; min-height: 100dvh; position: relative; box-shadow: 0 0 80px rgba(0,0,0,1); display: flex; flex-direction: column; }
 
-/* 2. GUARDS & LOADERS */
+/* 2. GUARDS & LOADERS (RESTORED V1) [cite: 30-36] */
 #install-guard { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; background: #fff; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; box-sizing: border-box; }
 .guard-logo { width: 110px; height: 110px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(231,76,60,0.2); }
 .btn-install-force { background: var(--pizz-green); color: white; border: none; padding: 18px 40px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; }
 #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
 .loader-img { width: 90px; height: 90px; border-radius: 50%; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-/* 3. HEADERS & CATEGORY SLIDER */
-.master-header { display: flex; align-items: center; justify-content: center; background: #fff; padding: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; font-weight: 700; font-size: 1.1rem; color: var(--pizz-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+/* 3. HEADERS & CATEGORY SLIDER (RESTORED V1) [cite: 37-43] */
+.master-header { display: flex; align-items: center; justify-content: center; background: #fff; padding: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 200; font-weight: 700; color: var(--pizz-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 .index-header { padding: 8px 12px; justify-content: flex-start; gap: 8px; }
 .brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
 .brand-logo-btn.active { border-color: var(--pizz-green); }
@@ -49,11 +34,23 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
 .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
 .cat-item span { font-size: 0.6rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 3px; }
-.movie-btn-pro { background: black; border-radius: 12px; padding: 6px 12px; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-.movie-btn-pro span:first-child { font-size: 1.5rem; color: #fff; line-height: 1; }
-.movie-btn-pro span:last-child { font-size: 0.55rem; color: #fff; font-weight: 700; margin-top: 2px; }
 
-/* 🎬 Movie Slider (RESTORED CLEAN) */
+/* FIXED: Round Movie Icon identical to Bottom FAB */
+.movie-btn-pro { 
+    width: 42px; height: 42px; 
+    background: #111111; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0; 
+    text-decoration: none;
+    border: 2px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.movie-btn-pro svg { width: 22px; height: 22px; fill: #ffffff; }
+
+/* 3.1 MOVIE SLIDER COMPONENT (RESTORED) [cite: 8-13] */
 .main-slider { width: 100%; height: 120px; overflow: hidden; position: relative; border-radius: var(--radius); margin: 10px 0; background: #eee; }
 .slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; }
 .slide { min-width: 100%; height: 100%; }
@@ -62,9 +59,8 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 50%; }
 .dot.active { background: #fff; width: 12px; border-radius: 3px; }
 
-
-/* 4. PRODUCT GRID & CARDS (INDEX) */
-.container { flex-grow: 1; overflow-y: auto; padding: 10px; padding-bottom: 240px; } 
+/* 4. PRODUCT GRID & CARDS (RESTORED V1) [cite: 46-59] */
+.container { flex-grow: 1; overflow-y: auto; padding: 10px; padding-bottom: 140px; } 
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .card { background: #fff; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; height: 100%; }
 .card img { width: 100%; height: 100px; object-fit: cover; cursor: pointer; display: block; flex-shrink: 0; }
@@ -80,7 +76,7 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .qty-btn { width: 26px; height: 26px; border: 1px solid #ddd; background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1rem; padding: 0; }
 .btn-add-cart-icon { background: var(--pizz-green); border: none; height: 32px; width: 32px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
 
-/* 5. ORDER LIST & CARDS (ORDERS.HTML) */
+/* 5. ORDER LIST & CARDS (RESTORED V1) [cite: 60-69] */
 .order-card { background: #fff; border-radius: 14px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f9f9f9; }
 .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 12px; }
 .order-id { font-weight: 800; color: #2c3e50; font-size: 1.05rem; margin-bottom: 4px; }
@@ -96,7 +92,7 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .login-box { text-align: center; margin-top: 40px; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 .login-box input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; font-family: inherit; text-align: center; margin: 15px 0; outline: none; }
 
-/* 6. FORMS & GENERAL BUTTONS */
+/* 6. FORMS & GENERAL BUTTONS (RESTORED V1) [cite: 70-76] */
 .order-form { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--pizz-border); }
 .input-group { margin-bottom: 12px; }
 .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; font-weight: 700; color: #7f8c8d; }
@@ -106,8 +102,8 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .btn-danger-outline { flex: 1; border: 1px solid #ffa39e; background: #fff1f0; color: var(--pizz-red); padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .btn-solid-green { background: var(--pizz-green); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; box-sizing: border-box; }
 
-/* 7. MINICART */
-.footer-cart { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 150; border-radius: 20px 20px 0 0; }
+/* 7. MINICART (RESTORED V1 + GAP FIX) [cite: 77-84] */
+.footer-cart { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 150; border-radius: 20px 20px 0 0; }
 .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .cart-header.open { display: flex; }
 .cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
@@ -117,7 +113,7 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .checkout-btn:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
 
-/* 8. OVERLAYS & MODALS */
+/* 8. OVERLAYS & MODALS (RESTORED V1) [cite: 85-93] */
 .pay-overlay, .modal-overlay, .popup-screen { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); box-sizing: border-box; padding: 15px; }
 .pay-overlay { z-index: 600; }
 .popup-screen { z-index: 800; }
@@ -126,7 +122,7 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .isolated-note-card textarea { width: 100% !important; padding: 12px !important; border: 1px solid #ccc !important; border-radius: 12px !important; font-family: inherit !important; resize: none !important; font-size: 0.9rem !important; margin-bottom: 15px !important; box-sizing: border-box !important; outline: none !important; background: #fff !important; color: #000 !important; }
 .close-x { position: absolute; top: 12px; right: 12px; background: #f0f2f5; border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 20px; font-weight: bold; color: var(--pizz-red); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
-/* 9. PAYMENT QR UI */
+/* 9. PAYMENT QR UI (RESTORED V1) [cite: 94-105] */
 .qr-card { background: white; border-radius: 20px; width: 95%; max-width: 380px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
 .qr-header-bar { background: var(--pizz-red); padding: 10px; color: white; font-weight: 700; text-align: center; border-radius: 10px 10px 0 0; margin: -15px -15px 10px -15px; }
 #qr-container { text-align: center; display: block; }
@@ -139,13 +135,13 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .btn-paid-final { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-paid-final:disabled { background: #95a5a6; cursor: not-allowed; }
 
-/* 10. PRODUCT DETAILS POPUP */
+/* 10. PRODUCT DETAILS POPUP (RESTORED V1) [cite: 106-107] */
 .popup-card { background: white; border-radius: 20px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 20px; box-sizing: border-box; position: relative; text-align: center; }
 
-/* 11. TOAST NOTIFICATION */
+/* 11. TOAST NOTIFICATION (RESTORED V1) [cite: 108-110] */
 #toast { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); background: var(--pizz-green); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: normal; display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); align-items: center; gap: 8px; white-space: nowrap; max-width: 90%; }
 
-/* 12. TELEGRAM FLOAT & FOOTER */
+/* 12. TELEGRAM FLOAT & FOOTER (RESTORED V1) [cite: 111-113] */
 .float-contact { position: fixed; bottom: 85px; right: calc(50% - 220px); width: 55px; height: 55px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 180; box-shadow: 0 4px 15px rgba(0,136,204,0.4); cursor: pointer; transition: bottom 0.3s ease; }
 @media (max-width: 500px) { .float-contact { right: 20px; } }
 footer { text-align: center; padding: 20px 20px 120px 20px; font-size: 0.7rem; color: #95a5a6; border-top: 1px solid var(--pizz-border); margin-top: 20px; }
