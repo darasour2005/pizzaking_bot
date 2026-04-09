@@ -1,64 +1,38 @@
-// sw.js - AGGRESSIVE CACHE CONTROLLER V3.0
+// sw.js - DYNAMIC AUTO-SYNC ENGINE (For Active Development & Live Updates)
+const CACHE_NAME = 'pizza-king-live-cache-v1';
 
-// 🛑 ARCHITECT RULE: YOU MUST CHANGE THIS NAME EVERY TIME YOU UPLOAD NEW CODE
-const CACHE_NAME = 'pizza-king-cache-v3.0'; 
-
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/orders.html',
-    '/movie.html',
-    '/sale.html',
-    '/style.css',
-    '/nav.js',
-    '/pwa.js',
-    '/logo.png'
-];
-
-// 1. INSTALLATION: Force the new worker to take over IMMEDIATELY
+// 1. INSTALLATION: Take over immediately
 self.addEventListener('install', event => {
-    self.skipWaiting(); // Kills the zombie worker
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            console.log('Opened cache');
-            return cache.addAll(urlsToCache);
-        })
-    );
+    self.skipWaiting(); 
 });
 
-// 2. ACTIVATION: Annihilate any old versions of the cache
+// 2. ACTIVATION: Claim the browser immediately
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    // If the cache name doesn't match our current version, delete it
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Destroying old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim()) // Force all open app windows to use the new code
-    );
+    event.waitUntil(self.clients.claim()); 
 });
 
-// 3. FETCH STRATEGY: Network-First (Always check the internet for updates first!)
+// 3. THE AUTO-SYNC FETCH STRATEGY (Network-First)
 self.addEventListener('fetch', event => {
+    // Only intercept basic web requests (HTML, CSS, JS, Images)
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
         fetch(event.request)
-            .then(response => {
-                // If we got a valid response from the internet, clone it and update the cache
-                if (response && response.status === 200 && response.type === 'basic') {
-                    const responseToCache = response.clone();
+            .then(liveResponse => {
+                // SUCCESS: We are online and the server responded!
+                // Save a silent, fresh backup of this file to the phone's hard drive
+                if (liveResponse && liveResponse.status === 200 && liveResponse.type === 'basic') {
+                    const responseToCache = liveResponse.clone();
                     caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, responseToCache);
                     });
                 }
-                return response;
+                // Deliver the fresh code to the user instantly
+                return liveResponse;
             })
             .catch(() => {
-                // If the internet is down, fallback to the saved PWA files
+                // FAILURE: The user is offline or the server is down.
+                // Pull the most recent backup from the cache so the app doesn't crash.
                 return caches.match(event.request);
             })
     );
