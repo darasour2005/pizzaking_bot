@@ -2,7 +2,7 @@
 
 const APP_CONFIG = {
     // Render.com Python Backend URL (FIXED: Underscore instead of hyphen)
-    RENDER_URL: "https://pizzaking_bot.onrender.com",
+    RENDER_URL: "https://pizzaking-bot.onrender.com",
     
     // WordPress Database Endpoint
     WC_BASE: "https://1.phsar.me/wp-json/wc/v3",
