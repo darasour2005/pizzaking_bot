@@ -1,36 +1,28 @@
-/* style.css - MASTER PRODUCT ENGINE V2.5 (CLEAN & RESTORED) */
-
-:root {
+/* PIZZA KING STORE - GLOBAL MASTER CSS LEDGER V3.0 (V1 RESTORED) */
+:root { 
+    --pizz-green: #2ecc71; 
     --pizz-red: #e74c3c;
-    --pizz-green: #2ecc71;
-    --pizz-dark: #2c3e50;
-    --pizz-gray: #f8f9fa;
-    --pizz-text: #333;
-    --pizz-bg: #ffffff;
+    --pizz-dark: #2c3e50; 
+    --pizz-gray: #f8f9fa; 
+    --pizz-border: #eeeeee; 
     --radius: 12px;
-    --shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* 1. APP SILHOUETTE (RESTORED V1) */
 body { 
-    margin: 0; 
     font-family: 'Kantumruy Pro', sans-serif; 
-    background-color: var(--pizz-gray); 
-    color: var(--pizz-text);
-    padding-bottom: 120px; 
-    overflow-x: hidden;
+    background: #000; /* Professional Black Backdrop restored  */
+    margin: 0; padding: 0; display: flex; justify-content: center; 
+    color: var(--pizz-dark); overflow-x: hidden; -webkit-font-smoothing: antialiased; 
+}
+#app-shell { 
+    width: 100%; max-width: 480px; background: #f0f2f5; 
+    min-height: 100dvh; position: relative; 
+    box-shadow: 0 0 80px rgba(0,0,0,1); display: flex; flex-direction: column; 
+    padding-bottom: 140px; /* Space for Mini-Cart + Nav */
 }
 
-/* Header & Categories */
-.master-header { position: sticky; top: 0; background: #fff; z-index: 1000; padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
-.brand-logo-btn { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; }
-.brand-logo-btn.active { border-color: var(--pizz-red); }
-.cat-slider { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; flex: 1; }
-.cat-slider::-webkit-scrollbar { display: none; }
-.cat-item { white-space: nowrap; padding: 8px 16px; background: #f0f2f5; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
-.cat-item.active { background: var(--pizz-red); color: #fff; }
-
-/* 🎬 Movie Slider (RESTORED CLEAN) */
+/* 🎬 MOVIE SLIDER (UPGRADE) */
 .main-slider { width: 100%; height: 120px; overflow: hidden; position: relative; border-radius: var(--radius); margin: 10px 0; background: #eee; }
 .slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; }
 .slide { min-width: 100%; height: 100%; }
@@ -39,23 +31,37 @@ body {
 .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.5); border-radius: 50%; }
 .dot.active { background: #fff; width: 12px; border-radius: 3px; }
 
-/* 🛒 Grid & Cards (STRICT 2-COLUMN) */
-.container { padding: 0 10px; }
-.grid { display: grid; grid-template-columns: repeat(2, 1fr) !important; gap: 12px; margin-top: 15px; }
-.card { background: #fff; border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); position: relative; }
-.card img { width: 100%; height: 110px; object-fit: contain; }
-.card .title { font-size: 0.8rem; font-weight: 700; height: 30px; overflow: hidden; margin-top: 5px; line-height: 1.2; }
-.price { color: var(--pizz-red); font-weight: 800; font-size: 0.9rem; margin-top: 5px; }
+/* 3. HEADERS & CATEGORY SLIDER (RESTORED V1) */
+.master-header { display: flex; align-items: center; background: #fff; padding: 15px; border-bottom: 1px solid var(--pizz-border); position: sticky; top: 0; z-index: 1000; }
+.index-header { padding: 8px 12px; justify-content: flex-start; gap: 8px; }
+.brand-logo-btn { width: 45px; height: 45px; border-radius: 50%; border: 2px solid transparent; }
+.brand-logo-btn.active { border-color: var(--pizz-green); }
+.cat-slider { display: flex; overflow-x: auto; padding: 5px 0; gap: 15px; scrollbar-width: none; flex-grow: 1; }
+.cat-slider::-webkit-scrollbar { display: none; }
+.cat-item { text-align: center; min-width: 55px; cursor: pointer; }
+.cat-item span { font-size: 0.6rem; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 3px; }
 
-.action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-.qty-control { display: flex; align-items: center; background: #f0f2f5; border-radius: 15px; padding: 2px 5px; }
-.qty-btn { background: none; border: none; font-weight: 800; cursor: padding: 0 5px; }
-.btn-add-cart-icon { width: 30px; height: 30px; background: var(--pizz-red); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+/* 4. PRODUCT GRID & CARDS (RESTORED V1) [cite: 340, 341] */
+.container { padding: 10px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card { background: #fff; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+.card img { width: 100%; height: 100px; object-fit: cover; }
+.card-body { padding: 8px; display: flex; flex-direction: column; }
+.title { font-size: 0.75rem; font-weight: 700; height: 32px; overflow: hidden; margin-bottom: 4px; color: var(--pizz-dark); }
+.price { color: var(--pizz-red); font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
 
-/* Mini-Cart Block */
-.footer-cart { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; z-index: 2000; border-radius: 20px 20px 0 0; padding: 15px; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); }
-.checkout-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: none; color: #fff; font-weight: 800; margin-top: 10px; }
+/* 5. MINICART (RESTORED V1) [cite: 370] */
+.footer-cart { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1500; border-radius: 20px 20px 0 0; }
+.cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
+.cart-details.open { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.checkout-btn { background: var(--pizz-green); color: #fff; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; }
 
-/* Modals */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; }
-.isolated-note-card { background: #fff; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; text-align: center; }
+/* 6. OVERLAYS & MODALS (RESTORED V1) [cite: 378] */
+.pay-overlay, .modal-overlay, .popup-screen { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); z-index: 5000; padding: 15px; }
+.isolated-note-card { background: #fff; border-radius: 16px; width: 95%; max-width: 360px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; position: relative; }
+
+/* Loader (RESTORED V1) [cite: 326] */
+#loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+.loader-img { width: 90px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
