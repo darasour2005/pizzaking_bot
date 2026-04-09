@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V1.5</title>
+    <title>Pizza King Store V1.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -35,12 +35,9 @@
 
     <div class="container">
         <div id="product-grid" class="grid"></div>
-        <div class="order-form">
-            <h4 style="margin:0 0 12px 0;">📍 ព័ត៌មានដឹកជញ្ជូន</h4>
-            <div class="input-group"><label>ឈ្មោះ</label><input type="text" id="user-name" oninput="saveFormData()"></div>
-            <div class="input-group"><label>លេខទូរស័ព្ទ</label><input type="tel" id="user-phone" oninput="saveFormData(); checkForm();"></div>
-            <div class="input-group"><label>ទីតាំង/ផ្ទះ</label><input type="text" id="user-loc" oninput="saveFormData(); checkForm();"></div>
-        </div>
+        
+        <div id="shipping-form-placeholder"></div>
+        
     </div>
 
     <div class="footer-cart" id="footer-ui" style="display:none;">
@@ -58,7 +55,7 @@
 
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card" id="invoice-card">
-            <div class="qr-header-bar">KHQR V1.5</div>
+            <div class="qr-header-bar">KHQR V1.6</div>
             <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
             <div id="recap-list" class="recap-list"></div>
             <div id="qr-container">
@@ -78,7 +75,7 @@
     <div id="note-modal" class="modal-overlay">
         <div class="isolated-note-card">
             <h4 style="margin:0 0 15px 0; color:#2c3e50; font-size: 1.1rem;">📝 បន្ថែមចំណាំ</h4>
-            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..." style="height:100px;"></textarea>
+            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..." style="height:100px; width:100%; box-sizing:border-box;"></textarea>
             <button class="btn-paid-final" onclick="saveNote()" style="margin-bottom:10px;">រក្សាទុក (Save)</button>
             <button onclick="closeNote()" style="background:none; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:1rem;">បោះបង់ (Cancel)</button>
         </div>
@@ -115,9 +112,11 @@
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
 <script src="aba-qr.js"></script> 
+<script src="shipping-form.js"></script> 
 
 <script>
     loadBottomNav('home'); 
+    loadShippingForm(); // Ignite the form component
 
     const tg = window.Telegram.WebApp;
     const RENDER_URL = "https://pizzaking-bot.onrender.com"; 
@@ -130,7 +129,19 @@
     const DELIVERY_CONFIG = { "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"], "siem_reap_free_over_riel": 40000, "siem_reap_charge_riel": 3000, "other_location_threshold_riel": 80000, "other_location_charge_below_riel": 8000, "other_location_charge_over_or_equal_riel": 11000 };
 
     function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
-    function saveFormData() { localStorage.setItem('pizz_king_tel', document.getElementById('user-phone').value); localStorage.setItem('pizz_king_loc', document.getElementById('user-loc').value); localStorage.setItem('pizz_king_name', document.getElementById('user-name').value); checkForm(); }
+    
+    // Adapted to read dynamically from the injected form
+    function saveFormData() { 
+        const nameInput = document.getElementById('user-name');
+        const phoneInput = document.getElementById('user-phone');
+        const locInput = document.getElementById('user-loc');
+        
+        if(nameInput) localStorage.setItem('pizz_king_name', nameInput.value); 
+        if(phoneInput) localStorage.setItem('pizz_king_tel', phoneInput.value); 
+        if(locInput) localStorage.setItem('pizz_king_loc', locInput.value); 
+        
+        checkForm(); 
+    }
 
     async function fetchData() {
         const C_PROD = "pizz_cache_prod_v2", C_VAR = "pizz_cache_var_v2", C_CAT = "pizz_cache_cat_v2", C_TIME = "pizz_cache_time_v2";
@@ -147,9 +158,14 @@
     }
 
     function restoreState() {
-        document.getElementById('user-phone').value = localStorage.getItem('pizz_king_tel') || "";
-        document.getElementById('user-loc').value = localStorage.getItem('pizz_king_loc') || "";
-        document.getElementById('user-name').value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
+        const nameInput = document.getElementById('user-name');
+        const phoneInput = document.getElementById('user-phone');
+        const locInput = document.getElementById('user-loc');
+
+        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
+        if(phoneInput) phoneInput.value = localStorage.getItem('pizz_king_tel') || "";
+        if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
+        
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
         updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
@@ -186,7 +202,11 @@
     function updateCartBasedOnDelivery() {
         const realItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')); if(realItems.length === 0) { cart = []; updateUI([]); return; }
         const subtotal = realItems.reduce((s, i) => s + (i.price * i.qty), 0);
-        const locRaw = document.getElementById('user-loc').value.toLowerCase(); cart = realItems;
+        
+        const locInput = document.getElementById('user-loc');
+        const locRaw = locInput ? locInput.value.toLowerCase() : ""; 
+        
+        cart = realItems;
         if(locRaw.length > 3) {
             const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
             let fee = isSR ? (subtotal < 40000 ? 3000 : 0) : (subtotal < 80000 ? 8000 : 11000);
@@ -205,11 +225,19 @@
     }
 
     function checkForm() {
-        const n = document.getElementById('user-name').value, p = document.getElementById('user-phone').value, l = document.getElementById('user-loc').value;
+        const nameInput = document.getElementById('user-name');
+        const phoneInput = document.getElementById('user-phone');
+        const locInput = document.getElementById('user-loc');
+        
+        const n = nameInput ? nameInput.value : "";
+        const p = phoneInput ? phoneInput.value : "";
+        const l = locInput ? locInput.value : "";
+        
         const hasItems = cart.filter(i => !i.cartId.toString().startsWith('delivery')).length > 0;
         const btn = document.getElementById('pre-pay-btn'); 
         const isValid = (n.length > 1 && p.length > 8 && l.length > 3 && hasItems);
         btn.disabled = !isValid; 
+        
         if(isValid) {
             btn.style.background = "#2ecc71";
             btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;margin-right:8px;vertical-align:middle;"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg><span style="vertical-align:middle;">ទូទាត់ប្រាក់ឥឡូវនេះ</span>`; 
@@ -224,7 +252,6 @@
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('recap-list').innerHTML = cart.map(i => `<div class="recap-row"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:2px solid #eee; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:800;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         document.getElementById('payment-screen').style.display = 'flex';
-        // External Engine Call
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
         startTimer(900);
@@ -239,10 +266,11 @@
     async function submitFinalOrder() {
         const btn = document.getElementById('confirm-btn'); btn.innerHTML = "⏳ កំពុងបញ្ជូន..."; btn.disabled = true;
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        const userName = document.getElementById('user-name').value;
-        const userPhone = document.getElementById('user-phone').value;
+        const userName = document.getElementById('user-name') ? document.getElementById('user-name').value : "";
+        const userPhone = document.getElementById('user-phone') ? document.getElementById('user-phone').value : "";
+        const userLoc = document.getElementById('user-loc') ? document.getElementById('user-loc').value : "";
         
-        const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: document.getElementById('user-loc').value, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
+        const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: userLoc, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
         
         try {
             await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
