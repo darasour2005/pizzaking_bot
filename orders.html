@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>បញ្ជីទិញរបស់ខ្ញុំ - Pizza King</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="pdf-generator.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* INLINE COMPONENT CSS FOR ACCORDION DETAILS */
+        /* UI ACCORDION & PDF BUTTON */
         .order-details-drawer { display: none; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; }
         .order-details-drawer.open { display: block; animation: slideDown 0.3s ease-out; }
         .info-section { background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #f0f0f0; }
         .detail-item-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
         .detail-item-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .btn-pdf { background: #fff1f0; border: 1px solid #ffa39e; color: var(--pizz-red); border-radius: 8px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.7rem; transition: 0.2s; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -46,7 +50,6 @@
 <script>
     loadBottomNav('orders'); 
     
-    // WordPress Backend Database link
     const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
     const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
     
@@ -60,7 +63,7 @@
     }
 
     function renderLogin() {
-        document.getElementById('main-container').innerHTML = `<div class="login-box"><div style="font-size:3rem; margin-bottom:10px;">📱</div><h3 style="margin:0 0 10px 0; color:var(--pizz-dark);">ស្វែងរកបញ្ជីទិញរបស់អ្នក</h3><p style="font-size:0.85rem; color:#7f8c8d; line-height:1.5;">សូមបញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើប្រាស់ពេលកម្ម៉ង់ទិញ។</p><input type="tel" id="manual-phone" placeholder="បញ្ចូលលេខទូរស័ព្ទ..."><button class="btn-paid-final" onclick="manualLogin()">ស្វែងរកការកម្ម៉ង់</button></div>`;
+        document.getElementById('main-container').innerHTML = `<div class="login-box"><div style="font-size:3rem; margin-bottom:10px;">📱</div><h3 style="margin:0 0 10px 0; color:var(--pizz-dark);">ស្វែងរកបញ្ជីទិញរបស់អ្នក</h3><p style="font-size:0.85rem; color:#7f8c8d; line-height:1.5;">សូមបញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើប្រាស់ពេលកម្ម៉ង់ទិញ។</p><input type="tel" id="manual-phone" placeholder="បញ្ចូលលេខទូរស័ព្ទ..."><button class="btn-solid-green" onclick="manualLogin()">ស្វែងរកការកម្ម៉ង់</button></div>`;
     }
 
     function manualLogin() {
@@ -79,7 +82,7 @@
             document.getElementById('loader').style.display = 'none';
             
             if(orders.length === 0) {
-                document.getElementById('main-container').innerHTML = `<div style="text-align:center; margin-top:50px;"><div style="font-size:4rem; margin-bottom:15px; opacity:0.5;">🛒</div><h3 style="color:#2c3e50;">មិនមានប្រវត្តិទិញទេ</h3><p style="color:#7f8c8d; font-size:0.9rem;">លេខទូរស័ព្ទ <strong>${phoneNumber}</strong> មិនទាន់មានទិន្នន័យកម្ម៉ង់ទេ។</p><button class="btn-paid-final" style="width:auto; padding:10px 30px; margin-top:20px;" onclick="window.location.href='index.html'">ទៅកាន់ទំព័រដើម</button><br><br><button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; cursor:pointer;">ប្តូរលេខទូរស័ព្ទ</button></div>`;
+                document.getElementById('main-container').innerHTML = `<div style="text-align:center; margin-top:50px;"><div style="font-size:4rem; margin-bottom:15px; opacity:0.5;">🛒</div><h3 style="color:#2c3e50;">មិនមានប្រវត្តិទិញទេ</h3><p style="color:#7f8c8d; font-size:0.9rem;">លេខទូរស័ព្ទ <strong>${phoneNumber}</strong> មិនទាន់មានទិន្នន័យកម្ម៉ង់ទេ។</p><button class="btn-solid-green" style="width:auto; padding:10px 30px; margin-top:20px;" onclick="window.location.href='index.html'">ទៅកាន់ទំព័រដើម</button><br><br><button onclick="localStorage.removeItem('pizz_user_phone'); location.reload();" style="background:none; border:none; color:var(--pizz-red); font-weight:700; cursor:pointer;">ប្តូរលេខទូរស័ព្ទ</button></div>`;
             } else { renderOrdersList(orders, phoneNumber); }
         } catch (e) { 
             document.getElementById('loader').style.display = 'none'; 
@@ -99,31 +102,14 @@
             const canCancel = ['pending', 'processing', 'on-hold'].includes(order.status);
             const cancelBtnHTML = canCancel ? `<button class="btn-danger-outline" onclick="openCancelModal(${order.id})">ស្នើសុំបោះបង់</button>` : `<button class="btn-outline" onclick="window.location.href='index.html'">ទិញម្ដងទៀត</button>`;
             
-            // --- DYNAMIC ACCORDION CONTENT ---
             const customerName = order.billing.first_name || order.shipping.first_name || "មិនបញ្ជាក់";
             const customerAddress = order.billing.address_1 || order.shipping.address_1 || "មិនបញ្ជាក់";
-            const noteHtml = order.customer_note ? `
-                <div class="info-section">
-                    <div style="font-weight:700; margin-bottom:5px; color:#2c3e50;">📝 ចំណាំពីអតិថិជន (Note)</div>
-                    <div style="color:#7f8c8d; font-size:0.8rem; line-height:1.5;">${order.customer_note}</div>
-                </div>` : '';
+            const noteHtml = order.customer_note ? `<div class="info-section"><div style="font-weight:700; margin-bottom:5px; color:#2c3e50;">📝 ចំណាំពីអតិថិជន (Note)</div><div style="color:#7f8c8d; font-size:0.8rem; line-height:1.5;">${order.customer_note}</div></div>` : '';
 
-            let itemsHTML = order.line_items.map(item => `
-                <div class="detail-item-row">
-                    <span style="font-weight:700; max-width:70%;">${item.name} <span style="color:var(--pizz-red);">x${item.quantity}</span></span>
-                    <span>${parseFloat(item.total).toLocaleString()}៛</span>
-                </div>
-            `).join('');
-
-            // Fallback for native WC Shipping Total (if Python creates it)
+            let itemsHTML = order.line_items.map(item => `<div class="detail-item-row"><span style="font-weight:700; max-width:70%;">${item.name} <span style="color:var(--pizz-red);">x${item.quantity}</span></span><span>${parseFloat(item.total).toLocaleString()}៛</span></div>`).join('');
+            
             const shippingTotal = parseFloat(order.shipping_total || 0);
-            if (shippingTotal > 0) {
-                itemsHTML += `
-                <div class="detail-item-row">
-                    <span style="font-weight:700; max-width:70%; color:#7f8c8d;">🚚 ថ្លៃដឹកជញ្ជូន (Shipping)</span>
-                    <span>${shippingTotal.toLocaleString()}៛</span>
-                </div>`;
-            }
+            if (shippingTotal > 0) { itemsHTML += `<div class="detail-item-row"><span style="font-weight:700; max-width:70%; color:#7f8c8d;">🚚 ថ្លៃដឹកជញ្ជូន (Shipping)</span><span>${shippingTotal.toLocaleString()}៛</span></div>`; }
 
             html += `
                 <div class="order-card">
@@ -132,14 +118,19 @@
                             <div class="order-id">#${order.id}</div>
                             <div class="order-date">📅 ${formatDate(order.date_created)}</div>
                         </div>
-                        <div class="status-badge ${statusConfig.class}">${statusConfig.text}</div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div class="status-badge ${statusConfig.class}">${statusConfig.text}</div>
+                            
+                            <button class="btn-pdf" onclick="handlePDFDownload(${order.id})" title="ទាញយកវិក្កយបត្រ">
+                                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg> PDF
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="order-items-preview">📦 ${itemsPreview}</div>
                     <div class="order-total">${parseFloat(order.total).toLocaleString()}៛</div>
                     
                     <div id="drawer-${order.id}" class="order-details-drawer">
-                        
                         <div class="info-section">
                             <div style="font-weight:700; margin-bottom:5px; color:#2c3e50;">📍 ព័ត៌មានដឹកជញ្ជូន (Delivery)</div>
                             <div style="color:#7f8c8d; font-size:0.8rem; line-height:1.5;">
@@ -148,18 +139,16 @@
                                 ទីតាំង៖ <span style="color:#2c3e50; font-weight:700;">${customerAddress}</span>
                             </div>
                         </div>
-
                         ${noteHtml}
-                        
                         <div class="info-section" style="background:#fff;">
-                            <div style="font-weight:700; margin-bottom:10px; color:#2c3e50; border-bottom: 1px solid #f0f0f0; padding-bottom:5px;">🛍️ វិក្កយបត្រលម្អិត (Invoice)</div>
+                            <div style="font-weight:700; margin-bottom:10px; color:#2c3e50; border-bottom: 1px solid #f0f0f0; padding-bottom:5px;">🛍️ វិក្កយបត្រលម្អិត</div>
                             ${itemsHTML}
                             <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.1rem; color:var(--pizz-red); margin-top:10px; border-top:2px solid #eee; padding-top:10px;">
                                 <span>សរុប៖</span><span>${parseFloat(order.total).toLocaleString()}៛</span>
                             </div>
                         </div>
-                        
                     </div>
+
                     <div class="btn-group" style="margin-top: 15px;">
                         <button class="btn-outline" onclick="toggleDetails(${order.id})">
                             <span id="caret-${order.id}">▼</span> មើលលម្អិត
@@ -172,21 +161,29 @@
         document.getElementById('main-container').innerHTML = html;
     }
 
-    // ACCORDION TOGGLE LOGIC
-    function toggleDetails(orderId) {
-        const drawer = document.getElementById(`drawer-${orderId}`);
-        const caret = document.getElementById(`caret-${orderId}`);
-        
-        if (drawer.classList.contains('open')) {
-            drawer.classList.remove('open');
-            caret.innerText = '▼';
-        } else {
-            drawer.classList.add('open');
-            caret.innerText = '▲';
-        }
+    // THE SECURE PDF HANDLER
+    function handlePDFDownload(orderId) {
+        const order = globalOrders.find(o => o.id === orderId);
+        if(!order) return;
+
+        // Map the raw WooCommerce data into a clean object to pass to our standalone engine
+        const invoiceData = {
+            id: order.id,
+            date: formatDate(order.date_created),
+            customerName: order.billing.first_name || order.shipping.first_name || "Guest",
+            customerAddress: order.billing.address_1 || order.shipping.address_1 || "N/A",
+            phone: order.billing.phone || localStorage.getItem('pizz_user_phone') || '',
+            status: statusMap[order.status] ? statusMap[order.status].text.replace(/[^a-zA-Z0-9 ]/g, "").trim() : order.status.toUpperCase(),
+            items: order.line_items.map(i => ({ name: i.name, quantity: i.quantity, total: parseFloat(i.total) })),
+            shippingTotal: parseFloat(order.shipping_total || 0),
+            grandTotal: parseFloat(order.total)
+        };
+
+        // Call the standalone engine
+        generateInvoicePDF(invoiceData);
     }
 
-    // CANCEL MODAL LOGIC (Untouched, still a safe popup)
+    function toggleDetails(orderId) { const drawer = document.getElementById(`drawer-${orderId}`); const caret = document.getElementById(`caret-${orderId}`); if (drawer.classList.contains('open')) { drawer.classList.remove('open'); caret.innerText = '▼'; } else { drawer.classList.add('open'); caret.innerText = '▲'; } }
     function openCancelModal(orderId) { currentCancelOrderId = orderId; document.getElementById('cancel-order-id').innerText = `#${orderId}`; document.getElementById('cancel-reason').value = ''; document.getElementById('cancel-modal').style.display = 'flex'; }
     function closeCancelModal() { document.getElementById('cancel-modal').style.display = 'none'; }
     
