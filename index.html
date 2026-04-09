@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V1.4</title>
+    <title>Pizza King Store V1.5</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
 
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card" id="invoice-card">
-            <div class="qr-header-bar">KHQR V1.4</div>
+            <div class="qr-header-bar">KHQR V1.5</div>
             <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
             <div id="recap-list" class="recap-list"></div>
             <div id="qr-container">
@@ -114,6 +114,7 @@
 
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
+<script src="aba-qr.js"></script> 
 
 <script>
     loadBottomNav('home'); 
@@ -218,21 +219,12 @@
         }
     }
 
-    function crc16(d) { let c = 0xFFFF; for (let i = 0; i < d.length; i++) { let x = ((c >> 8) ^ d.charCodeAt(i)) & 0xFF; x ^= x >> 4; c = ((c << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF; } return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); }
-    function generateDynamicABAQR(amt) {
-        const prefix = "00020101021229450016abaakhppxxx@abaa01090872828270208ABA Bank40390006abaP2P0112864C75E859140209087282827520400005303116";
-        const amtVal = amt.toString() + ".0";
-        const payload = prefix + `54${(amtVal.length).toString().padStart(2, '0')}${amtVal}` + "5802KH5909SOUR DARA6010Phnom Penh";
-        const tag99 = `99340013${Date.now()}0113${Date.now()+31536000000}`;
-        const full = payload + tag99 + "6304";
-        return full + crc16(full);
-    }
-
     function openPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         document.getElementById('pay-amt-label').innerText = total.toLocaleString();
         document.getElementById('recap-list').innerHTML = cart.map(i => `<div class="recap-row"><span>${i.name} x${i.qty}</span><span>${(i.price * i.qty).toLocaleString()}៛</span></div>`).join('') + `<div style="border-top:2px solid #eee; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:800;"><span>សរុប៖</span><span>${total.toLocaleString()}៛</span></div>`;
         document.getElementById('payment-screen').style.display = 'flex';
+        // External Engine Call
         const dynamicQR = generateDynamicABAQR(total);
         document.getElementById('dynamic-khqr').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(dynamicQR)}`;
         startTimer(900);
@@ -249,6 +241,7 @@
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         const userName = document.getElementById('user-name').value;
         const userPhone = document.getElementById('user-phone').value;
+        
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: document.getElementById('user-loc').value, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
         
         try {
