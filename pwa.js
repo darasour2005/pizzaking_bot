@@ -1,5 +1,5 @@
-// pwa.js - MASTER PWA & SMART GUARD ENGINE V1.5
-// Handles: 2-Week Snooze, Telegram Non-Blocking Banner, and Aggressive Cache Updates
+// pwa.js - MASTER PWA & SMART GUARD ENGINE V1.6
+// Handles: 2-Week Snooze, Telegram Non-Blocking Banner, and Aggressive Visibility Cache Updates
 
 let deferredPrompt;
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
@@ -61,12 +61,18 @@ function initPWAGuard() {
     const isTelegram = tg && tg.initData !== "";
 
     // Rule A: If already installed, do absolutely nothing.
-    if (isPWA) return; 
-
+    if (isPWA) {
+        const guard = document.getElementById('install-guard');
+        if (guard) guard.style.display = 'none';
+    } 
     // Rule B: Handle Telegram vs Standard Browser
-    if (isTelegram) {
+    else if (isTelegram) {
+        const guard = document.getElementById('install-guard');
+        if (guard) guard.style.display = 'none';
         showTelegramBanner(); // Show non-blocking banner
-    } else {
+    } 
+    // Rule C: Standard Mobile/PC Browser (Force Install with Snooze)
+    else {
         const guard = document.getElementById('install-guard');
         const lastSnooze = parseInt(localStorage.getItem(SNOOZE_KEY) || '0', 10);
         
@@ -86,15 +92,24 @@ function initPWAGuard() {
         }
     }
 
-    // 6. Aggressive Cache Busting (Force Update Engine)
+    // 6. Aggressive Cache Busting & Visibility Auto-Sync
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
+            
+            // THE CACHE KILLER: Ping the server every time the app comes back on screen
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    console.log("App active. Pinging server for updates...");
+                    reg.update();
+                }
+            });
+
             reg.onupdatefound = () => {
                 const installingWorker = reg.installing;
                 installingWorker.onstatechange = () => {
                     if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // A new version is found and installed. Force reload to clear old cache.
-                        console.log("Pizza King App Updated. Reloading...");
+                        // A new version is found and installed. Force a hard reload to clear old cache.
+                        console.log("Pizza King App Updated. Hard Reloading...");
                         window.location.reload(true);
                     }
                 };
