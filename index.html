@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V1.6</title>
+    <title>Pizza King Store V2.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -55,7 +55,7 @@
 
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card" id="invoice-card">
-            <div class="qr-header-bar">KHQR V1.6</div>
+            <div class="qr-header-bar">KHQR V2.0</div>
             <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
             <div id="recap-list" class="recap-list"></div>
             <div id="qr-container">
@@ -109,6 +109,7 @@
     <div id="bottom-nav-placeholder"></div>
 </div>
 
+<script src="config.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
 <script src="aba-qr.js"></script> 
@@ -116,21 +117,15 @@
 
 <script>
     loadBottomNav('home'); 
-    loadShippingForm(); // Ignite the form component
+    loadShippingForm();
 
     const tg = window.Telegram.WebApp;
-    const RENDER_URL = "https://pizzaking-bot.onrender.com"; 
-    const WC_BASE = "https://1.phsar.me/wp-json/wc/v3";
-    const AUTH = "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57";
-    
     tg.expand(); tg.ready();
+    
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
-
-    const DELIVERY_CONFIG = { "siem_reap_keywords": ["siem reap", "សៀមរាប", "ខេត្តសៀមរាប"], "siem_reap_free_over_riel": 40000, "siem_reap_charge_riel": 3000, "other_location_threshold_riel": 80000, "other_location_charge_below_riel": 8000, "other_location_charge_over_or_equal_riel": 11000 };
 
     function saveCartToStorage() { localStorage.setItem('pizz_king_cart_v36', JSON.stringify(cart)); }
     
-    // Adapted to read dynamically from the injected form
     function saveFormData() { 
         const nameInput = document.getElementById('user-name');
         const phoneInput = document.getElementById('user-phone');
@@ -140,6 +135,8 @@
         if(phoneInput) localStorage.setItem('pizz_king_tel', phoneInput.value); 
         if(locInput) localStorage.setItem('pizz_king_loc', locInput.value); 
         
+        // CRITICAL: Triggers instant recalculation when typing location
+        updateCartBasedOnDelivery();
         checkForm(); 
     }
 
@@ -150,9 +147,9 @@
             allProducts = JSON.parse(localStorage.getItem(C_PROD)); productVariations = JSON.parse(localStorage.getItem(C_VAR)); renderCategories(JSON.parse(localStorage.getItem(C_CAT))); renderProducts(allProducts); restoreState(); document.getElementById('loader').style.display = 'none'; return;
         }
         try {
-            const catRes = await fetch(`${WC_BASE}/products/categories${AUTH}&hide_empty=true&parent=0`); const cats = await catRes.json(); renderCategories(cats); localStorage.setItem(C_CAT, JSON.stringify(cats));
-            const prodRes = await fetch(`${WC_BASE}/products${AUTH}&per_page=100&status=publish`); allProducts = await prodRes.json();
-            for (const vp of allProducts.filter(p => p.type === 'variable')) { const vRes = await fetch(`${WC_BASE}/products/${vp.id}/variations${AUTH}`); productVariations[vp.id] = await vRes.json(); }
+            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); const cats = await catRes.json(); renderCategories(cats); localStorage.setItem(C_CAT, JSON.stringify(cats));
+            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); allProducts = await prodRes.json();
+            for (const vp of allProducts.filter(p => p.type === 'variable')) { const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); productVariations[vp.id] = await vRes.json(); }
             localStorage.setItem(C_PROD, JSON.stringify(allProducts)); localStorage.setItem(C_VAR, JSON.stringify(productVariations)); localStorage.setItem(C_TIME, now); document.getElementById('loader').style.display = 'none'; restoreState();
         } catch(e) { document.getElementById('loader').style.display = 'none'; }
     }
@@ -208,8 +205,8 @@
         
         cart = realItems;
         if(locRaw.length > 3) {
-            const isSR = DELIVERY_CONFIG.siem_reap_keywords.some(k => locRaw.includes(k));
-            let fee = isSR ? (subtotal < 40000 ? 3000 : 0) : (subtotal < 80000 ? 8000 : 11000);
+            const isSR = APP_CONFIG.DELIVERY.siem_reap_keywords.some(k => locRaw.includes(k));
+            let fee = isSR ? (subtotal < APP_CONFIG.DELIVERY.siem_reap_free_over_riel ? APP_CONFIG.DELIVERY.siem_reap_charge_riel : 0) : (subtotal < APP_CONFIG.DELIVERY.other_location_threshold_riel ? APP_CONFIG.DELIVERY.other_location_charge_below_riel : APP_CONFIG.DELIVERY.other_location_charge_over_or_equal_riel);
             if(fee > 0) cart.push({ cartId: "delivery", id: "delivery", name: "ថ្លៃដឹកជញ្ជូន", price: fee, qty: 1 });
         }
         updateUI(cart);
@@ -273,7 +270,7 @@
         const orderData = { telegram_id: tg.initDataUnsafe.user?.id || 12345, name: userName, phone: userPhone, location: userLoc, items: cart, total, note: customerNote, auto_create_account: true, account_email: userPhone + "@phsar.me", account_pass: "Nprk@Angkor203" };
         
         try {
-            await fetch(`${RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
+            await fetch(`${APP_CONFIG.RENDER_URL}/create-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderData) });
             localStorage.removeItem('pizz_king_cart_v36'); localStorage.setItem('pizz_user_phone', userPhone);
             document.getElementById('success-name-kh').innerText = userName; document.getElementById('success-name-en').innerText = userName;
             document.getElementById('payment-screen').style.display = 'none'; document.getElementById('success-modal').style.display = 'flex';
