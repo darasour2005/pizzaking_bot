@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V4.4</title>
+    <title>Pizza King Store V4.5</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -18,13 +18,6 @@
 
 <div id="toast"><svg style="width:16px;height:16px;fill:white;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>បន្ថែមក្នុងកន្ត្រករួចរាល់!</span></div>
 <div id="loader"><img src="logo.png" class="loader-img"><div style="font-weight:700; color:var(--pizz-red); margin-top:15px;">🚀 កំពុងទាញយកទិន្នន័យ...</div></div>
-
-<div id="install-guard">
-    <img src="logo.png" class="guard-logo">
-    <div style="font-size:1.4rem; font-weight:800; color:var(--pizz-red); margin-bottom:10px;">Pizza King Store & Drama</div>
-    <div style="font-size:1rem; font-weight:700; color:#2c3e50; margin-bottom:5px;">ងាយស្រួលមើលកុន និងទិញទំនិញ!</div>
-    <button class="btn-install-force" onclick="installPWA()">📲 ដំឡើងកម្មវិធីឥឡូវនេះ</button>
-</div>
 
 <div id="app-shell">
     <div class="master-header index-header">
@@ -97,55 +90,32 @@
 
     async function fetchData() {
         const loader = document.getElementById('loader');
-        const cachedCats = CacheEngine.get("pizz_cats", 24);
-        const cachedProds = CacheEngine.get("pizz_prods", 24);
-
-        if (cachedCats && cachedProds) {
-            allProducts = cachedProds; renderCategories(cachedCats); renderProducts(allProducts); restoreState(); loader.style.display = 'none'; return;
-        }
-
         try {
-            // Secure Proxy Routing
+            // Talk to your Render Proxy, not WooCommerce directly
             const catRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-categories`);
             const cats = await catRes.json();
-            if (Array.isArray(cats)) { renderCategories(cats); CacheEngine.set("pizz_cats", cats); }
+            if (Array.isArray(cats)) { renderCategories(cats); }
 
             const prodRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-products`);
             allProducts = await prodRes.json();
             if (Array.isArray(allProducts)) {
-                // Background fetch variations for variable products
-                for (const vp of allProducts.filter(p => p.type === 'variable')) { 
-                    try {
-                        const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
-                        productVariations[vp.id] = await vRes.json(); 
-                    } catch(ve) {}
-                }
-                renderProducts(allProducts); CacheEngine.set("pizz_prods", allProducts);
+                renderProducts(allProducts);
             }
-            restoreState(); loader.style.display = 'none';
-        } catch(e) { loader.style.display = 'none'; alert("⚠️ Connection Error!"); }
-    }
-
-    function restoreState() {
-        const nameInput = document.getElementById('user-name');
-        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
-        const savedCart = localStorage.getItem('pizz_king_cart_v36');
-        if(savedCart) cart = JSON.parse(savedCart);
-        if(typeof updateCartBasedOnDelivery === 'function') updateCartBasedOnDelivery(); if(typeof checkForm === 'function') checkForm();
+            loader.style.display = 'none';
+        } catch(e) { 
+            loader.style.display = 'none'; 
+            alert("⚠️ Connection Error! Your Render server might be asleep or the new routes aren't active in main.py."); 
+        }
     }
 
     function renderProducts(items) {
-        const grid = document.getElementById('product-grid');
-        grid.innerHTML = items.map(p => {
-            const pid = p.id; cardQtys[pid] = 1; let variations = "";
-            if (p.type === 'variable' && productVariations[pid]) {
-                variations = `<select class=\"var-selector\" onchange=\"selectVariationDropdown(${pid}, this)\"><option value=\"\">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value=\"${v.id}\">${v.attributes[0].option}</option>`).join('') + `</select>`;
-            }
-            return `<div class=\"card\"><img src=\"${p.images[0]?.src || ''}\" onclick=\"openDetail(${pid})\"><div class=\"card-body\"><div class=\"title\">${p.name}</div><div class=\"price\">${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class=\"action-row\"><button onclick=\"addToCart(${pid})\" class=\"btn-add-cart-icon\">ADD</button></div></div></div>`;
+        document.getElementById('product-grid').innerHTML = items.map(p => {
+            const pid = p.id; cardQtys[pid] = 1;
+            return `<div class="card"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div><div class="action-row"><button onclick="addToCart(${pid})" class="btn-add-cart-icon">ADD</button></div></div></div>`;
         }).join('');
     }
 
-    function renderCategories(cats) { document.getElementById('cat-slider').innerHTML = cats.map(c => `<div class=\"cat-item\" onclick=\"filterCatLocal(${c.id})\"><span>${c.name}</span></div>`).join(''); }
+    function renderCategories(cats) { document.getElementById('cat-slider').innerHTML = cats.map(c => `<div class="cat-item" onclick="filterCatLocal(${c.id})"><span>${c.name}</span></div>`).join(''); }
     function filterCatLocal(id) { renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
 
     fetchData();
