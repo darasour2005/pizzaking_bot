@@ -29,6 +29,9 @@ async def main():
     dp.include_router(router)
     app = web.Application()
 
+    # --- ADD THESE TO YOUR MAIN.PY ROUTING TABLE ---
+    app.router.add_get('/get-products', ai_handler.get_products_proxy)
+    app.router.add_get('/get-categories', ai_handler.get_categories_proxy)
    
     # Add the AI routes to your aiohttp application setup
     # (Look for where you define app = web.Application() and add these right below it)
