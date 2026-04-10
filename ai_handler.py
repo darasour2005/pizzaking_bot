@@ -1,9 +1,10 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V1.0
-# Zero-Omission Protocol: Secure Moonshot API + WooCommerce Tool Calling
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.1
+# Zero-Omission Protocol: Decoupled Prompt Architecture + Full WooCommerce Autonomy
 
 import json
 import logging
 import asyncio
+import os
 from aiohttp import web
 from openai import OpenAI
 import config
@@ -15,18 +16,17 @@ client = OpenAI(
     base_url="https://api.moonshot.cn/v1"
 )
 
-# 2. SYSTEM PROMPT (The AI's Personality and Rules)
-SYSTEM_PROMPT = """
-You are Dara's elite AI Sales Assistant for the 'Pizza King Store' in Siem Reap, Cambodia. 
-You are friendly, highly professional, and speak fluent Khmer and English.
-Your goal is to answer questions, suggest products (especially Mulberry Wine and Pizzas), and close sales.
-
-RULES:
-1. Always quote prices in Khmer Riel (៛).
-2. If a user asks what you have, use the 'check_inventory' tool.
-3. If a user says they want to buy, confirm their phone number, location, and the total price.
-4. Once they confirm, you MUST use the 'generate_checkout' tool to ask for payment. Do not pretend to take money yourself.
-"""
+# 2. DYNAMIC PROMPT INJECTION
+def get_system_prompt():
+    """Reads the AI personality and rules from an external text file."""
+    try:
+        # Strict utf-8 encoding is required to safely read Khmer characters and the Riel (៛) symbol
+        with open("system_prompt.txt", "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        logging.error(f"Failed to load system_prompt.txt: {e}")
+        # Emergency fallback just in case the file is deleted
+        return "You are a helpful AI assistant for Pizza King in Cambodia. Please help the customer."
 
 # 3. TOOL DEFINITIONS (The AI's Hands)
 KIMI_TOOLS = [
@@ -41,122 +41,170 @@ KIMI_TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "create_order",
+            "description": "Create a real WooCommerce order.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Customer's first name"},
+                    "phone": {"type": "string", "description": "Customer's phone number"},
+                    "product_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of Product IDs to buy"},
+                    "quantities": {"type": "array", "items": {"type": "integer"}, "description": "List of quantities matching the product IDs"}
+                },
+                "required": ["name", "phone", "product_ids", "quantities"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "update_order_status",
+            "description": "Update an order to 'processing' (paid) or 'cancelled'.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order_id": {"type": "integer"},
+                    "status": {"type": "string", "enum": ["processing", "cancelled"]}
+                },
+                "required": ["order_id", "status"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "add_order_note",
+            "description": "Add a note to the WooCommerce order (e.g., saving that a slip was uploaded).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order_id": {"type": "integer"},
+                    "note": {"type": "string"}
+                },
+                "required": ["order_id", "note"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "generate_invoice_link",
+            "description": "Generate the URL for the customer to download their PDF invoice.",
+            "parameters": {
+                "type": "object",
+                "properties": {"order_id": {"type": "integer"}},
+                "required": ["order_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "generate_checkout",
             "description": "Trigger the ABA QR Code generation for the customer to pay.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "total_riel": {"type": "integer", "description": "Total amount in Riel"},
-                    "phone": {"type": "string", "description": "Customer phone number"},
-                    "summary": {"type": "string", "description": "Short summary of items (e.g., '1x Pizza, 2x Wine')"}
+                    "total_riel": {"type": "integer"},
+                    "summary": {"type": "string"}
                 },
-                "required": ["total_riel", "phone", "summary"]
+                "required": ["total_riel", "summary"]
             }
         }
     }
 ]
 
-# 4. BACKGROUND WORKERS (Pulse-Verify-Confirm Architecture)
-def fetch_live_inventory():
-    """Synchronous WooCommerce call wrapped safely."""
+# 4. WOOCOMMERCE WORKERS (Pulse-Verify-Confirm Architecture)
+def woo_fetch_inventory():
     try:
-        response = wcapi.get("products", params={"per_page": 20, "status": "publish"})
-        if response.status_code == 200:
-            products = response.json()
-            inventory = [f"{p['name']}: {p['price']}៛" for p in products]
-            return "\n".join(inventory)
-        return "Error checking inventory."
-    except Exception as e:
-        logging.error(f"Inventory Fetch Error: {e}")
-        return "Store system offline."
+        res = wcapi.get("products", params={"per_page": 20, "status": "publish"})
+        return "\n".join([f"ID: {p['id']} | {p['name']}: {p['price']}៛" for p in res.json()]) if res.status_code == 200 else "Failed."
+    except Exception as e: return str(e)
 
+def woo_create_order(name, phone, product_ids, quantities):
+    try:
+        line_items = [{"product_id": pid, "quantity": qty} for pid, qty in zip(product_ids, quantities)]
+        data = {
+            "billing": {"first_name": name, "phone": phone},
+            "line_items": line_items
+        }
+        res = wcapi.post("orders", data)
+        if res.status_code == 201:
+            order = res.json()
+            return f"SUCCESS. Order ID: {order['id']}, Total: {order['total']}៛"
+        return f"FAILED: {res.text}"
+    except Exception as e: return str(e)
+
+def woo_update_status(order_id, status):
+    try:
+        res = wcapi.put(f"orders/{order_id}", {"status": status})
+        return "SUCCESS" if res.status_code == 200 else "FAILED"
+    except Exception as e: return str(e)
+
+def woo_add_note(order_id, note):
+    try:
+        res = wcapi.post(f"orders/{order_id}/notes", {"note": note})
+        return "SUCCESS" if res.status_code == 201 else "FAILED"
+    except Exception as e: return str(e)
+
+def woo_get_invoice(order_id):
+    # Assuming standard WooCommerce Customer Invoice endpoint
+    return f"https://1.phsar.me/my-account/view-order/{order_id}/"
+
+# 5. MAIN CHAT ENDPOINT
 async def process_chat_endpoint(request):
-    """
-    The main API route that the frontend ai-chat.js talks to.
-    """
-    headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-    }
-    
-    if request.method == "OPTIONS":
-        return web.Response(status=200, headers=headers)
+    headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
+    if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
         
     try:
         data = await request.json()
-        user_message = data.get("message", "")
-        conversation_history = data.get("history", []) # Array of previous messages
+        user_message, conversation_history = data.get("message", ""), data.get("history", [])
         
-        # Build the exact message structure Kimi needs
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-        messages.extend(conversation_history)
-        messages.append({"role": "user", "content": user_message})
+        # Inject the external text file into the brain instantly
+        current_system_prompt = get_system_prompt()
+        
+        messages = [{"role": "system", "content": current_system_prompt}] + conversation_history + [{"role": "user", "content": user_message}]
 
-        # Step 1: Send to Kimi
-        response = client.chat.completions.create(
-            model="moonshot-v1-8k",
-            messages=messages,
-            tools=KIMI_TOOLS,
-            temperature=0.3 # Keep the AI focused on sales, not hallucinating
-        )
-        
+        # Step 1: Kimi Processing
+        response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
         response_message = response.choices[0].message
-        tool_calls = response_message.tool_calls
         
-        action_payload = None # Used to tell the frontend to show a QR code
+        # Step 2: Intercept Tool Calls
+        if response_message.tool_calls:
+            messages.append(response_message)
+            qr_action = None
+            
+            for tool_call in response_message.tool_calls:
+                func_name = tool_call.function.name
+                args = json.loads(tool_call.function.arguments)
+                result = "Executed."
 
-        # Step 2: Did Kimi decide to use a tool?
-        if tool_calls:
-            for tool_call in tool_calls:
-                function_name = tool_call.function.name
-                arguments = json.loads(tool_call.function.arguments)
-                
-                if function_name == "check_inventory":
-                    # Kimi wants to know what's in stock
-                    inventory_data = await asyncio.to_thread(fetch_live_inventory)
-                    messages.append(response_message)
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "name": function_name,
-                        "content": inventory_data
-                    })
-                    
-                    # Pulse-Verify: Ask Kimi to reply again now that it has the inventory
-                    second_response = client.chat.completions.create(
-                        model="moonshot-v1-8k",
-                        messages=messages
-                    )
-                    return web.json_response({
-                        "reply": second_response.choices[0].message.content,
-                        "action": "none"
-                    }, headers=headers)
+                if func_name == "check_inventory":
+                    result = await asyncio.to_thread(woo_fetch_inventory)
+                elif func_name == "create_order":
+                    result = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
+                elif func_name == "update_order_status":
+                    result = await asyncio.to_thread(woo_update_status, args.get("order_id"), args.get("status"))
+                elif func_name == "add_order_note":
+                    result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
+                elif func_name == "generate_invoice_link":
+                    result = f"Invoice Link: {woo_get_invoice(args.get('order_id'))}"
+                elif func_name == "generate_checkout":
+                    qr_action = {"action": "show_qr", "checkout_data": {"total": args.get("total_riel"), "summary": args.get("summary")}}
+                    result = "QR generated on user screen."
 
-                elif function_name == "generate_checkout":
-                    # Kimi is closing the sale!
-                    total = arguments.get("total_riel", 0)
-                    summary = arguments.get("summary", "")
-                    
-                    # Instead of creating the order instantly, we generate the checkout UI
-                    # The frontend will render the QR code using JS based on this action
-                    reply_text = f"អរគុណសម្រាប់ការកម្ម៉ង់! (Thank you for your order!)\n\nសរុប: {total}៛\n\nសូមធ្វើការស្កេន QR Code ខាងក្រោមដើម្បីទូទាត់ប្រាក់។ (Please scan the QR below to pay.)"
-                    
-                    return web.json_response({
-                        "reply": reply_text,
-                        "action": "show_qr",
-                        "checkout_data": {
-                            "total": total,
-                            "summary": summary
-                        }
-                    }, headers=headers)
+                messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
+            
+            # Step 3: Pulse-Verify (Let Kimi read the tool results and talk back to the user)
+            final_response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages)
+            
+            payload = {"reply": final_response.choices[0].message.content, "action": "none"}
+            if qr_action: payload.update(qr_action)
+            return web.json_response(payload, headers=headers)
 
-        # Step 3: Normal text response (No tools used)
-        return web.json_response({
-            "reply": response_message.content,
-            "action": "none"
-        }, headers=headers)
+        # Normal Response
+        return web.json_response({"reply": response_message.content, "action": "none"}, headers=headers)
 
     except Exception as e:
         logging.error(f"AI Handler Error: {e}")
-        return web.json_response({"reply": "⚠️ សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System busy, please try again.)", "action": "error"}, headers=headers)
+        return web.json_response({"reply": "⚠️ សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
