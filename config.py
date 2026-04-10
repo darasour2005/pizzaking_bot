@@ -1,5 +1,6 @@
-# config.py - MASTER BACKEND CONFIGURATION V3.0
-# Zero-Omission Protocol: All system-wide keys synchronized.
+# config.py - MASTER BACKEND CONFIGURATION V3.1
+# Zero-Omission Protocol: All system-wide keys synchronized + AI Engine Added.
+import os
 
 # --- TELEGRAM MTPROTO KEYS (From my.telegram.org) ---
 # Used by video_streamer.py to bypass 20MB bot limits for movies.
@@ -29,3 +30,8 @@ MINI_APP_URL = "https://darasour2005.github.io/pizzaking_bot/"
 # --- SYSTEM SETTINGS ---
 # Timezone for Khmer report generation.
 TIMEZONE = 'Asia/Phnom_Penh'
+
+# --- AI AGENT ENGINE (KIMI / MOONSHOT) ---
+# Used by ai_handler.py to process autonomous sales, inventory, and chat.
+# Fallback hardcoded key deployed. Repo must be PRIVATE.
+KIMI_API_KEY = os.environ.get("KIMI_API_KEY", "sk-b68OX3GXRX6dW1bUyqUKTKPgZuOgarmfesULPKH0LKnZ0GKf")
