@@ -1,10 +1,13 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.1
-# Zero-Omission Protocol: Decoupled Prompt Architecture + Full WooCommerce Autonomy
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.2
+# Zero-Omission Protocol: Telegram Refund Alerts + 24-Hour Cancel Policy
 
 import json
 import logging
 import asyncio
 import os
+import datetime
+import pytz
+import aiohttp
 from aiohttp import web
 from openai import OpenAI
 import config
@@ -18,14 +21,16 @@ client = OpenAI(
 
 # 2. DYNAMIC PROMPT INJECTION
 def get_system_prompt():
-    """Reads the AI personality and rules from an external text file."""
+    """Reads the AI rules and injects the live Cambodian clock."""
     try:
-        # Strict utf-8 encoding is required to safely read Khmer characters and the Riel (៛) symbol
         with open("system_prompt.txt", "r", encoding="utf-8") as f:
-            return f.read()
+            base_prompt = f.read()
+            
+        # Inject live time so Kimi can calculate the 24-hour rule perfectly
+        current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
+        return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
     except Exception as e:
         logging.error(f"Failed to load system_prompt.txt: {e}")
-        # Emergency fallback just in case the file is deleted
         return "You are a helpful AI assistant for Pizza King in Cambodia. Please help the customer."
 
 # 3. TOOL DEFINITIONS (The AI's Hands)
@@ -46,12 +51,24 @@ KIMI_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Customer's first name"},
-                    "phone": {"type": "string", "description": "Customer's phone number"},
-                    "product_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of Product IDs to buy"},
-                    "quantities": {"type": "array", "items": {"type": "integer"}, "description": "List of quantities matching the product IDs"}
+                    "name": {"type": "string"},
+                    "phone": {"type": "string"},
+                    "product_ids": {"type": "array", "items": {"type": "integer"}},
+                    "quantities": {"type": "array", "items": {"type": "integer"}}
                 },
                 "required": ["name", "phone", "product_ids", "quantities"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_order_details",
+            "description": "Look up an order to check its date and status BEFORE allowing a cancellation.",
+            "parameters": {
+                "type": "object",
+                "properties": {"order_id": {"type": "integer"}},
+                "required": ["order_id"]
             }
         }
     },
@@ -64,7 +81,8 @@ KIMI_TOOLS = [
                 "type": "object",
                 "properties": {
                     "order_id": {"type": "integer"},
-                    "status": {"type": "string", "enum": ["processing", "cancelled"]}
+                    "status": {"type": "string", "enum": ["processing", "cancelled"]},
+                    "refund_needed": {"type": "boolean", "description": "Set true ONLY if cancelling a paid order."}
                 },
                 "required": ["order_id", "status"]
             }
@@ -74,13 +92,10 @@ KIMI_TOOLS = [
         "type": "function",
         "function": {
             "name": "add_order_note",
-            "description": "Add a note to the WooCommerce order (e.g., saving that a slip was uploaded).",
+            "description": "Add a note to the WooCommerce order.",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "order_id": {"type": "integer"},
-                    "note": {"type": "string"}
-                },
+                "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}},
                 "required": ["order_id", "note"]
             }
         }
@@ -101,33 +116,41 @@ KIMI_TOOLS = [
         "type": "function",
         "function": {
             "name": "generate_checkout",
-            "description": "Trigger the ABA QR Code generation for the customer to pay.",
+            "description": "Trigger the ABA QR Code generation.",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "total_riel": {"type": "integer"},
-                    "summary": {"type": "string"}
-                },
+                "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}},
                 "required": ["total_riel", "summary"]
             }
         }
     }
 ]
 
-# 4. WOOCOMMERCE WORKERS (Pulse-Verify-Confirm Architecture)
+# 4. WOOCOMMERCE & TELEGRAM WORKERS
 def woo_fetch_inventory():
     try:
         res = wcapi.get("products", params={"per_page": 20, "status": "publish"})
         return "\n".join([f"ID: {p['id']} | {p['name']}: {p['price']}៛" for p in res.json()]) if res.status_code == 200 else "Failed."
     except Exception as e: return str(e)
 
+def woo_get_order_details(order_id):
+    try:
+        res = wcapi.get(f"orders/{order_id}")
+        if res.status_code == 200:
+            order = res.json()
+            return json.dumps({
+                "id": order['id'],
+                "status": order['status'], # pending, processing, completed
+                "date_created": order['date_created'],
+                "total": order['total']
+            })
+        return "FAILED: Order not found."
+    except Exception as e: return str(e)
+
 def woo_create_order(name, phone, product_ids, quantities):
     try:
         line_items = [{"product_id": pid, "quantity": qty} for pid, qty in zip(product_ids, quantities)]
-        data = {
-            "billing": {"first_name": name, "phone": phone},
-            "line_items": line_items
-        }
+        data = {"billing": {"first_name": name, "phone": phone}, "line_items": line_items}
         res = wcapi.post("orders", data)
         if res.status_code == 201:
             order = res.json()
@@ -148,8 +171,23 @@ def woo_add_note(order_id, note):
     except Exception as e: return str(e)
 
 def woo_get_invoice(order_id):
-    # Assuming standard WooCommerce Customer Invoice endpoint
     return f"https://1.phsar.me/my-account/view-order/{order_id}/"
+
+async def send_telegram_alert(order_id, refund_needed):
+    """Fires a priority alert to the Telegram Group when AI cancels an order."""
+    text = f"🚨 <b>AI ORDER CANCELLATION</b>\nOrder ID: #{order_id}\n"
+    if refund_needed:
+        text += "💰 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check slip and process the refund for the customer ASAP."
+    else:
+        text += "⚪ STATUS: UNPAID - No refund needed."
+        
+    url = f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage"
+    payload = {"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"}
+    try:
+        async with aiohttp.ClientSession() as session:
+            await session.post(url, json=payload)
+    except Exception as e:
+        logging.error(f"Telegram Alert Failed: {e}")
 
 # 5. MAIN CHAT ENDPOINT
 async def process_chat_endpoint(request):
@@ -160,9 +198,7 @@ async def process_chat_endpoint(request):
         data = await request.json()
         user_message, conversation_history = data.get("message", ""), data.get("history", [])
         
-        # Inject the external text file into the brain instantly
         current_system_prompt = get_system_prompt()
-        
         messages = [{"role": "system", "content": current_system_prompt}] + conversation_history + [{"role": "user", "content": user_message}]
 
         # Step 1: Kimi Processing
@@ -181,10 +217,21 @@ async def process_chat_endpoint(request):
 
                 if func_name == "check_inventory":
                     result = await asyncio.to_thread(woo_fetch_inventory)
+                elif func_name == "get_order_details":
+                    result = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
                 elif func_name == "create_order":
                     result = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
                 elif func_name == "update_order_status":
-                    result = await asyncio.to_thread(woo_update_status, args.get("order_id"), args.get("status"))
+                    status = args.get("status")
+                    order_id = args.get("order_id")
+                    refund_needed = args.get("refund_needed", False)
+                    
+                    result = await asyncio.to_thread(woo_update_status, order_id, status)
+                    
+                    # TELEGRAM ALERT TRIGGER
+                    if status == "cancelled" and result == "SUCCESS":
+                        asyncio.create_task(send_telegram_alert(order_id, refund_needed))
+
                 elif func_name == "add_order_note":
                     result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
                 elif func_name == "generate_invoice_link":
@@ -195,7 +242,7 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Step 3: Pulse-Verify (Let Kimi read the tool results and talk back to the user)
+            # Step 3: Pulse-Verify (Let Kimi read the tool results)
             final_response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages)
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
