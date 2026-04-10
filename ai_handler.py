@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.6
-# Zero-Omission Protocol: Secure Proxy + Async K2-5 + Reasoning Fix
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.7
+# Zero-Omission Protocol: Secure Proxy + Reasoning Serialization + Async
 
 import json
 import logging
@@ -14,15 +14,13 @@ import config
 from woo_handler import wcapi
 
 # 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
-# Using the flagship model and the official CN endpoint
 client = AsyncOpenAI(
     api_key=config.KIMI_API_KEY,
     base_url="https://api.moonshot.cn/v1"
 )
 
-# 2. SECURE PRODUCT PROXY (Protects your keys from index.html)
+# 2. SECURE PRODUCT PROXY (Zero-Omission: Supports index.html UI)
 async def get_products_proxy(request):
-    """Securely fetches products using backend keys to prevent frontend leaks."""
     headers = {"Access-Control-Allow-Origin": "*"}
     try:
         res = await asyncio.to_thread(wcapi.get, "products", params={"per_page": 100, "status": "publish"})
@@ -32,7 +30,6 @@ async def get_products_proxy(request):
         return web.json_response({"error": str(e)}, status=500, headers=headers)
 
 async def get_categories_proxy(request):
-    """Securely fetches categories using backend keys."""
     headers = {"Access-Control-Allow-Origin": "*"}
     try:
         res = await asyncio.to_thread(wcapi.get, "products/categories", params={"hide_empty": True, "parent": 0})
@@ -43,7 +40,6 @@ async def get_categories_proxy(request):
 
 # 3. DYNAMIC PROMPT INJECTION
 def get_system_prompt():
-    """Reads the AI rules and injects the live Cambodian clock."""
     fallback = "You are Dara's AI Sales Assistant for Pizza King. Use tools for inventory and orders."
     try:
         with open("system_prompt.txt", "r", encoding="utf-8") as f:
@@ -53,18 +49,18 @@ def get_system_prompt():
     current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
     return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
 
-# 4. TOOL DEFINITIONS (The AI's Hands)
+# 4. TOOL DEFINITIONS
 KIMI_TOOLS = [
     {"type": "function", "function": {"name": "check_inventory", "description": "Fetch live products and prices.", "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {"name": "create_order", "description": "Create a real WooCommerce order.", "parameters": {"type": "object", "properties": {"name": {"type": "string"}, "phone": {"type": "string"}, "product_ids": {"type": "array", "items": {"type": "integer"}}, "quantities": {"type": "array", "items": {"type": "integer"}}}, "required": ["name", "phone", "product_ids", "quantities"]}}},
-    {"type": "function", "function": {"name": "get_order_details", "description": "Look up an order to check status and date.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
-    {"type": "function", "function": {"name": "update_order_status", "description": "Update order to 'processing' or 'cancelled'.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "status": {"type": "string", "enum": ["processing", "cancelled"]}, "refund_needed": {"type": "boolean"}, "order_data": {"type": "string"}}, "required": ["order_id", "status"]}}},
-    {"type": "function", "function": {"name": "add_order_note", "description": "Add a note to the WooCommerce order.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}}, "required": ["order_id", "note"]}}},
-    {"type": "function", "function": {"name": "generate_invoice_link", "description": "Generate URL for PDF invoice.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
-    {"type": "function", "function": {"name": "generate_checkout", "description": "Trigger ABA QR Code generation.", "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}}}
+    {"type": "function", "function": {"name": "get_order_details", "description": "Look up an order to check status.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
+    {"type": "function", "function": {"name": "update_order_status", "description": "Update order status.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "status": {"type": "string", "enum": ["processing", "cancelled"]}, "refund_needed": {"type": "boolean"}, "order_data": {"type": "string"}}, "required": ["order_id", "status"]}}},
+    {"type": "function", "function": {"name": "add_order_note", "description": "Add a note to the order.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}}, "required": ["order_id", "note"]}}},
+    {"type": "function", "function": {"name": "generate_invoice_link", "description": "Get PDF invoice link.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
+    {"type": "function", "function": {"name": "generate_checkout", "description": "Trigger ABA QR Code.", "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}}}
 ]
 
-# 5. WORKERS
+# 5. WORKERS (Historical Logic Preserved)
 def woo_fetch_inventory():
     try:
         res = wcapi.get("products", params={"per_page": 20, "status": "publish"})
@@ -107,7 +103,7 @@ async def send_telegram_alert(order_id, refund_needed, order_data_str):
             await s.post(f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage", json={"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"})
     except Exception: pass
 
-# 6. MAIN CHAT ENDPOINT
+# 6. MAIN CHAT ENDPOINT (Reasoning Serialization Fix)
 async def process_chat_endpoint(request):
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
     if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
@@ -116,26 +112,19 @@ async def process_chat_endpoint(request):
         conversation_history = data.get("history", [])
         messages = [{"role": "system", "content": get_system_prompt()}] + conversation_history
 
-        # Use flagship model with the correct hyphen
         response = await client.chat.completions.create(
-            model="kimi-k2-5", 
-            messages=messages, 
-            tools=KIMI_TOOLS,
-            tool_choice="auto",
-            temperature=0.2,
-            max_tokens=4096
+            model="kimi-k2-5", messages=messages, tools=KIMI_TOOLS, tool_choice="auto", temperature=0.2, max_tokens=4096
         )
         response_message = response.choices[0].message
         
         if response_message.tool_calls:
-            # FIX: Serialization to preserve "reasoning_content" and stop 400 errors
+            # FIX: Serialization to prevent Moonshot 400 rejection
             assistant_msg = response_message.model_dump(exclude_none=True)
             if hasattr(response_message, 'reasoning_content') and response_message.reasoning_content:
                 assistant_msg['reasoning_content'] = response_message.reasoning_content
-                
             messages.append(assistant_msg)
-            qr_action = None
             
+            qr_action = None
             for tool_call in response_message.tool_calls:
                 func = tool_call.function.name
                 args = json.loads(tool_call.function.arguments)
@@ -165,4 +154,4 @@ async def process_chat_endpoint(request):
 
     except Exception as e:
         logging.error(f"AI Handler Error: {e}")
-        return web.json_response({"reply": "⚠️ V3.5 សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
+        return web.json_response({"reply": "⚠️ សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
