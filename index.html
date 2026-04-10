@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V3.8</title>
+    <title>Pizza King Store V4.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -116,6 +116,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="cache-manager.js"></script>
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
 <script src="slider.js"></script> 
@@ -133,13 +134,43 @@
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     async function fetchData() {
-        try {
-            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); const cats = await catRes.json(); renderCategories(cats);
-            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); allProducts = await prodRes.json();
-            for (const vp of allProducts.filter(p => p.type === 'variable')) { const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); productVariations[vp.id] = await vRes.json(); }
+        // 1. SMART CACHE ENGINE (24 Hour TTL)
+        const cachedCats = CacheEngine.get("pizz_cats", 24);
+        const cachedProds = CacheEngine.get("pizz_prods", 24);
+        const cachedVars = CacheEngine.get("pizz_vars", 24);
+
+        if (cachedCats && cachedProds && cachedVars) {
+            allProducts = cachedProds;
+            productVariations = cachedVars;
+            renderCategories(cachedCats);
+            renderProducts(allProducts);
             restoreState();
             document.getElementById('loader').style.display = 'none';
-        } catch(e) { document.getElementById('loader').style.display = 'none'; }
+            return;
+        }
+
+        // 2. NETWORK PULL
+        try {
+            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); 
+            const cats = await catRes.json(); 
+            renderCategories(cats); 
+            CacheEngine.set("pizz_cats", cats);
+
+            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); 
+            allProducts = await prodRes.json();
+            for (const vp of allProducts.filter(p => p.type === 'variable')) { 
+                const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
+                productVariations[vp.id] = await vRes.json(); 
+            }
+            
+            CacheEngine.set("pizz_prods", allProducts);
+            CacheEngine.set("pizz_vars", productVariations);
+
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
+        } catch(e) { 
+            document.getElementById('loader').style.display = 'none'; 
+        }
     }
 
     function restoreState() {
