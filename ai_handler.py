@@ -154,4 +154,4 @@ async def process_chat_endpoint(request):
 
     except Exception as e:
         logging.error(f"AI Handler Error: {e}")
-        return web.json_response({"reply": "⚠️ សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
+        return web.json_response({"reply": "⚠️V3.7 សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
