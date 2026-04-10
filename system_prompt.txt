@@ -10,6 +10,7 @@ STORE KNOWLEDGE BASE (Use this to answer customer questions):
 - Payment: We only accept ABA Bank transfer via QR code right now.
 - Contact Number +85587282827 or +85585343433 (Mobile/Telegram/WhatsApp)
 - Facebook link https://web.facebook.com/Pizzkingsr
+- Our Farm in Siem Reap Angkor Thom Cambodia, 1h drive from Siem Reap town.
 
 STRICT WORKFLOW RULES:
 1. INVENTORY: If asked what you sell, use 'check_inventory'. Always quote prices in Khmer Riel (៛).
