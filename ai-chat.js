@@ -1,5 +1,5 @@
-// ai-chat.js - MASTER AI INTERFACE V1.1
-// Zero-Omission Protocol: Isolated DOM Injection + Live Render Integration
+// ai-chat.js - MASTER AI INTERFACE V1.2
+// Zero-Omission Protocol: Bottom-Nav Integrated & Properly Docked
 
 const AIChatEngine = {
     chatHistory: [], // Memory buffer so Kimi remembers the conversation
@@ -13,9 +13,8 @@ const AIChatEngine = {
     injectCSS: function() {
         const style = document.createElement('style');
         style.innerHTML = `
-            #ai-chat-widget { position: fixed; bottom: 150px; right: 20px; width: 60px; height: 60px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; transition: 0.3s; border: 2px solid #fff; }
-            #ai-chat-widget:hover { transform: scale(1.05); }
-            #ai-chat-window { position: fixed; bottom: 220px; right: 20px; width: 350px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 240px); background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; }
+            /* Floating Widget Removed. Chat window now docks securely above 65px Bottom Nav */
+            #ai-chat-window { position: fixed; bottom: 85px; right: 50%; transform: translateX(50%); width: 95%; max-width: 440px; height: 500px; max-height: calc(100vh - 120px); background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; }
             .ai-header { background: #111; color: #fff; padding: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
             .ai-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; width: 24px; height: 24px; }
             .ai-messages { flex-grow: 1; padding: 15px; overflow-y: auto; background: #f8f9fa; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
@@ -39,14 +38,10 @@ const AIChatEngine = {
 
     injectHTML: function() {
         const html = `
-            <div id="ai-chat-widget" onclick="AIChatEngine.toggleChat()">
-                <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #fff;"><path d="M12 2C6.48 2 2 5.92 2 10.75c0 2.87 1.62 5.43 4.14 7.04v3.96l3.78-2.18c.66.1 1.35.18 2.08.18 5.52 0 10-3.92 10-8.75S17.52 2 12 2zm0 15c-.6 0-1.18-.06-1.74-.16l-2.4 1.38v-2.43C5.7 14.5 4 12.76 4 10.75 4 6.9 7.58 4 12 4s8 2.9 8 6.75-3.58 6.75-8 6.75z"/></svg>
-            </div>
-
             <div id="ai-chat-window">
                 <div class="ai-header">
                     <span style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.2rem;">🤖</span> Kimi AI Sales
+                        <span style="font-size: 1.2rem;">🤖</span> ជំនួយការ Kimi 
                     </span>
                     <button class="ai-close" onclick="AIChatEngine.toggleChat()">×</button>
                 </div>
@@ -83,7 +78,6 @@ const AIChatEngine = {
         // File Upload Handler (For Bank Slips)
         document.getElementById('ai-file-upload').addEventListener('change', function(e) {
             if(e.target.files.length > 0) {
-                // Future expansion: Extract image data to Base64 and send to Kimi Vision API
                 AIChatEngine.appendMessage("user", "📸 បង្ហោះវិក័យប័ត្របញ្ជាក់ការបង់ប្រាក់ (Payment Slip Uploaded)");
                 AIChatEngine.sendMessage("I just uploaded my payment slip image to verify my transfer.");
                 e.target.value = ""; // Reset input
@@ -107,59 +101,46 @@ const AIChatEngine = {
         if (isHTML) {
             div.innerHTML = text;
         } else {
-            // Convert line breaks to <br> for neat formatting
             div.innerHTML = text.replace(/\\n/g, '<br>');
         }
         
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
-        return div; // Return element so we can remove it if it's a "typing..." indicator
+        return div; 
     },
 
-    // --------------------------------------------------------
-    // THE NERVOUS SYSTEM: Sending data to Python
-    // --------------------------------------------------------
     sendMessage: async function(overrideText = null) {
         const input = document.getElementById('ai-text-input');
         const text = overrideText || input.value.trim();
         if (!text) return;
 
-        // 1. Show user message in UI
         if (!overrideText) this.appendMessage("user", text);
         input.value = '';
 
-        // 2. Add to Memory Buffer
         this.chatHistory.push({ role: "user", content: text });
 
-        // 3. Show "Kimi is thinking..." indicator
         const typingIndicator = this.appendMessage("kimi", "<span class='typing-indicator'>... កំពុងគិត ...</span>", true);
 
         try {
-            // 4. Send secure payload to Python Render Server
-            // Requires APP_CONFIG.RENDER_URL to be defined in your config.js
             const response = await fetch(`${APP_CONFIG.RENDER_URL}/ai-chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     message: text,
-                    history: this.chatHistory // Kimi needs history to understand context
+                    history: this.chatHistory 
                 })
             });
 
             if (!response.ok) throw new Error("Server disconnected");
 
             const data = await response.json();
-            
-            // 5. Remove typing indicator
             typingIndicator.remove();
 
-            // 6. Print Kimi's reply
             if (data.reply) {
                 this.appendMessage("kimi", data.reply);
                 this.chatHistory.push({ role: "assistant", content: data.reply });
             }
 
-            // 7. ACTION INTERCEPTOR: Did Kimi trigger a checkout?
             if (data.action === "show_qr" && data.checkout_data) {
                 this.renderChatQR(data.checkout_data.total);
             }
@@ -172,7 +153,6 @@ const AIChatEngine = {
     },
 
     renderChatQR: function(totalAmount) {
-        // Uses your existing generateDynamicABAQR function from aba-qr.js!
         if (typeof generateDynamicABAQR !== 'function') {
             console.error("aba-qr.js is missing!");
             return;
@@ -193,5 +173,4 @@ const AIChatEngine = {
     }
 };
 
-// Initialize when DOM is completely loaded
 document.addEventListener('DOMContentLoaded', () => AIChatEngine.init());
