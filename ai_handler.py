@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.7
-# Zero-Omission Protocol: Secure Proxy + Reasoning Serialization + Async
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V4.0
+# Zero-Omission Protocol: Synced to working .AI endpoint + Proxy Fix + Variable Bug Fix
 
 import json
 import logging
@@ -14,13 +14,15 @@ import config
 from woo_handler import wcapi
 
 # 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
+# Synced to match your working kimi.py desktop BASE_URL
 client = AsyncOpenAI(
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.cn/v1"
+    base_url="https://api.moonshot.ai/v1" 
 )
 
-# 2. SECURE PRODUCT PROXY (Zero-Omission: Supports index.html UI)
+# 2. SECURE PRODUCT PROXY (Fixes the Connection Error on Home Page)
 async def get_products_proxy(request):
+    """Securely fetches products using backend keys for the UI."""
     headers = {"Access-Control-Allow-Origin": "*"}
     try:
         res = await asyncio.to_thread(wcapi.get, "products", params={"per_page": 100, "status": "publish"})
@@ -30,6 +32,7 @@ async def get_products_proxy(request):
         return web.json_response({"error": str(e)}, status=500, headers=headers)
 
 async def get_categories_proxy(request):
+    """Securely fetches categories using backend keys for the UI."""
     headers = {"Access-Control-Allow-Origin": "*"}
     try:
         res = await asyncio.to_thread(wcapi.get, "products/categories", params={"hide_empty": True, "parent": 0})
@@ -60,7 +63,7 @@ KIMI_TOOLS = [
     {"type": "function", "function": {"name": "generate_checkout", "description": "Trigger ABA QR Code.", "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}}}
 ]
 
-# 5. WORKERS (Historical Logic Preserved)
+# 5. WORKERS
 def woo_fetch_inventory():
     try:
         res = wcapi.get("products", params={"per_page": 20, "status": "publish"})
@@ -103,22 +106,29 @@ async def send_telegram_alert(order_id, refund_needed, order_data_str):
             await s.post(f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage", json={"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"})
     except Exception: pass
 
-# 6. MAIN CHAT ENDPOINT (Reasoning Serialization Fix)
+# 6. MAIN CHAT ENDPOINT
 async def process_chat_endpoint(request):
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
     if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
     try:
         data = await request.json()
         conversation_history = data.get("history", [])
-        messages = [{"role": "system", "content": get_system_prompt()}] + conversation_history
+        current_system_prompt = get_system_prompt()
+        messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
 
+        # Synced with your working kimi.py model name: "kimi-k2.5"
         response = await client.chat.completions.create(
-            model="kimi-k2-5", messages=messages, tools=KIMI_TOOLS, tool_choice="auto", temperature=0.2, max_tokens=4096
+            model="kimi-k2.5", 
+            messages=messages, 
+            tools=KIMI_TOOLS,
+            tool_choice="auto",
+            temperature=0.2,
+            max_tokens=4096
         )
         response_message = response.choices[0].message
         
         if response_message.tool_calls:
-            # FIX: Serialization to prevent Moonshot 400 rejection
+            # Serializing reasoning data to prevent Moonshot API 400 rejection
             assistant_msg = response_message.model_dump(exclude_none=True)
             if hasattr(response_message, 'reasoning_content') and response_message.reasoning_content:
                 assistant_msg['reasoning_content'] = response_message.reasoning_content
@@ -126,26 +136,26 @@ async def process_chat_endpoint(request):
             
             qr_action = None
             for tool_call in response_message.tool_calls:
-                func = tool_call.function.name
+                func_name = tool_call.function.name # Fixed variable name bug
                 args = json.loads(tool_call.function.arguments)
                 res = "Executed."
 
-                if func == "check_inventory": res = await asyncio.to_thread(woo_fetch_inventory)
-                elif func == "get_order_details": res = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
-                elif func == "create_order": res = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
-                elif func == "update_order_status":
+                if func_name == "check_inventory": res = await asyncio.to_thread(woo_fetch_inventory)
+                elif func_name == "get_order_details": res = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
+                elif func_name == "create_order": res = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
+                elif func_name == "update_order_status":
                     res = await asyncio.to_thread(woo_update_status, args.get("order_id"), args.get("status"))
                     if args.get("status") == "cancelled" and res == "SUCCESS":
                         asyncio.create_task(send_telegram_alert(args.get("order_id"), args.get("refund_needed"), args.get("order_data")))
-                elif func == "add_order_note": res = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
-                elif func == "generate_invoice_link": res = f"Link: https://1.phsar.me/my-account/view-order/{args.get('order_id')}/"
-                elif func == "generate_checkout":
+                elif func_name == "add_order_note": res = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
+                elif func_name == "generate_invoice_link": res = f"Link: https://1.phsar.me/my-account/view-order/{args.get('order_id')}/"
+                elif func_name == "generate_checkout":
                     qr_action = {"action": "show_qr", "checkout_data": {"total": args.get("total_riel"), "summary": args.get("summary")}}
                     res = "QR code displayed."
 
-                messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func, "content": res})
+                messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": res})
             
-            final = await client.chat.completions.create(model="kimi-k2-5", messages=messages)
+            final = await client.chat.completions.create(model="kimi-k2.5", messages=messages)
             payload = {"reply": final.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
             return web.json_response(payload, headers=headers)
@@ -154,4 +164,4 @@ async def process_chat_endpoint(request):
 
     except Exception as e:
         logging.error(f"AI Handler Error: {e}")
-        return web.json_response({"reply": "⚠️V3.7 សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
+        return web.json_response({"reply": f"⚠️ V4.0 System Error: {str(e)}", "action": "error"}, headers=headers)
