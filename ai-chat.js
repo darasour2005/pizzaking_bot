@@ -1,5 +1,5 @@
-// ai-chat.js - MASTER AI INTERFACE V1.3
-// Zero-Omission Protocol: Global Scope Fix for Navigation Button
+// ai-chat.js - MASTER AI INTERFACE V1.4
+// Zero-Omission Protocol: Custom Welcome Text and Title Updated
 
 window.AIChatEngine = {
     chatHistory: [], // Memory buffer so Kimi remembers the conversation
@@ -40,13 +40,13 @@ window.AIChatEngine = {
             <div id="ai-chat-window">
                 <div class="ai-header">
                     <span style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.2rem;">🤖</span> ជំនួយការ Kimi 
+                        <span style="font-size: 1.2rem;">🤖</span> កម្ម៉ង់ជាមួយខ្ញុំ
                     </span>
                     <button class="ai-close" onclick="window.AIChatEngine.toggleChat()">×</button>
                 </div>
                 
                 <div class="ai-messages" id="ai-msg-container">
-                    <div class="msg-bubble msg-kimi">សួស្តី! ខ្ញុំជាជំនួយការ Kimi របស់ Pizza King។ តើមានអ្វីឱ្យខ្ញុំជួយទេថ្ងៃនេះ? (I can help you order, check stock, or verify payments!)</div>
+                    <div class="msg-bubble msg-kimi">សួស្តី! អ្នកអាចធ្វើការកម្ម៉ង់ ពិនិត្យមើលផលិតផល និងសួរសំណួរផ្សេងៗបាន។ ខ្ញុំអាចនិយាយភាសាខ្មែរ និងអង់គ្លេស។ (You can make an order, check products, and answer your questions. I can speak English and Khmer.)</div>
                 </div>
                 
                 <div class="ai-input-area">
@@ -121,6 +121,7 @@ window.AIChatEngine = {
         const typingIndicator = this.appendMessage("kimi", "<span class='typing-indicator'>... កំពុងគិត ...</span>", true);
 
         try {
+            // NOTE: Ensure APP_CONFIG.RENDER_URL exists in your config.js!
             const response = await fetch(`${APP_CONFIG.RENDER_URL}/ai-chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
