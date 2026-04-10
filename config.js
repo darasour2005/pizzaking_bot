@@ -8,7 +8,7 @@ const APP_CONFIG = {
     WC_BASE: "https://1.phsar.me/wp-json/wc/v3",
     
     // WordPress API Keys (Read-Only/Customer Level)
-    WC_AUTH: "?consumer_key=ck_6a9c8caa18a2b0ab114ef90bb9e982d69521ec03&consumer_secret=cs_63c256e1b4eba0a65723f054159e55d2148c3c57",
+    WC_AUTH: "?consumer_key=ck_",
     
     // Delivery Configuration
     DELIVERY: {
