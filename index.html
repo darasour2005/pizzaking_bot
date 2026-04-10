@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V4.1</title>
+    <title>Pizza King Store V4.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -89,17 +89,13 @@
 
     <div id="success-modal" class="modal-overlay">
         <div class="isolated-note-card" style="padding: 30px 20px;">
-            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);">
+            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
                 <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
             <h3 style="color: var(--pizz-green); margin: 0 0 15px 0; font-size: 1.3rem;">ការកម្ម៉ង់ជោគជ័យ!</h3>
             <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
                 អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
                 <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ</span>
-            </p>
-            <p style="font-size: 0.8rem; color: #7f8c8d; line-height: 1.4; margin-bottom: 25px;">
-                Thank you <span id="success-name-en" style="color:var(--pizz-red); font-weight:700;"></span> for your order.<br>
-                Please find your order details in the Order Box.
             </p>
             <button class="btn-paid-final" onclick="location.reload()" style="margin-bottom:0;">យល់ព្រម (OK)</button>
         </div>
@@ -116,7 +112,6 @@
 </div>
 
 <script src="config.js"></script>
-<script src="cache-manager.js"></script>
 <script src="ai-chat.js"></script>    
 <script src="nav.js"></script>
 <script src="pwa.js"></script> 
@@ -126,52 +121,68 @@
 <script src="shopcart-payment.js"></script> 
     
 <script>
+    // Initialize Navigation & UI
     loadBottomNav('home'); 
     loadShippingForm();
-    initSlider(); // INITIALIZE MOVIE SLIDER
+    if(typeof initSlider === 'function') initSlider();
 
     const tg = window.Telegram.WebApp;
     tg.expand(); tg.ready();
     
     let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
+    // FETCHDATA V4.3: Secure Proxy Protocol (No Direct WP Keys)
     async function fetchData() {
-        // 1. SMART CACHE ENGINE (24 Hour TTL)
-        const cachedCats = CacheEngine.get("pizz_cats", 24);
-        const cachedProds = CacheEngine.get("pizz_prods", 24);
-        const cachedVars = CacheEngine.get("pizz_vars", 24);
+        const loader = document.getElementById('loader');
+        
+        // 1. Cache Layer Check
+        const cachedCats = (typeof CacheEngine !== 'undefined') ? CacheEngine.get("pizz_cats", 24) : null;
+        const cachedProds = (typeof CacheEngine !== 'undefined') ? CacheEngine.get("pizz_prods", 24) : null;
 
-        if (cachedCats && cachedProds && cachedVars) {
+        if (cachedCats && cachedProds) {
             allProducts = cachedProds;
-            productVariations = cachedVars;
             renderCategories(cachedCats);
             renderProducts(allProducts);
             restoreState();
-            document.getElementById('loader').style.display = 'none';
+            loader.style.display = 'none';
             return;
         }
 
-        // 2. NETWORK PULL
+        // 2. Secure Backend Proxy Layer
         try {
-            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); 
-            const cats = await catRes.json(); 
-            renderCategories(cats); 
-            CacheEngine.set("pizz_cats", cats);
-
-            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); 
-            allProducts = await prodRes.json();
-            for (const vp of allProducts.filter(p => p.type === 'variable')) { 
-                const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
-                productVariations[vp.id] = await vRes.json(); 
-            }
+            // Fetch Categories via Python Proxy
+            const catRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-categories`);
+            const cats = await catRes.json();
             
-            CacheEngine.set("pizz_prods", allProducts);
-            CacheEngine.set("pizz_vars", productVariations);
+            if (Array.isArray(cats)) {
+                renderCategories(cats);
+                if(typeof CacheEngine !== 'undefined') CacheEngine.set("pizz_cats", cats);
+            }
+
+            // Fetch Products via Python Proxy
+            const prodRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-products`);
+            allProducts = await prodRes.json();
+            
+            if (Array.isArray(allProducts)) {
+                // Background variation fetch for variable products
+                for (const vp of allProducts.filter(p => p.type === 'variable')) { 
+                    try {
+                        const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
+                        productVariations[vp.id] = await vRes.json(); 
+                    } catch(ve) { console.error(`Variation Sync Error:`, ve); }
+                }
+                
+                renderProducts(allProducts);
+                if(typeof CacheEngine !== 'undefined') CacheEngine.set("pizz_prods", allProducts);
+            }
 
             restoreState();
-            document.getElementById('loader').style.display = 'none';
+            loader.style.display = 'none';
+            
         } catch(e) { 
-            document.getElementById('loader').style.display = 'none'; 
+            console.error("Master Proxy Sync Error:", e);
+            loader.style.display = 'none';
+            alert("⚠️ Connection to Render Server failed. Please check internet!");
         }
     }
 
@@ -184,27 +195,59 @@
         if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
         const savedCart = localStorage.getItem('pizz_king_cart_v36');
         if(savedCart) cart = JSON.parse(savedCart);
-        updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
+        if(typeof updateCartBasedOnDelivery === 'function') updateCartBasedOnDelivery(); 
+        if(typeof checkForm === 'function') checkForm();
     }
 
     function renderProducts(items) {
-        document.getElementById('product-grid').innerHTML = items.map(p => {
+        const grid = document.getElementById('product-grid');
+        if(!grid || !Array.isArray(items)) return;
+        
+        grid.innerHTML = items.map(p => {
             const pid = p.id; cardQtys[pid] = 1; let variations = "";
             if (p.type === 'variable' && productVariations[pid]) {
-                variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
-                if(productVariations[pid].length > 2) { variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`; }
+                const vars = productVariations[pid];
+                if(vars.length > 2) {
+                    variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + vars.map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`;
+                } else {
+                    variations = `<div class="var-container">` + vars.map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
+                }
             }
             return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
         }).join('');
     }
 
-    function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
+    function selectVariation(pid, vid) { 
+        variationSelections[pid] = vid; 
+        document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); 
+        const chip = document.getElementById(`var-${pid}-${vid}`); 
+        if(chip) chip.classList.add('active'); 
+    }
+    
     function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
-    function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%; max-height:250px; object-fit:contain; border-radius:12px; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`; document.getElementById('detail-popup').style.display = 'flex'; }
+    
+    function openDetail(pid) { 
+        const p = allProducts.find(x => x.id === pid); 
+        if(!p) return;
+        document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%; max-height:250px; object-fit:contain; border-radius:12px; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`; 
+        document.getElementById('detail-popup').style.display = 'flex'; 
+    }
+    
     function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
     function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
-    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
-    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
+    
+    function renderCategories(cats) { 
+        const slider = document.getElementById('cat-slider');
+        if(!slider || !Array.isArray(cats)) return;
+        slider.innerHTML = cats.map(c => `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`).join('');
+    }
+
+    function filterCatLocal(id) { 
+        document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); 
+        const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); 
+        if(el) el.classList.add('active'); 
+        renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); 
+    }
 
     fetchData();
 </script>
