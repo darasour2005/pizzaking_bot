@@ -10,6 +10,7 @@ from aiohttp import web
 import config
 import woo_handler  # Your specialized order logic
 import video_streamer # The new MTProto streaming engine
+import ai_handler  # Import the new AI handler at the top of your main file
 
 # Bot Setup
 bot = Bot(token=config.TELEGRAM_API_TOKEN)
@@ -27,6 +28,12 @@ async def start_handler(message: types.Message):
 async def main():
     dp.include_router(router)
     app = web.Application()
+
+   
+    # Add the AI routes to your aiohttp application setup
+    # (Look for where you define app = web.Application() and add these right below it)
+    app.router.add_post('/ai-chat', ai_handler.process_chat_endpoint)
+    app.router.add_options('/ai-chat', ai_handler.process_chat_endpoint) # Required for CORS
     
     # 🔗 Routing Table
     app.router.add_get("/", lambda r: web.Response(text="Pizz King System V3.0 Online"))
