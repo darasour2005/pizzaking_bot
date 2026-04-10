@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.3
-# Zero-Omission Protocol: Comprehensive Telegram Refund Alerts
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.4
+# Zero-Omission Protocol: Kimi K2.5 Flagship Model Upgrade
 
 import json
 import logging
@@ -215,8 +215,8 @@ async def process_chat_endpoint(request):
         current_system_prompt = get_system_prompt()
         messages = [{"role": "system", "content": current_system_prompt}] + conversation_history + [{"role": "user", "content": user_message}]
 
-        # Step 1: Kimi Processing
-        response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
+        # Step 1: Kimi Processing (Upgraded to Flagship K2.5)
+        response = client.chat.completions.create(model="kimi-k2.5", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
         response_message = response.choices[0].message
         
         # Step 2: Intercept Tool Calls
@@ -257,8 +257,8 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Step 3: Pulse-Verify
-            final_response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages)
+            # Step 3: Pulse-Verify (Upgraded to Flagship K2.5)
+            final_response = client.chat.completions.create(model="kimi-k2.5", messages=messages)
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
