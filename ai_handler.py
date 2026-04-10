@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.2
-# Zero-Omission Protocol: Telegram Refund Alerts + 24-Hour Cancel Policy
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.3
+# Zero-Omission Protocol: Comprehensive Telegram Refund Alerts
 
 import json
 import logging
@@ -26,7 +26,6 @@ def get_system_prompt():
         with open("system_prompt.txt", "r", encoding="utf-8") as f:
             base_prompt = f.read()
             
-        # Inject live time so Kimi can calculate the 24-hour rule perfectly
         current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
         return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
     except Exception as e:
@@ -64,7 +63,7 @@ KIMI_TOOLS = [
         "type": "function",
         "function": {
             "name": "get_order_details",
-            "description": "Look up an order to check its date and status BEFORE allowing a cancellation.",
+            "description": "Look up an order to check its date, status, total, and customer info.",
             "parameters": {
                 "type": "object",
                 "properties": {"order_id": {"type": "integer"}},
@@ -82,7 +81,8 @@ KIMI_TOOLS = [
                 "properties": {
                     "order_id": {"type": "integer"},
                     "status": {"type": "string", "enum": ["processing", "cancelled"]},
-                    "refund_needed": {"type": "boolean", "description": "Set true ONLY if cancelling a paid order."}
+                    "refund_needed": {"type": "boolean", "description": "Set true ONLY if cancelling a paid order."},
+                    "order_data": {"type": "string", "description": "Pass the full JSON string returned from 'get_order_details' here so we can alert the admins."}
                 },
                 "required": ["order_id", "status"]
             }
@@ -140,9 +140,11 @@ def woo_get_order_details(order_id):
             order = res.json()
             return json.dumps({
                 "id": order['id'],
-                "status": order['status'], # pending, processing, completed
+                "status": order['status'],
                 "date_created": order['date_created'],
-                "total": order['total']
+                "total": order['total'],
+                "customer_name": order.get('billing', {}).get('first_name', 'Unknown'),
+                "customer_phone": order.get('billing', {}).get('phone', 'Unknown')
             })
         return "FAILED: Order not found."
     except Exception as e: return str(e)
@@ -173,17 +175,29 @@ def woo_add_note(order_id, note):
 def woo_get_invoice(order_id):
     return f"https://1.phsar.me/my-account/view-order/{order_id}/"
 
-async def send_telegram_alert(order_id, refund_needed):
-    """Fires a priority alert to the Telegram Group when AI cancels an order."""
-    text = f"🚨 <b>AI ORDER CANCELLATION</b>\nOrder ID: #{order_id}\n"
-    if refund_needed:
-        text += "💰 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check slip and process the refund for the customer ASAP."
-    else:
-        text += "⚪ STATUS: UNPAID - No refund needed."
-        
-    url = f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage"
-    payload = {"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"}
+async def send_telegram_alert(order_id, refund_needed, order_data_str):
+    """Fires a priority alert to the Telegram Group with full customer details."""
     try:
+        # Try to parse the order data Kimi passed back
+        order_data = json.loads(order_data_str) if order_data_str else {}
+        total = order_data.get('total', 'Unknown')
+        name = order_data.get('customer_name', 'Unknown')
+        phone = order_data.get('customer_phone', 'Unknown')
+        
+        text = f"🚨 <b>AI ORDER CANCELLATION</b>\n"
+        text += f"📦 <b>Order ID:</b> #{order_id}\n"
+        text += f"👤 <b>Customer:</b> {name}\n"
+        text += f"📞 <b>Phone:</b> <code>{phone}</code>\n"
+        text += f"💵 <b>Total Amount:</b> {total}៛\n\n"
+        
+        if refund_needed:
+            text += "🔴 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check bank slips and contact the customer immediately to process their refund."
+        else:
+            text += "⚪ <b>STATUS: UNPAID</b>\nNo refund needed."
+            
+        url = f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage"
+        payload = {"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"}
+        
         async with aiohttp.ClientSession() as session:
             await session.post(url, json=payload)
     except Exception as e:
@@ -225,12 +239,13 @@ async def process_chat_endpoint(request):
                     status = args.get("status")
                     order_id = args.get("order_id")
                     refund_needed = args.get("refund_needed", False)
+                    order_data = args.get("order_data", "")
                     
                     result = await asyncio.to_thread(woo_update_status, order_id, status)
                     
-                    # TELEGRAM ALERT TRIGGER
+                    # TELEGRAM ALERT TRIGGER (Now with full payload)
                     if status == "cancelled" and result == "SUCCESS":
-                        asyncio.create_task(send_telegram_alert(order_id, refund_needed))
+                        asyncio.create_task(send_telegram_alert(order_id, refund_needed, order_data))
 
                 elif func_name == "add_order_note":
                     result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
@@ -242,7 +257,7 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Step 3: Pulse-Verify (Let Kimi read the tool results)
+            # Step 3: Pulse-Verify
             final_response = client.chat.completions.create(model="moonshot-v1-8k", messages=messages)
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
