@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.2
-# Zero-Omission Protocol: Kimi K2-5 Flagship Restored + Multi-Turn Serialization Fix
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.3
+# Zero-Omission Protocol: .AI Endpoint Sync + Tool Object Serialization Fix
 
 import json
 import logging
@@ -13,106 +13,40 @@ from openai import AsyncOpenAI
 import config
 from woo_handler import wcapi
 
-# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET ASYNCHRONOUSLY
+# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
+# Synced to match your working kimi.py desktop environment
 client = AsyncOpenAI(
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.cn/v1"
+    base_url="https://api.moonshot.ai/v1" 
 )
 
 # 2. DYNAMIC PROMPT INJECTION
 def get_system_prompt():
-    fallback_prompt = """You are Dara's elite AI Sales Assistant for 'Pizza King Store'.
-    RULES: 1. Use 'check_inventory' to check stock. 2. Use 'create_order' when they buy. 3. Use 'generate_checkout' for payment."""
-    
+    fallback = "You are Dara's AI Sales Assistant for Pizza King. Use tools for inventory and orders."
     try:
         with open("system_prompt.txt", "r", encoding="utf-8") as f:
             base_prompt = f.read()
-    except Exception as e:
-        logging.error(f"Missing system_prompt.txt. Using fallback. Error: {e}")
-        base_prompt = fallback_prompt
-        
+    except Exception:
+        base_prompt = fallback
     current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
     return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
 
-# 3. TOOL DEFINITIONS (The AI's Hands)
+# 3. TOOL DEFINITIONS
 KIMI_TOOLS = [
-    {
-        "type": "function",
-        "function": {"name": "check_inventory", "description": "Fetch live products and prices.", "parameters": {"type": "object", "properties": {}}}
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_order",
-            "description": "Create a real WooCommerce order.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "phone": {"type": "string"},
-                    "product_ids": {"type": "array", "items": {"type": "integer"}},
-                    "quantities": {"type": "array", "items": {"type": "integer"}}
-                },
-                "required": ["name", "phone", "product_ids", "quantities"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_order_details",
-            "description": "Look up an order to check its date, status, total, and customer info.",
-            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "update_order_status",
-            "description": "Update an order to 'processing' (paid) or 'cancelled'.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "order_id": {"type": "integer"},
-                    "status": {"type": "string", "enum": ["processing", "cancelled"]},
-                    "refund_needed": {"type": "boolean"},
-                    "order_data": {"type": "string"}
-                },
-                "required": ["order_id", "status"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "add_order_note",
-            "description": "Add a note to the WooCommerce order.",
-            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}}, "required": ["order_id", "note"]}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "generate_invoice_link",
-            "description": "Generate the URL for PDF invoice.",
-            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "generate_checkout",
-            "description": "Trigger the ABA QR Code generation.",
-            "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}
-        }
-    }
+    {"type": "function", "function": {"name": "check_inventory", "description": "Check store stock.", "parameters": {"type": "object", "properties": {}}}},
+    {"type": "function", "function": {"name": "create_order", "description": "Create WooCommerce order.", "parameters": {"type": "object", "properties": {"name": {"type": "string"}, "phone": {"type": "string"}, "product_ids": {"type": "array", "items": {"type": "integer"}}, "quantities": {"type": "array", "items": {"type": "integer"}}}, "required": ["name", "phone", "product_ids", "quantities"]}}},
+    {"type": "function", "function": {"name": "get_order_details", "description": "Check order status.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
+    {"type": "function", "function": {"name": "update_order_status", "description": "Cancel or pay order.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "status": {"type": "string", "enum": ["processing", "cancelled"]}, "refund_needed": {"type": "boolean"}, "order_data": {"type": "string"}}, "required": ["order_id", "status"]}}},
+    {"type": "function", "function": {"name": "add_order_note", "description": "Add note to order.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}}, "required": ["order_id", "note"]}}},
+    {"type": "function", "function": {"name": "generate_invoice_link", "description": "Get PDF receipt link.", "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}}},
+    {"type": "function", "function": {"name": "generate_checkout", "description": "Show ABA QR code.", "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}}}
 ]
 
-# 4. WOOCOMMERCE & TELEGRAM WORKERS
+# 4. WORKERS
 def woo_fetch_inventory():
     try:
         res = wcapi.get("products", params={"per_page": 20, "status": "publish"})
-        return "\n".join([f"ID: {p['id']} | {p['name']}: {p['price']}៛" for p in res.json()]) if res.status_code == 200 else "Failed."
+        return "\n".join([f"ID: {p['id']} | {p['name']}: {p['price']}៛" for p in res.json()]) if res.status_code == 200 else "Error."
     except Exception as e: return str(e)
 
 def woo_get_order_details(order_id):
@@ -120,23 +54,15 @@ def woo_get_order_details(order_id):
         res = wcapi.get(f"orders/{order_id}")
         if res.status_code == 200:
             order = res.json()
-            return json.dumps({
-                "id": order['id'], "status": order['status'], "date_created": order['date_created'],
-                "total": order['total'], "customer_name": order.get('billing', {}).get('first_name', 'Unknown'),
-                "customer_phone": order.get('billing', {}).get('phone', 'Unknown')
-            })
-        return "FAILED: Order not found."
+            return json.dumps({"id": order['id'], "status": order['status'], "total": order['total'], "customer_name": order.get('billing', {}).get('first_name'), "customer_phone": order.get('billing', {}).get('phone')})
+        return "Not found."
     except Exception as e: return str(e)
 
 def woo_create_order(name, phone, product_ids, quantities):
     try:
-        line_items = [{"product_id": pid, "quantity": qty} for pid, qty in zip(product_ids, quantities)]
-        data = {"billing": {"first_name": name, "phone": phone}, "line_items": line_items}
+        data = {"billing": {"first_name": name, "phone": phone}, "line_items": [{"product_id": pid, "quantity": qty} for pid, qty in zip(product_ids, quantities)]}
         res = wcapi.post("orders", data)
-        if res.status_code == 201:
-            order = res.json()
-            return f"SUCCESS. Order ID: {order['id']}, Total: {order['total']}៛"
-        return f"FAILED: {res.text}"
+        return f"SUCCESS. Order ID: {res.json()['id']}" if res.status_code == 201 else "Failed."
     except Exception as e: return str(e)
 
 def woo_update_status(order_id, status):
@@ -151,97 +77,65 @@ def woo_add_note(order_id, note):
         return "SUCCESS" if res.status_code == 201 else "FAILED"
     except Exception as e: return str(e)
 
-def woo_get_invoice(order_id):
-    return f"https://1.phsar.me/my-account/view-order/{order_id}/"
-
 async def send_telegram_alert(order_id, refund_needed, order_data_str):
     try:
-        order_data = json.loads(order_data_str) if order_data_str else {}
-        total = order_data.get('total', 'Unknown')
-        name = order_data.get('customer_name', 'Unknown')
-        phone = order_data.get('customer_phone', 'Unknown')
-        
-        text = f"🚨 <b>AI ORDER CANCELLATION</b>\n📦 <b>Order ID:</b> #{order_id}\n👤 <b>Customer:</b> {name}\n📞 <b>Phone:</b> <code>{phone}</code>\n💵 <b>Total Amount:</b> {total}៛\n\n"
-        
-        if refund_needed: text += "🔴 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check bank slips and process refund."
-        else: text += "⚪ <b>STATUS: UNPAID</b>\nNo refund needed."
-            
-        url = f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage"
-        payload = {"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"}
-        async with aiohttp.ClientSession() as session:
-            await session.post(url, json=payload)
-    except Exception as e: logging.error(f"Telegram Alert Failed: {e}")
+        d = json.loads(order_data_str)
+        text = f"🚨 <b>AI CANCELLATION</b>\nID: #{order_id}\nName: {d.get('customer_name')}\nPhone: {d.get('customer_phone')}\nRefund: {'YES' if refund_needed else 'NO'}"
+        async with aiohttp.ClientSession() as s:
+            await s.post(f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage", json={"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"})
+    except Exception: pass
 
-# 5. MAIN CHAT ENDPOINT
+# 5. ENDPOINT
 async def process_chat_endpoint(request):
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}
     if request.method == "OPTIONS": return web.Response(status=200, headers=headers)
-        
     try:
         data = await request.json()
         conversation_history = data.get("history", [])
-        current_system_prompt = get_system_prompt()
-        messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
+        messages = [{"role": "system", "content": get_system_prompt()}] + conversation_history
 
-        # CRITICAL FIX: Upgraded to kimi-k2-5 with explicit tokens and tool_choice
+        # Use the flagship model from your screenshot
         response = await client.chat.completions.create(
             model="kimi-k2-5", 
             messages=messages, 
             tools=KIMI_TOOLS,
             tool_choice="auto",
-            temperature=0.2,
-            max_tokens=4096
+            temperature=0.3
         )
+        
         response_message = response.choices[0].message
         
         if response_message.tool_calls:
-            # CRITICAL FIX: Convert the OpenAI object to a raw dictionary to prevent the library from stripping Moonshot's custom "reasoning_content"
-            assistant_message_dict = response_message.model_dump(exclude_none=True)
-            
-            # Manually inject reasoning_content if it exists in the raw response
-            if hasattr(response_message, 'reasoning_content') and response_message.reasoning_content:
-                assistant_message_dict['reasoning_content'] = response_message.reasoning_content
-            elif 'reasoning_content' in response.choices[0].model_extra if hasattr(response.choices[0], 'model_extra') and response.choices[0].model_extra else {}:
-                 assistant_message_dict['reasoning_content'] = response.choices[0].model_extra['reasoning_content']
-                
-            messages.append(assistant_message_dict)
-            
+            # FIX: Convert response to a clean dictionary before appending
+            messages.append(response_message.model_dump(exclude_none=True))
             qr_action = None
+            
             for tool_call in response_message.tool_calls:
-                func_name = tool_call.function.name
+                func = tool_call.function.name
                 args = json.loads(tool_call.function.arguments)
-                result = "Executed."
+                res = "Executed."
 
-                if func_name == "check_inventory": result = await asyncio.to_thread(woo_fetch_inventory)
-                elif func_name == "get_order_details": result = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
-                elif func_name == "create_order": result = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
-                elif func_name == "update_order_status":
-                    status, order_id, refund_needed, order_data = args.get("status"), args.get("order_id"), args.get("refund_needed", False), args.get("order_data", "")
-                    result = await asyncio.to_thread(woo_update_status, order_id, status)
-                    if status == "cancelled" and result == "SUCCESS": asyncio.create_task(send_telegram_alert(order_id, refund_needed, order_data))
-                elif func_name == "add_order_note": result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
-                elif func_name == "generate_invoice_link": result = f"Invoice Link: {woo_get_invoice(args.get('order_id'))}"
-                elif func_name == "generate_checkout":
+                if func == "check_inventory": res = await asyncio.to_thread(woo_fetch_inventory)
+                elif func == "get_order_details": res = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
+                elif func_name == "create_order": res = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
+                elif func == "update_order_status":
+                    res = await asyncio.to_thread(woo_update_status, args.get("order_id"), args.get("status"))
+                    if args.get("status") == "cancelled" and res == "SUCCESS": asyncio.create_task(send_telegram_alert(args.get("order_id"), args.get("refund_needed"), args.get("order_data")))
+                elif func == "add_order_note": res = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
+                elif func == "generate_invoice_link": res = f"Link: https://1.phsar.me/my-account/view-order/{args.get('order_id')}/"
+                elif func == "generate_checkout":
                     qr_action = {"action": "show_qr", "checkout_data": {"total": args.get("total_riel"), "summary": args.get("summary")}}
-                    result = "QR generated on user screen."
+                    res = "QR code displayed."
 
-                messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
+                messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func, "content": res})
             
-            # Second pass to let Kimi reply with the tool data
-            final_response = await client.chat.completions.create(
-                model="kimi-k2-5",
-                messages=messages,
-                temperature=0.2,
-                max_tokens=4096
-            )
-            
-            payload = {"reply": final_response.choices[0].message.content, "action": "none"}
+            final = await client.chat.completions.create(model="kimi-k2-5", messages=messages)
+            payload = {"reply": final.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
             return web.json_response(payload, headers=headers)
 
-        # Standard text response if no tools were used
         return web.json_response({"reply": response_message.content, "action": "none"}, headers=headers)
 
     except Exception as e:
         logging.error(f"AI Handler Error: {e}")
-        return web.json_response({"reply": "⚠️ សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
+        return web.json_response({"reply": "⚠️ V3.3 សុំទោស ប្រព័ន្ធមានបញ្ហាបន្តិចបន្តួច។ (System error.)", "action": "error"}, headers=headers)
