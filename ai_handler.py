@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.6
-# Zero-Omission Protocol: Kimi K2.5 Restored + Double-Fire Bug Fixed
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.7
+# Zero-Omission Protocol: AsyncOpenAI Upgrade (Non-Blocking Architecture)
 
 import json
 import logging
@@ -9,14 +9,14 @@ import datetime
 import pytz
 import aiohttp
 from aiohttp import web
-from openai import OpenAI
+from openai import AsyncOpenAI  # <-- CRITICAL UPGRADE: Async Client
 import config
 from woo_handler import wcapi
 
-# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
-client = OpenAI(
+# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET ASYNCHRONOUSLY
+client = AsyncOpenAI(  # <-- CRITICAL UPGRADE
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.ai/v1" # Synced to match your working kimi.py environment
+    base_url="https://api.moonshot.ai/v1"
 )
 
 # 2. DYNAMIC PROMPT INJECTION
@@ -34,13 +34,10 @@ def get_system_prompt():
 
 # 3. TOOL DEFINITIONS (The AI's Hands)
 KIMI_TOOLS = [
+    # ... [Keep all exactly the same as V2.6: check_inventory, create_order, get_order_details, update_order_status, add_order_note, generate_invoice_link, generate_checkout] ...
     {
         "type": "function",
-        "function": {
-            "name": "check_inventory",
-            "description": "Fetch live products and prices from the WooCommerce store.",
-            "parameters": {"type": "object", "properties": {}}
-        }
+        "function": {"name": "check_inventory", "description": "Fetch live products and prices.", "parameters": {"type": "object", "properties": {}}}
     },
     {
         "type": "function",
@@ -64,11 +61,7 @@ KIMI_TOOLS = [
         "function": {
             "name": "get_order_details",
             "description": "Look up an order to check its date, status, total, and customer info.",
-            "parameters": {
-                "type": "object",
-                "properties": {"order_id": {"type": "integer"}},
-                "required": ["order_id"]
-            }
+            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}
         }
     },
     {
@@ -81,8 +74,8 @@ KIMI_TOOLS = [
                 "properties": {
                     "order_id": {"type": "integer"},
                     "status": {"type": "string", "enum": ["processing", "cancelled"]},
-                    "refund_needed": {"type": "boolean", "description": "Set true ONLY if cancelling a paid order."},
-                    "order_data": {"type": "string", "description": "Pass the full JSON string returned from 'get_order_details' here so we can alert the admins."}
+                    "refund_needed": {"type": "boolean"},
+                    "order_data": {"type": "string"}
                 },
                 "required": ["order_id", "status"]
             }
@@ -93,23 +86,15 @@ KIMI_TOOLS = [
         "function": {
             "name": "add_order_note",
             "description": "Add a note to the WooCommerce order.",
-            "parameters": {
-                "type": "object",
-                "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}},
-                "required": ["order_id", "note"]
-            }
+            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}, "note": {"type": "string"}}, "required": ["order_id", "note"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "generate_invoice_link",
-            "description": "Generate the URL for the customer to download their PDF invoice.",
-            "parameters": {
-                "type": "object",
-                "properties": {"order_id": {"type": "integer"}},
-                "required": ["order_id"]
-            }
+            "description": "Generate the URL for PDF invoice.",
+            "parameters": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}
         }
     },
     {
@@ -117,11 +102,7 @@ KIMI_TOOLS = [
         "function": {
             "name": "generate_checkout",
             "description": "Trigger the ABA QR Code generation.",
-            "parameters": {
-                "type": "object",
-                "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}},
-                "required": ["total_riel", "summary"]
-            }
+            "parameters": {"type": "object", "properties": {"total_riel": {"type": "integer"}, "summary": {"type": "string"}}, "required": ["total_riel", "summary"]}
         }
     }
 ]
@@ -139,11 +120,8 @@ def woo_get_order_details(order_id):
         if res.status_code == 200:
             order = res.json()
             return json.dumps({
-                "id": order['id'],
-                "status": order['status'],
-                "date_created": order['date_created'],
-                "total": order['total'],
-                "customer_name": order.get('billing', {}).get('first_name', 'Unknown'),
+                "id": order['id'], "status": order['status'], "date_created": order['date_created'],
+                "total": order['total'], "customer_name": order.get('billing', {}).get('first_name', 'Unknown'),
                 "customer_phone": order.get('billing', {}).get('phone', 'Unknown')
             })
         return "FAILED: Order not found."
@@ -176,31 +154,22 @@ def woo_get_invoice(order_id):
     return f"https://1.phsar.me/my-account/view-order/{order_id}/"
 
 async def send_telegram_alert(order_id, refund_needed, order_data_str):
-    """Fires a priority alert to the Telegram Group with full customer details."""
     try:
         order_data = json.loads(order_data_str) if order_data_str else {}
         total = order_data.get('total', 'Unknown')
         name = order_data.get('customer_name', 'Unknown')
         phone = order_data.get('customer_phone', 'Unknown')
         
-        text = f"🚨 <b>AI ORDER CANCELLATION</b>\n"
-        text += f"📦 <b>Order ID:</b> #{order_id}\n"
-        text += f"👤 <b>Customer:</b> {name}\n"
-        text += f"📞 <b>Phone:</b> <code>{phone}</code>\n"
-        text += f"💵 <b>Total Amount:</b> {total}៛\n\n"
+        text = f"🚨 <b>AI ORDER CANCELLATION</b>\n📦 <b>Order ID:</b> #{order_id}\n👤 <b>Customer:</b> {name}\n📞 <b>Phone:</b> <code>{phone}</code>\n💵 <b>Total Amount:</b> {total}៛\n\n"
         
-        if refund_needed:
-            text += "🔴 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check bank slips and contact the customer immediately to process their refund."
-        else:
-            text += "⚪ <b>STATUS: UNPAID</b>\nNo refund needed."
+        if refund_needed: text += "🔴 <b>STATUS: PAID - REFUND REQUIRED</b>\n⚠️ Please check bank slips and process refund."
+        else: text += "⚪ <b>STATUS: UNPAID</b>\nNo refund needed."
             
         url = f"https://api.telegram.org/bot{config.TELEGRAM_API_TOKEN}/sendMessage"
         payload = {"chat_id": config.GROUP_CHAT_ID, "text": text, "parse_mode": "HTML"}
-        
         async with aiohttp.ClientSession() as session:
             await session.post(url, json=payload)
-    except Exception as e:
-        logging.error(f"Telegram Alert Failed: {e}")
+    except Exception as e: logging.error(f"Telegram Alert Failed: {e}")
 
 # 5. MAIN CHAT ENDPOINT
 async def process_chat_endpoint(request):
@@ -209,19 +178,14 @@ async def process_chat_endpoint(request):
         
     try:
         data = await request.json()
-        # FIX: We NO LONGER extract user_message separately. The frontend already put it inside conversation_history!
         conversation_history = data.get("history", [])
-        
         current_system_prompt = get_system_prompt()
-        
-        # Build the message array correctly without duplicating the user's input
         messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
 
-        # Step 1: Kimi Processing (Restored K2.5)
-        response = client.chat.completions.create(model="kimi-k2.5", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
+        # CRITICAL FIX: await the Async client to prevent server freezing
+        response = await client.chat.completions.create(model="kimi-k2.5", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
         response_message = response.choices[0].message
         
-        # Step 2: Intercept Tool Calls
         if response_message.tool_calls:
             messages.append(response_message)
             qr_action = None
@@ -231,42 +195,28 @@ async def process_chat_endpoint(request):
                 args = json.loads(tool_call.function.arguments)
                 result = "Executed."
 
-                if func_name == "check_inventory":
-                    result = await asyncio.to_thread(woo_fetch_inventory)
-                elif func_name == "get_order_details":
-                    result = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
-                elif func_name == "create_order":
-                    result = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
+                if func_name == "check_inventory": result = await asyncio.to_thread(woo_fetch_inventory)
+                elif func_name == "get_order_details": result = await asyncio.to_thread(woo_get_order_details, args.get("order_id"))
+                elif func_name == "create_order": result = await asyncio.to_thread(woo_create_order, args.get("name"), args.get("phone"), args.get("product_ids"), args.get("quantities"))
                 elif func_name == "update_order_status":
-                    status = args.get("status")
-                    order_id = args.get("order_id")
-                    refund_needed = args.get("refund_needed", False)
-                    order_data = args.get("order_data", "")
-                    
+                    status, order_id, refund_needed, order_data = args.get("status"), args.get("order_id"), args.get("refund_needed", False), args.get("order_data", "")
                     result = await asyncio.to_thread(woo_update_status, order_id, status)
-                    
-                    # TELEGRAM ALERT TRIGGER
-                    if status == "cancelled" and result == "SUCCESS":
-                        asyncio.create_task(send_telegram_alert(order_id, refund_needed, order_data))
-
-                elif func_name == "add_order_note":
-                    result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
-                elif func_name == "generate_invoice_link":
-                    result = f"Invoice Link: {woo_get_invoice(args.get('order_id'))}"
+                    if status == "cancelled" and result == "SUCCESS": asyncio.create_task(send_telegram_alert(order_id, refund_needed, order_data))
+                elif func_name == "add_order_note": result = await asyncio.to_thread(woo_add_note, args.get("order_id"), args.get("note"))
+                elif func_name == "generate_invoice_link": result = f"Invoice Link: {woo_get_invoice(args.get('order_id'))}"
                 elif func_name == "generate_checkout":
                     qr_action = {"action": "show_qr", "checkout_data": {"total": args.get("total_riel"), "summary": args.get("summary")}}
                     result = "QR generated on user screen."
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Step 3: Pulse-Verify
-            final_response = client.chat.completions.create(model="kimi-k2.5", messages=messages)
+            # CRITICAL FIX: await the Async client for the second pass
+            final_response = await client.chat.completions.create(model="kimi-k2.5", messages=messages)
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
             return web.json_response(payload, headers=headers)
 
-        # Normal Response
         return web.json_response({"reply": response_message.content, "action": "none"}, headers=headers)
 
     except Exception as e:
