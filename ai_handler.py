@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.8
-# Zero-Omission Protocol: Kimi K2-5 Exact Endpoint + Async Architecture
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V3.2
+# Zero-Omission Protocol: Kimi K2-5 Flagship Restored + Multi-Turn Serialization Fix
 
 import json
 import logging
@@ -9,28 +9,30 @@ import datetime
 import pytz
 import aiohttp
 from aiohttp import web
-from openai import AsyncOpenAI  # Non-blocking server architecture
+from openai import AsyncOpenAI
 import config
 from woo_handler import wcapi
 
-# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
+# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET ASYNCHRONOUSLY
 client = AsyncOpenAI(
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.cn/v1"  # Confirmed via official docs
+    base_url="https://api.moonshot.cn/v1"
 )
 
 # 2. DYNAMIC PROMPT INJECTION
 def get_system_prompt():
-    """Reads the AI rules and injects the live Cambodian clock."""
+    fallback_prompt = """You are Dara's elite AI Sales Assistant for 'Pizza King Store'.
+    RULES: 1. Use 'check_inventory' to check stock. 2. Use 'create_order' when they buy. 3. Use 'generate_checkout' for payment."""
+    
     try:
         with open("system_prompt.txt", "r", encoding="utf-8") as f:
             base_prompt = f.read()
-            
-        current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
-        return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
     except Exception as e:
-        logging.error(f"Failed to load system_prompt.txt: {e}")
-        return "You are a helpful AI assistant for Pizza King in Cambodia. Please help the customer."
+        logging.error(f"Missing system_prompt.txt. Using fallback. Error: {e}")
+        base_prompt = fallback_prompt
+        
+    current_time = datetime.datetime.now(pytz.timezone(config.TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
+    return f"{base_prompt}\n\nCURRENT SYSTEM TIME: {current_time}"
 
 # 3. TOOL DEFINITIONS (The AI's Hands)
 KIMI_TOOLS = [
@@ -181,19 +183,30 @@ async def process_chat_endpoint(request):
         current_system_prompt = get_system_prompt()
         messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
 
-        # CRITICAL FIX: The Exact Model Name from your screenshot
+        # CRITICAL FIX: Upgraded to kimi-k2-5 with explicit tokens and tool_choice
         response = await client.chat.completions.create(
-            model="kimi-k2-5",  # Hyphen instead of dot!
+            model="kimi-k2-5", 
             messages=messages, 
-            tools=KIMI_TOOLS, 
-            temperature=0.2
+            tools=KIMI_TOOLS,
+            tool_choice="auto",
+            temperature=0.2,
+            max_tokens=4096
         )
         response_message = response.choices[0].message
         
         if response_message.tool_calls:
-            messages.append(response_message)
-            qr_action = None
+            # CRITICAL FIX: Convert the OpenAI object to a raw dictionary to prevent the library from stripping Moonshot's custom "reasoning_content"
+            assistant_message_dict = response_message.model_dump(exclude_none=True)
             
+            # Manually inject reasoning_content if it exists in the raw response
+            if hasattr(response_message, 'reasoning_content') and response_message.reasoning_content:
+                assistant_message_dict['reasoning_content'] = response_message.reasoning_content
+            elif 'reasoning_content' in response.choices[0].model_extra if hasattr(response.choices[0], 'model_extra') and response.choices[0].model_extra else {}:
+                 assistant_message_dict['reasoning_content'] = response.choices[0].model_extra['reasoning_content']
+                
+            messages.append(assistant_message_dict)
+            
+            qr_action = None
             for tool_call in response_message.tool_calls:
                 func_name = tool_call.function.name
                 args = json.loads(tool_call.function.arguments)
@@ -214,16 +227,19 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Second pass with exact model name
+            # Second pass to let Kimi reply with the tool data
             final_response = await client.chat.completions.create(
-                model="kimi-k2-5", # Hyphen instead of dot!
-                messages=messages
+                model="kimi-k2-5",
+                messages=messages,
+                temperature=0.2,
+                max_tokens=4096
             )
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
             return web.json_response(payload, headers=headers)
 
+        # Standard text response if no tools were used
         return web.json_response({"reply": response_message.content, "action": "none"}, headers=headers)
 
     except Exception as e:
