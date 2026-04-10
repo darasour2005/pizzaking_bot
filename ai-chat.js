@@ -1,7 +1,7 @@
-// ai-chat.js - MASTER AI INTERFACE V1.2
-// Zero-Omission Protocol: Bottom-Nav Integrated & Properly Docked
+// ai-chat.js - MASTER AI INTERFACE V1.3
+// Zero-Omission Protocol: Global Scope Fix for Navigation Button
 
-const AIChatEngine = {
+window.AIChatEngine = {
     chatHistory: [], // Memory buffer so Kimi remembers the conversation
 
     init: function() {
@@ -13,7 +13,6 @@ const AIChatEngine = {
     injectCSS: function() {
         const style = document.createElement('style');
         style.innerHTML = `
-            /* Floating Widget Removed. Chat window now docks securely above 65px Bottom Nav */
             #ai-chat-window { position: fixed; bottom: 85px; right: 50%; transform: translateX(50%); width: 95%; max-width: 440px; height: 500px; max-height: calc(100vh - 120px); background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; }
             .ai-header { background: #111; color: #fff; padding: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
             .ai-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; width: 24px; height: 24px; }
@@ -43,7 +42,7 @@ const AIChatEngine = {
                     <span style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 1.2rem;">🤖</span> ជំនួយការ Kimi 
                     </span>
-                    <button class="ai-close" onclick="AIChatEngine.toggleChat()">×</button>
+                    <button class="ai-close" onclick="window.AIChatEngine.toggleChat()">×</button>
                 </div>
                 
                 <div class="ai-messages" id="ai-msg-container">
@@ -58,7 +57,7 @@ const AIChatEngine = {
 
                     <input type="text" class="ai-input" id="ai-text-input" placeholder="សរសេរសារទីនេះ... (Type here...)">
                     
-                    <button class="ai-btn ai-btn-send" onclick="AIChatEngine.sendMessage()">
+                    <button class="ai-btn ai-btn-send" onclick="window.AIChatEngine.sendMessage()">
                         <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: currentColor;"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </div>
@@ -72,14 +71,14 @@ const AIChatEngine = {
     attachListeners: function() {
         const input = document.getElementById('ai-text-input');
         input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') AIChatEngine.sendMessage();
+            if (e.key === 'Enter') window.AIChatEngine.sendMessage();
         });
         
         // File Upload Handler (For Bank Slips)
         document.getElementById('ai-file-upload').addEventListener('change', function(e) {
             if(e.target.files.length > 0) {
-                AIChatEngine.appendMessage("user", "📸 បង្ហោះវិក័យប័ត្របញ្ជាក់ការបង់ប្រាក់ (Payment Slip Uploaded)");
-                AIChatEngine.sendMessage("I just uploaded my payment slip image to verify my transfer.");
+                window.AIChatEngine.appendMessage("user", "📸 បង្ហោះវិក័យប័ត្របញ្ជាក់ការបង់ប្រាក់ (Payment Slip Uploaded)");
+                window.AIChatEngine.sendMessage("I just uploaded my payment slip image to verify my transfer.");
                 e.target.value = ""; // Reset input
             }
         });
@@ -173,4 +172,4 @@ const AIChatEngine = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => AIChatEngine.init());
+document.addEventListener('DOMContentLoaded', () => window.AIChatEngine.init());
