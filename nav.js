@@ -1,5 +1,5 @@
-// nav.js - MASTER BOTTOM NAVIGATION ENGINE V2.4
-// Zero-Omission Protocol: Ultra-Slim & Panel-Aligned (480px) -> UPGRADED SIZE
+// nav.js - MASTER BOTTOM NAVIGATION ENGINE V2.5
+// Zero-Omission Protocol: AI Chat Integration (Centerpiece)
 
 function openTelegramContact(e) {
     e.preventDefault();
@@ -33,17 +33,17 @@ function loadBottomNav(activePage) {
         </a>
 
         <div style="position: relative; top: -16px; text-align: center; width: 20%;">
-            <a href="movie.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; transition: 0.2s;">
+            <a href="javascript:void(0)" onclick="if(window.AIChatEngine) { AIChatEngine.toggleChat(); } else { alert('AI is loading...'); }" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; transition: 0.2s;">
                 <div style="width: 54px; height: 54px; background: #111111; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 3px solid #ffffff; margin-bottom: 4px;">
-                    <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #ffffff;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-2z"/></svg>
+                    <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #ffffff;"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.73V7h5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-1v2a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V5.73c-.6-.35-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A1.5 1.5 0 0 0 6 14.5A1.5 1.5 0 0 0 7.5 16A1.5 1.5 0 0 0 9 14.5A1.5 1.5 0 0 0 7.5 13m9 0a1.5 1.5 0 0 0-1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 1.5-1.5 1.5 1.5 0 0 0-1.5-1.5M12 9c-2.21 0-4 1.79-4 4h8c0-2.21-1.79-4-4-4z"/></svg>
                 </div>
-                <span style="font-size: 0.75rem; font-weight: 800; color: ${activePage === 'movies' ? activeColor : '#111111'};">មើលកុន</span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #111111;">ប្រើខ្ញុំ</span>
             </a>
         </div>
 
-        <a href="orders.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; font-size: 0.75rem; transition: 0.2s; width: 20%; ${getActiveBox('orders')}">
-            <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor; margin-bottom: 3px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-            <span>បញ្ជីទិញ</span>
+        <a href="movie.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; font-size: 0.75rem; transition: 0.2s; width: 20%; ${getActiveBox('movies')}">
+            <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor; margin-bottom: 3px;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-2z"/></svg>
+            <span>មើលកុន</span>
         </a>
 
         <a href="javascript:void(0)" onclick="openTelegramContact(event)" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; font-size: 0.75rem; width: 20%; color: #0088cc; padding: 6px 8px;">
