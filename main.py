@@ -1,4 +1,6 @@
-# main.py - MASTER DISPATCHER V3.0
+# main.py - MASTER DISPATCHER V3.1
+# Zero-Omission Protocol: Secure Proxy + AI + Streaming Sync
+
 import os
 import asyncio
 import logging
@@ -8,11 +10,11 @@ from aiogram.types import WebAppInfo
 from aiohttp import web
 
 import config
-import woo_handler  # Your specialized order logic
-import video_streamer # The new MTProto streaming engine
-import ai_handler  # Import the new AI handler at the top of your main file
+import woo_handler      # Specialized order logic
+import video_streamer   # MTProto streaming engine
+import ai_handler       # Kimi K2.5 AI handler
 
-# Bot Setup
+# 1. BOT SETUP
 bot = Bot(token=config.TELEGRAM_API_TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -25,42 +27,39 @@ async def start_handler(message: types.Message):
     )
     await message.answer(f"🇰🇭 <b>Pizz King Streamer Engine</b>\nYour ID: <code>{message.from_user.id}</code>", reply_markup=markup, parse_mode="HTML")
 
+# 2. SERVER ENGINE
 async def main():
     dp.include_router(router)
     app = web.Application()
 
-    # --- ADD THESE TO YOUR MAIN.PY ROUTING TABLE ---
+    # --- SECURE PRODUCT PROXY ROUTES ---
     app.router.add_get('/get-products', ai_handler.get_products_proxy)
     app.router.add_get('/get-categories', ai_handler.get_categories_proxy)
-   
-    # Add the AI routes to your aiohttp application setup
-    # (Look for where you define app = web.Application() and add these right below it)
+    
+    # --- AI CHAT ENDPOINTS ---
     app.router.add_post('/ai-chat', ai_handler.process_chat_endpoint)
-    app.router.add_options('/ai-chat', ai_handler.process_chat_endpoint) # Required for CORS
+    app.router.add_options('/ai-chat', ai_handler.process_chat_endpoint) 
     
-    # 🔗 Routing Table
-    app.router.add_get("/", lambda r: web.Response(text="Pizz King System V3.0 Online"))
-    
-    # Order Logic (Preserving Zero Omission from V1.0)
+    # --- CORE STORE LOGIC ---
+    app.router.add_get("/", lambda r: web.Response(text="Pizz King System V3.1 Online"))
     app.router.add_post("/create-order", woo_handler.create_order_endpoint)
     app.router.add_options("/create-order", woo_handler.create_order_endpoint)
     
-    # Video Streaming Logic (The MTProto Bridge)
+    # --- VIDEO STREAMING (MTProto Bridge) ---
     app.router.add_get("/stream/{message_id}", video_streamer.stream_movie_endpoint)
 
     # 🚀 STARTUP SEQUENCE
-    # Start MTProto Client first to ensure it's ready for requests
+    # Ignite MTProto Client
     await video_streamer.stream_client.start()
 
-    # Start Server on Render's assigned Port
+    # Ignite Render Web Server
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get("PORT", 10000)))
     await site.start()
     
-    logging.info("System V3.0 Dispatcher Started Successfully")
+    logging.info("System V3.1 Dispatcher Online. Roster Synchronized.")
     
-    # Start Polling and handle clean shutdown
     try:
         await dp.start_polling(bot)
     finally:
