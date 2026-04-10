@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.7
-# Zero-Omission Protocol: AsyncOpenAI Upgrade (Non-Blocking Architecture)
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.8
+# Zero-Omission Protocol: Kimi K2-5 Exact Endpoint + Async Architecture
 
 import json
 import logging
@@ -9,14 +9,14 @@ import datetime
 import pytz
 import aiohttp
 from aiohttp import web
-from openai import AsyncOpenAI  # <-- CRITICAL UPGRADE: Async Client
+from openai import AsyncOpenAI  # Non-blocking server architecture
 import config
 from woo_handler import wcapi
 
-# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET ASYNCHRONOUSLY
-client = AsyncOpenAI(  # <-- CRITICAL UPGRADE
+# 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
+client = AsyncOpenAI(
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.ai/v1"
+    base_url="https://api.moonshot.cn/v1"  # Confirmed via official docs
 )
 
 # 2. DYNAMIC PROMPT INJECTION
@@ -34,7 +34,6 @@ def get_system_prompt():
 
 # 3. TOOL DEFINITIONS (The AI's Hands)
 KIMI_TOOLS = [
-    # ... [Keep all exactly the same as V2.6: check_inventory, create_order, get_order_details, update_order_status, add_order_note, generate_invoice_link, generate_checkout] ...
     {
         "type": "function",
         "function": {"name": "check_inventory", "description": "Fetch live products and prices.", "parameters": {"type": "object", "properties": {}}}
@@ -182,8 +181,13 @@ async def process_chat_endpoint(request):
         current_system_prompt = get_system_prompt()
         messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
 
-        # CRITICAL FIX: await the Async client to prevent server freezing
-        response = await client.chat.completions.create(model="kimi-k2.5", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
+        # CRITICAL FIX: The Exact Model Name from your screenshot
+        response = await client.chat.completions.create(
+            model="kimi-k2-5",  # Hyphen instead of dot!
+            messages=messages, 
+            tools=KIMI_TOOLS, 
+            temperature=0.2
+        )
         response_message = response.choices[0].message
         
         if response_message.tool_calls:
@@ -210,8 +214,11 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # CRITICAL FIX: await the Async client for the second pass
-            final_response = await client.chat.completions.create(model="kimi-k2.5", messages=messages)
+            # Second pass with exact model name
+            final_response = await client.chat.completions.create(
+                model="kimi-k2-5", # Hyphen instead of dot!
+                messages=messages
+            )
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
             if qr_action: payload.update(qr_action)
