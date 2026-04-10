@@ -1,5 +1,5 @@
-# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.4
-# Zero-Omission Protocol: Kimi K2.5 Flagship Model Upgrade
+# ai_handler.py - MASTER AI ORCHESTRATION ENGINE V2.6
+# Zero-Omission Protocol: Kimi K2.5 Restored + Double-Fire Bug Fixed
 
 import json
 import logging
@@ -16,7 +16,7 @@ from woo_handler import wcapi
 # 1. INITIALIZE KIMI (MOONSHOT) NEURAL NET
 client = OpenAI(
     api_key=config.KIMI_API_KEY,
-    base_url="https://api.moonshot.cn/v1"
+    base_url="https://api.moonshot.ai/v1" # Synced to match your working kimi.py environment
 )
 
 # 2. DYNAMIC PROMPT INJECTION
@@ -178,7 +178,6 @@ def woo_get_invoice(order_id):
 async def send_telegram_alert(order_id, refund_needed, order_data_str):
     """Fires a priority alert to the Telegram Group with full customer details."""
     try:
-        # Try to parse the order data Kimi passed back
         order_data = json.loads(order_data_str) if order_data_str else {}
         total = order_data.get('total', 'Unknown')
         name = order_data.get('customer_name', 'Unknown')
@@ -210,12 +209,15 @@ async def process_chat_endpoint(request):
         
     try:
         data = await request.json()
-        user_message, conversation_history = data.get("message", ""), data.get("history", [])
+        # FIX: We NO LONGER extract user_message separately. The frontend already put it inside conversation_history!
+        conversation_history = data.get("history", [])
         
         current_system_prompt = get_system_prompt()
-        messages = [{"role": "system", "content": current_system_prompt}] + conversation_history + [{"role": "user", "content": user_message}]
+        
+        # Build the message array correctly without duplicating the user's input
+        messages = [{"role": "system", "content": current_system_prompt}] + conversation_history
 
-        # Step 1: Kimi Processing (Upgraded to Flagship K2.5)
+        # Step 1: Kimi Processing (Restored K2.5)
         response = client.chat.completions.create(model="kimi-k2.5", messages=messages, tools=KIMI_TOOLS, temperature=0.2)
         response_message = response.choices[0].message
         
@@ -243,7 +245,7 @@ async def process_chat_endpoint(request):
                     
                     result = await asyncio.to_thread(woo_update_status, order_id, status)
                     
-                    # TELEGRAM ALERT TRIGGER (Now with full payload)
+                    # TELEGRAM ALERT TRIGGER
                     if status == "cancelled" and result == "SUCCESS":
                         asyncio.create_task(send_telegram_alert(order_id, refund_needed, order_data))
 
@@ -257,7 +259,7 @@ async def process_chat_endpoint(request):
 
                 messages.append({"role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": result})
             
-            # Step 3: Pulse-Verify (Upgraded to Flagship K2.5)
+            # Step 3: Pulse-Verify
             final_response = client.chat.completions.create(model="kimi-k2.5", messages=messages)
             
             payload = {"reply": final_response.choices[0].message.content, "action": "none"}
