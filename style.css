@@ -1,4 +1,4 @@
-/* PIZZA KING STORE - GLOBAL MASTER CSS LEDGER V3.7 (V1 RESTORED + UI SCALE UP) */
+/* PIZZA KING STORE - GLOBAL MASTER CSS LEDGER V3.9 (V1 RESTORED + TOP MENU FORCE OVERRIDE) */
 :root { 
     --pizz-green: #2ecc71; 
     --pizz-red: #e74c3c; 
@@ -35,9 +35,10 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .cat-item.active .cat-icon { border-color: var(--pizz-green); background: #e8f5e9; }
 .cat-item span { font-size: 0.75rem; font-weight: 700; display: block; white-space: nowrap; color: #7f8c8d; margin-top: 5px; }
 
-/* FIXED: Round Movie Icon Scaled to match Bottom FAB exactly */
+/* FIXED: Round Movie Icon Scaled & Forced to match Bottom FAB exactly (Overriding inline HTML limits) */
 .movie-btn-pro { 
-    width: 54px; height: 54px; 
+    width: 54px !important; 
+    height: 54px !important; 
     background: #111111; 
     border-radius: 50%; 
     display: flex; 
@@ -48,7 +49,8 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
     border: 3px solid #ffffff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.movie-btn-pro svg { width: 28px; height: 28px; fill: #ffffff; }
+.movie-btn-pro svg { width: 28px !important; height: 28px !important; fill: #ffffff; }
+.movie-btn-pro + span { font-size: 0.75rem !important; margin-top: 4px !important; }
 
 /* 3.1 MOVIE SLIDER COMPONENT (RESTORED) */
 .main-slider { width: 100%; height: 120px; overflow: hidden; position: relative; border-radius: var(--radius); margin: 10px 0; background: #eee; }
@@ -102,8 +104,8 @@ body { font-family: 'Kantumruy Pro', sans-serif; background: #000; margin: 0; pa
 .btn-danger-outline { flex: 1; border: 1px solid #ffa39e; background: #fff1f0; color: var(--pizz-red); padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .btn-solid-green { background: var(--pizz-green); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; box-sizing: border-box; }
 
-/* 7. MINICART (RESTORED V1 + GAP FIX) */
-.footer-cart { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 150; border-radius: 20px 20px 0 0; }
+/* 7. MINICART (RESTORED V1 + CLEARANCE FIX FOR NEW 65PX NAV) */
+.footer-cart { position: fixed; bottom: 68px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; border-top: 1px solid #ddd; padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 150; border-radius: 20px 20px 0 0; }
 .cart-header { display: none; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .cart-header.open { display: flex; }
 .cart-details { max-height: 0; overflow: hidden; transition: 0.3s; }
