@@ -1,5 +1,5 @@
 # main.py - MASTER DISPATCHER V3.1
-# Zero-Omission Protocol: Secure Proxy + AI + Streaming Sync
+# Zero-Omission: Triple-Model AI + Secure Proxy + Streaming Sync
 
 import os
 import asyncio
@@ -10,11 +10,11 @@ from aiogram.types import WebAppInfo
 from aiohttp import web
 
 import config
-import woo_handler      # Specialized order logic
+import woo_handler      # Final autonomous order hub
 import video_streamer   # MTProto streaming engine
-import ai_handler       # Kimi K2.5 AI handler
+import ai_handler       # Dual AI Orchestrator with memory
 
-# 1. BOT SETUP
+# 1. BOT ARCHITECTURE
 bot = Bot(token=config.TELEGRAM_API_TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -25,9 +25,10 @@ async def start_handler(message: types.Message):
         keyboard=[[types.KeyboardButton(text="🛍️ បើកហាងទំនិញ", web_app=WebAppInfo(url=config.MINI_APP_URL))]], 
         resize_keyboard=True
     )
-    await message.answer(f"🇰🇭 <b>Pizz King Streamer Engine</b>\nYour ID: <code>{message.from_user.id}</code>", reply_markup=markup, parse_mode="HTML")
+    # Zero Omission: Kh/En Start text maintained
+    await message.answer(f"🇰🇭 <b>Pizz King Streamer Engine V3.1</b>\nYour ID: <code>{message.from_user.id}</code>", reply_markup=markup, parse_mode="HTML")
 
-# 2. SERVER ENGINE
+# 2. SERVER ORCHESTRATION
 async def main():
     dp.include_router(router)
     app = web.Application()
@@ -38,10 +39,10 @@ async def main():
     
     # --- AI CHAT ENDPOINTS ---
     app.router.add_post('/ai-chat', ai_handler.process_chat_endpoint)
-    app.router.add_options('/ai-chat', ai_handler.process_chat_endpoint) 
+    app.router.add_options('/ai-chat', ai_handler.process_chat_endpoint) # Required for CORS
     
-    # --- CORE STORE LOGIC ---
-    app.router.add_get("/", lambda r: web.Response(text="Pizz King System V3.1 Online"))
+    # --- CORE STORE LOGIC (V1.0 Sync Kept) ---
+    app.router.add_get("/", lambda r: web.Response(text="Pizz King Sovereign System V3.1 Online"))
     app.router.add_post("/create-order", woo_handler.create_order_endpoint)
     app.router.add_options("/create-order", woo_handler.create_order_endpoint)
     
@@ -49,10 +50,10 @@ async def main():
     app.router.add_get("/stream/{message_id}", video_streamer.stream_movie_endpoint)
 
     # 🚀 STARTUP SEQUENCE
-    # Ignite MTProto Client
+    # Ignite MTProto Video Streamer
     await video_streamer.stream_client.start()
 
-    # Ignite Render Web Server
+    # Ignite Web Server (Port managed by Render/VPS)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get("PORT", 10000)))
@@ -60,6 +61,7 @@ async def main():
     
     logging.info("System V3.1 Dispatcher Online. Roster Synchronized.")
     
+    # Start Polling and handle clean shutdown
     try:
         await dp.start_polling(bot)
     finally:
