@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pizza King Store V4.5</title>
+    <title>Pizza King Store V4.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -18,6 +18,15 @@
 
 <div id="toast"><svg style="width:16px;height:16px;fill:white;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>បន្ថែមក្នុងកន្ត្រករួចរាល់!</span></div>
 <div id="loader"><img src="logo.png" class="loader-img"><div style="font-weight:700; color:var(--pizz-red); margin-top:15px;">🚀 កំពុងទាញយកទិន្នន័យ...</div></div>
+
+<div id="install-guard">
+    <img src="logo.png" class="guard-logo">
+    <div style="font-size:1.4rem; font-weight:800; color:var(--pizz-red); margin-bottom:10px;">Pizza King Store & Drama</div>
+    <div style="font-size:1rem; font-weight:700; color:#2c3e50; margin-bottom:5px;">ងាយស្រួលមើលកុន និងទិញទំនិញ!</div>
+    <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:30px; line-height:1.5;">បទពិសោធន៍ថ្មី ងាយស្រួលកម្ម៉ង់ជាភាសាខ្មែរ<br>និងទស្សនាខ្សែភាពយន្តល្បីៗដោយសេរី។</div>
+    <button class="btn-install-force" onclick="installPWA()">📲 ដំឡើងកម្មវិធីឥឡូវនេះ</button>
+    <button onclick="installLater()" style="background:none; border:none; color:#95a5a6; font-weight:700; margin-top:20px; cursor:pointer; font-size:0.85rem; text-decoration:underline;">ខ្ញុំនឹងដំឡើងពេលក្រោយ</button>
+</div>
 
 <div id="app-shell">
     <div class="master-header index-header">
@@ -40,11 +49,12 @@
     <div class="footer-cart" id="footer-ui" style="display:none;">
         <div class="cart-header" id="cart-header">
             <span style="font-weight:700;display:flex;align-items:center;gap:10px;font-size:1.1rem;">🛒 ទំនិញដែលបានរើស</span>
+            <button onclick="openNote()" style="background:#f0f2f5; border:1px dashed #ccc; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer;" id="note-btn">➕ ចំណាំ</button>
             <button onclick="toggleCart()" style="background:none; border:none; font-size:32px; color:#ccc; cursor:pointer;">×</button>
         </div>
         <div id="cart-list" class="cart-details"></div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:700; cursor:pointer;" onclick="toggleCart()">
-            <span id="cart-count">🛒 កន្ត្រក: ០ មុខ</span><span id="cart-total">០៛</span>
+            <span id="cart-count">🛒 កន្ត្រក: ០ មុខ (មើលលម្អិត)</span><span id="cart-total">០៛</span>
         </div>
         <button class="checkout-btn" id="pre-pay-btn" onclick="openPayment()" disabled>ចាប់ផ្តើមបំពេញព័ត៌មានដឹកជញ្ជូន</button>
     </div>
@@ -52,24 +62,56 @@
     <div id="payment-screen" class="pay-overlay">
         <div class="qr-card" id="invoice-card">
             <div class="qr-header-bar">KHQR V2.0</div>
+            <button class="recap-toggle" onclick="toggleRecap()"><span>📋 ពិនិត្យទំនិញឡើងវិញ</span><span id="recap-caret">▼</span></button>
+            <div id="recap-list" class="recap-list"></div>
             <div id="qr-container">
                 <div style="font-weight:700; margin-bottom:10px; color:var(--pizz-red);">⏳ បង់ប្រាក់ក្នុងរយះពេល: <span id="pay-timer">15:00</span></div>
                 <div class="qr-one-line"><span style="color:#7f8c8d; font-size:0.9rem;">SOUR DARA —</span><span style="color:var(--pizz-red);"><span id="pay-amt-label">0</span>៛</span></div>
                 <img src="" id="dynamic-khqr" class="qr-img-main" crossOrigin="anonymous">
+                <div style="font-size:0.75rem; color:#2c3e50; font-weight: 700; margin: 10px 0;">សូមស្កេនដើម្បីបង់ប្រាក់</div>
             </div>
-            <button class="btn-paid-final" id="confirm-btn" onclick="submitFinalOrder()">ខ្ញុំបានបង់ប្រាក់រួចរាល់</button>
+            <button onclick="downloadQRImage()" class="btn-save-qr-mini">រក្សាទុក QR Code</button>
+            <button class="btn-paid-final" id="confirm-btn" onclick="submitFinalOrder()">
+                <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>ខ្ញុំបានបង់ប្រាក់រួចរាល់</span>
+            </button>
+            <button onclick="closePay()" style="background:none; border:none; color:#95a5a6; font-weight:700; cursor:pointer; font-size:0.9rem; margin-bottom:5px;">ត្រឡប់ក្រោយ</button>
+        </div>
+    </div>
+
+    <div id="note-modal" class="modal-overlay">
+        <div class="isolated-note-card">
+            <h4 style="margin:0 0 15px 0; color:#2c3e50; font-size: 1.1rem;">📝 បន្ថែមចំណាំ</h4>
+            <textarea id="note-input" placeholder="ឧទាហរណ៍៖ កុំដាក់ហិរ..." style="height:100px; width:100%; box-sizing:border-box;"></textarea>
+            <button class="btn-paid-final" onclick="saveNote()" style="margin-bottom:10px;">រក្សាទុក (Save)</button>
+            <button onclick="closeNote()" style="background:none; border:none; color:#e74c3c; font-weight:bold; cursor:pointer; font-size:1rem;">បោះបង់ (Cancel)</button>
         </div>
     </div>
 
     <div id="success-modal" class="modal-overlay">
         <div class="isolated-note-card" style="padding: 30px 20px;">
-            <h3 style="color: var(--pizz-green);">ការកម្ម៉ង់ជោគជ័យ!</h3>
-            <p>អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!</p>
-            <button class="btn-paid-final" onclick="location.reload()">យល់ព្រម (OK)</button>
+            <div style="background: var(--pizz-green); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);">
+                <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:white;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h3 style="color: var(--pizz-green); margin: 0 0 15px 0; font-size: 1.3rem;">ការកម្ម៉ង់ជោគជ័យ!</h3>
+            <p style="font-size: 0.95rem; color: #2c3e50; line-height: 1.6; margin-bottom: 20px; font-weight:700;">
+                អរគុណ <span id="success-name-kh" style="color:var(--pizz-red);"></span> សម្រាប់ការកម្ម៉ង់!<br>
+                <span style="font-weight:normal; font-size: 0.85rem; color: #7f8c8d;">សូមពិនិត្យមើលព័ត៌មានលម្អិតនៅក្នុងបញ្ជីទិញ</span>
+            </p>
+            <p style="font-size: 0.8rem; color: #7f8c8d; line-height: 1.4; margin-bottom: 25px;">
+                Thank you <span id="success-name-en" style="color:var(--pizz-red); font-weight:700;"></span> for your order.<br>
+                Please find your order details in the Order Box.
+            </p>
+            <button class="btn-paid-final" onclick="location.reload()" style="margin-bottom:0;">យល់ព្រម (OK)</button>
         </div>
     </div>
 
-    <div id="detail-popup" class="popup-screen" onclick="closeDetail()"><div class="popup-card" onclick="event.stopPropagation()"><div id="popup-content"></div></div></div>
+    <div id="detail-popup" class="popup-screen" onclick="closeDetail()">
+        <div class="popup-card" onclick="event.stopPropagation()">
+            <button class="close-x" onclick="closeDetail()">×</button>
+            <div id="popup-content"></div>
+        </div>
+    </div>
+    
     <div id="bottom-nav-placeholder"></div>
 </div>
 
@@ -84,39 +126,85 @@
 <script src="shopcart-payment.js"></script> 
     
 <script>
-    loadBottomNav('home'); loadShippingForm(); if(typeof initSlider === 'function') initSlider();
-    const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {};
+    loadBottomNav('home'); 
+    loadShippingForm();
+    initSlider(); // INITIALIZE MOVIE SLIDER
+
+    const tg = window.Telegram.WebApp;
+    tg.expand(); tg.ready();
+    
+    let allProducts = [], cart = [], cardQtys = {}, productVariations = {}, variationSelections = {}, customerNote = "";
 
     async function fetchData() {
-        const loader = document.getElementById('loader');
-        try {
-            // Talk to your Render Proxy, not WooCommerce directly
-            const catRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-categories`);
-            const cats = await catRes.json();
-            if (Array.isArray(cats)) { renderCategories(cats); }
+        // 1. SMART CACHE ENGINE (24 Hour TTL)
+        const cachedCats = CacheEngine.get("pizz_cats", 24);
+        const cachedProds = CacheEngine.get("pizz_prods", 24);
+        const cachedVars = CacheEngine.get("pizz_vars", 24);
 
-            const prodRes = await fetch(`${APP_CONFIG.RENDER_URL}/get-products`);
-            allProducts = await prodRes.json();
-            if (Array.isArray(allProducts)) {
-                renderProducts(allProducts);
-            }
-            loader.style.display = 'none';
-        } catch(e) { 
-            loader.style.display = 'none'; 
-            alert("⚠️ Connection Error! Your Render server might be asleep or the new routes aren't active in main.py."); 
+        if (cachedCats && cachedProds && cachedVars) {
+            allProducts = cachedProds;
+            productVariations = cachedVars;
+            renderCategories(cachedCats);
+            renderProducts(allProducts);
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
+            return;
         }
+
+        // 2. NETWORK PULL
+        try {
+            const catRes = await fetch(`${APP_CONFIG.WC_BASE}/products/categories${APP_CONFIG.WC_AUTH}&hide_empty=true&parent=0`); 
+            const cats = await catRes.json(); 
+            renderCategories(cats); 
+            CacheEngine.set("pizz_cats", cats);
+
+            const prodRes = await fetch(`${APP_CONFIG.WC_BASE}/products${APP_CONFIG.WC_AUTH}&per_page=100&status=publish`); 
+            allProducts = await prodRes.json();
+            for (const vp of allProducts.filter(p => p.type === 'variable')) { 
+                const vRes = await fetch(`${APP_CONFIG.WC_BASE}/products/${vp.id}/variations${APP_CONFIG.WC_AUTH}`); 
+                productVariations[vp.id] = await vRes.json(); 
+            }
+            
+            CacheEngine.set("pizz_prods", allProducts);
+            CacheEngine.set("pizz_vars", productVariations);
+
+            restoreState();
+            document.getElementById('loader').style.display = 'none';
+        } catch(e) { 
+            document.getElementById('loader').style.display = 'none'; 
+        }
+    }
+
+    function restoreState() {
+        const nameInput = document.getElementById('user-name');
+        const phoneInput = document.getElementById('user-phone');
+        const locInput = document.getElementById('user-loc');
+        if(nameInput) nameInput.value = localStorage.getItem('pizz_king_name') || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "");
+        if(phoneInput) phoneInput.value = localStorage.getItem('pizz_king_tel') || "";
+        if(locInput) locInput.value = localStorage.getItem('pizz_king_loc') || "";
+        const savedCart = localStorage.getItem('pizz_king_cart_v36');
+        if(savedCart) cart = JSON.parse(savedCart);
+        updateCartBasedOnDelivery(); checkForm(); renderProducts(allProducts);
     }
 
     function renderProducts(items) {
         document.getElementById('product-grid').innerHTML = items.map(p => {
-            const pid = p.id; cardQtys[pid] = 1;
-            return `<div class="card"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title">${p.name}</div><div class="price">${parseInt(p.price).toLocaleString()}៛</div><div class="action-row"><button onclick="addToCart(${pid})" class="btn-add-cart-icon">ADD</button></div></div></div>`;
+            const pid = p.id; cardQtys[pid] = 1; let variations = "";
+            if (p.type === 'variable' && productVariations[pid]) {
+                variations = `<div class="var-container">` + productVariations[pid].map(v => `<div class="var-chip" id="var-${pid}-${v.id}" onclick="selectVariation(${pid}, ${v.id})">${v.attributes[0].option}</div>`).join('') + `</div>`;
+                if(productVariations[pid].length > 2) { variations = `<select class="var-selector" onchange="selectVariationDropdown(${pid}, this)"><option value="">-- រើសប្រភេទ --</option>` + productVariations[pid].map(v => `<option value="${v.id}">${v.attributes[0].option}</option>`).join('') + `</select>`; }
+            }
+            return `<div class="card" id="card-${pid}"><img src="${p.images[0]?.src || ''}" onclick="openDetail(${pid})"><div class="card-body"><div class="title" onclick="openDetail(${pid})">${p.name}</div><div class="price">${p.type === 'variable' ? 'ចាប់ពី ' : ''}${parseInt(p.price).toLocaleString()}៛</div>${variations}<div class="action-row"><div class="qty-control"><button class="qty-btn" onclick="changeCardQty(${pid},-1)">−</button><span id="q-${pid}" style="font-weight:bold; font-size:0.85rem; width:20px; text-align:center;">1</span><button class="qty-btn" onclick="changeCardQty(${pid},1)">+</button></div><button class="btn-add-cart-icon" onclick="addToCart(${pid})"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg></button></div></div></div>`;
         }).join('');
     }
 
-    function renderCategories(cats) { document.getElementById('cat-slider').innerHTML = cats.map(c => `<div class="cat-item" onclick="filterCatLocal(${c.id})"><span>${c.name}</span></div>`).join(''); }
-    function filterCatLocal(id) { renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
+    function selectVariation(pid, vid) { variationSelections[pid] = vid; document.querySelectorAll(`#card-${pid} .var-chip`).forEach(c => c.classList.remove('active')); const chip = document.getElementById(`var-${pid}-${vid}`); if(chip) chip.classList.add('active'); }
+    function selectVariationDropdown(pid, s) { variationSelections[pid] = s.value; }
+    function openDetail(pid) { const p = allProducts.find(x => x.id === pid); document.getElementById('popup-content').innerHTML = `<img src="${p.images[0].src}" style="width:100%; max-height:250px; object-fit:contain; border-radius:12px; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">${p.name}</h3><div style="font-size:0.85rem;color:#7f8c8d;line-height:1.6;text-align:left;">${p.description || "គ្មានការពិពណ៌នា"}</div>`; document.getElementById('detail-popup').style.display = 'flex'; }
+    function closeDetail() { document.getElementById('detail-popup').style.display = 'none'; }
+    function changeCardQty(pid, d) { cardQtys[pid] = Math.max(1, (cardQtys[pid] || 1) + d); document.getElementById(`q-${pid}`).innerText = cardQtys[pid]; }
+    function renderCategories(cats) { cats.forEach(c => { document.getElementById('cat-slider').innerHTML += `<div class="cat-item" id="cat-${c.id}" onclick="filterCatLocal(${c.id})"><div class="cat-icon">${c.image ? `<img src="${c.image.src}">` : "📦"}</div><span>${c.name}</span></div>`; }); }
+    function filterCatLocal(id) { document.querySelectorAll('.cat-item, .brand-logo-btn').forEach(el => el.classList.remove('active')); const el = id === 0 ? document.getElementById('cat-0') : document.getElementById(`cat-${id}`); if(el) el.classList.add('active'); renderProducts(id === 0 ? allProducts : allProducts.filter(p => p.categories.some(c => c.id === id))); }
 
     fetchData();
 </script>
